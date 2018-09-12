@@ -1,0 +1,8 @@
+ul.all-tree-lines {margin: 4px 0 !important;font-size: 13px;padding: 2px 0 2px 8px !important}
+ul.all-tree-lines:hover {background: #ebf2f9;}
+ul.all-tree-lines li {display: inline-block;vertical-align: top;list-style-type: none;margin: 0 8px 0 0}
+ul.all-tree-lines li::after {content: ' »';margin-left: 4px}
+ul.all-tree-lines li:last-child::after {display: none}
+ul.all-tree-lines.copy::before {content: 'copy: ';color: #c5c5c5;display: inline-block;;vertical-align: top;margin-right: 8px}
+ul.all-tree-lines li a {text-decoration: none}
+ul.all-tree-lines li a:hover {text-decoration: underline;}
