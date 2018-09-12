@@ -1,0 +1,23 @@
+/*#elfinderDialog {z-index:999; position:fixed; padding:8px; top:10%; left:10%}
+#elfinderDialog button.close-elfinder-popup {font-size:12px;margin-bottom:25px}*/
+#elfinderDialog {width: 800px;height: 400px; background: #fff;z-index: 200}
+#elfinderDialog .elfinder-dialog-close {cursor: pointer;float: right}
+#elfinder .ui-state-hover, #elfinder .elfinder-navbar-wrapper, #elfinder .ui-state-active, #elfinderDialog .ui-state-hover, #elfinderDialog .elfinder-navbar-wrapper, #elfinderDialog .ui-state-active {font-weight: normal !important}
+
+.elfinder-image {display:flex; flex-wrap:wrap}
+.elfinder-image label {flex-basis:100%}
+.elfinder-image > input[type="text"] {display:none}
+.elfinder-image .e-image-container {min-width:5px; /*height:70px;*/ display:flex; flex-wrap:wrap; padding:3px 0; max-width: calc(100% - 100px)}
+.elfinder-image .e-image-container > div {border: 1px solid #ccc; margin:0 3px 0 0; position:relative; margin-right:8px; width:62px; height:62px}
+.elfinder-image .e-image-container > div a, .elfinder-image .e-image-container > div img {display:block}
+.elfinder-image .e-image-container a.e-image-delete, .elfinder-image .e-image-container a.e-image-info, .elfinder-image .e-image-container a.e-image-open {cursor:pointer; font-size:12px; position:absolute; top:0; left:0;display:none; width:100%;background: #1784c7;color: #fff;text-align: center;}
+.elfinder-image .e-image-container > div:hover a.e-image-delete, .elfinder-image .e-image-container > div:hover a.e-image-info, .elfinder-image .e-image-container > div:hover a.e-image-open {display:block;}
+.elfinder-image .e-image-container a.e-image-delete:hover, .elfinder-image .e-image-container a.e-image-info:hover, .elfinder-image .e-image-container a.e-image-open:hover {background: #968b00;}
+.elfinder-image .e-image-container a.e-image-info {bottom: 0; left: 0;top: auto; width: 20px; height: 15px; }
+.elfinder-image .e-image-container a.e-image-open {bottom: 0; right: 0;left:auto;top: auto; width: 20px; height: 15px; }
+
+.elfinnder-ui-sortable-placeholder {width:62px !important; height:62px !important}
+.e-file-info-text {position: absolute !important; top: calc(100% + 5px);left: 0;width: 410px;}
+.e-file-info-text textarea, .e-file-info-text button {display: inline-block; vertical-align: middle;height: 32px}
+.e-file-info-text textarea {width: 350px; font-size: 12px; padding: 0px 8px;margin: 0; }
+.e-file-info-text button {width: 50px;padding: 0;margin: 0;background: #449d44;border: none; color: #fff; cursor: pointer}
