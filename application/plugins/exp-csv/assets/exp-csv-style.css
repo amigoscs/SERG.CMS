@@ -1,0 +1,7 @@
+.simple-table * {font-size:11px}
+.simple-table textarea, .simple-table input[type="text"] {width:100%; min-width:100px}
+.simple-table tr {border-bottom:1px solid #ccc}
+.simple-table th, .simple-table td {padding:8px; vertical-align: top;}
+.simple-table .block-value { display:block; max-height:65px; min-height:64px;overflow:hidden}
+.simple-table .block-value * {margin:0 !important; padding:0 !important}
+.simple-table .block-value + textarea {display:none}
