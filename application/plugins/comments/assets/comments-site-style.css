@@ -1,0 +1,10 @@
+.comments-form legend {font-size: 1.6rem;margin-bottom: 8px;font-weight: 600;}
+.comments-form .row {margin: 8px 0}
+.comments-form textarea, .comments-form input[type="text"], .comments-form select {display: block;width: 100%}
+.comments-form textarea {height: 150px}
+.comments {padding: 0;margin: 24px 0 8px 0}
+.comments li {padding: 8px 0}
+.comments li ul {padding-left: 24px}
+.comments .ctop-item {font-size: 1.2rem;font-weight: 600;}
+.comments .cbottom-item {font-size: 1.4rem}
+#commet_form_container .stop-answer {display: none}

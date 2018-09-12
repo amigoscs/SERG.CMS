@@ -1,0 +1,21 @@
+.comment-info-table {width: 100%}
+.comment-info-table tr td {vertical-align: middle}
+.comment-info-table tr td:nth-child(1) {padding: 12px 8px}
+.comment-info-table tr td:nth-last-child(1) {width: 270px;text-align: end;}
+.comment-info-table tr:nth-child(odd) {background: #f7f7f7}
+.comment-info-table tr.cpublish button[data-status="publish"] {display: none}
+.comment-info-table tr.chidden button[data-status="hidden"] {display: none}
+.comment-info-table button.comment-delete {margin-left: 12px}
+.comment-info-table tr.chidden .crow-title, .comment-info-table tr.chidden .crow-descr, .comment-info-table tr.chidden .crow-title a, .comment-info-table tr.chidden .crow-descr a {color: #c7c7c7}
+.comment-info-table tr:hover {background: #eeffea !important}
+
+.crow-title {font-size: 12px;margin-bottom: 8px}
+.crow-descr {font-size: 14px}
+
+.descr-row {flex-direction: row;flex-wrap: nowrap;align-items: center;justify-content: flex-start;margin-bottom: 8px}
+.descr-row > * {flex-basis: calc(100% - 310px)}
+.descr-row > *:first-child {flex-basis: 300px}
+.descr-row textarea {width: 100%; height: 120px}
+
+.descr-row.btns {justify-content: center}
+.descr-row.btns > * {flex-basis: auto; margin: 0 24px}
