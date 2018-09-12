@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /admin
+Disallow: /login
+Disallow: /logout
+Disallow: /registration
+Disallow: /password-recovery
+Disallow: /ajax
+Disallow: /ajax/*

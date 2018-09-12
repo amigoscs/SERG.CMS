@@ -1,0 +1,29 @@
+/*CSS template default*/
+html {font-size:10px}
+*, *:after, *:before {box-sizing: border-box;line-height:1.4em; }
+img {max-width:100%}
+body {margin: 0; padding: 0;font-size: 1.2rem; font-family: 'Open Sans', sans-serif;}
+p, ul, ol, span, i, a, input {font-family: 'Open Sans', sans-serif;}
+a, a:visited, a:focus {cursor: pointer;text-decoration:none;outline:none}
+a:hover {text-decoration:none;}
+a img {border:none;}
+ul {list-style:none;margin:0;padding:0;}
+strong {font-weight:700}
+h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {margin:0.4em 0;font-weight:700;color:#000;line-height:1.4em;}
+h1, .h1 {font-size:3rem;}h2, .h2 {font-size:2.5rem;}h3, .h3 {font-size:2.2rem;}h4, .h4 {font-size:2rem;}h5, .h5 {font-size:2rem;}h6, .h6 {font-size:2rem;}
+p {font-size: 1.4rem; margin:0.4em 0}
+.clear {clear: both;}
+.system-logo {margin: 25px 0}
+.main, form {width: 100%; max-width: 800px;margin: 50px auto; display: block}
+.main { text-align: center; }
+.but {display: inline-block; font-size: 1.9rem; border: 1px solid #e2e2e2; border-radius: 4px; line-height: 2.2em; padding: 0 0.8em; color: #000; text-decoration: none}
+.but:hover {background-color: #f9f9f9}
+
+.but.but-success {background-color: #449d44;border-color: #398439;color: #fff;}
+.but.but-success:hover {background-color: #42921a}
+.error {color: #b20000; font-size: 1.6rem; margin: 0.8em 0}
+form fieldset {border: 1px solid #e2e2e2; padding: 4px 12px; margin: 0 0 24px 0}
+form legend {font-size: 1.6rem; margin: 0; padding: 0 0.6em; font-weight: 700}
+form .form-control {display: flex; flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: space-between; margin: 12px 0}
+form .form-control label {flex-basis: 180px; flex-shrink: 0; font-size: 1.4rem}
+form .form-control input, form .form-control select {flex-basis: 100%; flex-shrink: 1; font-size: 1.6rem; height: 32px; border: 1px solid #e2e2e2; padding: 0 12px}
