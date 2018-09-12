@@ -484,13 +484,20 @@ function app_get_site_templates($level = 2)
 	$templates = array();
 	$CI->load->helper('directory');
 	$map_dir_templates = directory_map(info('templates_dir'), $level);
-	//return $map_dir_templates;
-	if(!$map_dir_templates) return array();
+	
+	if(!$map_dir_templates) {
+		return array();
+	}
 
 	foreach($map_dir_templates as $key => $value)
 	{
-		if(!in_array('info.php', $value))
+		if(!is_array($value)) {
 			continue;
+		}
+
+		if(!in_array('info.php', $value)) {
+			continue;
+		}
 
 		require(info('templates_dir') . '' . $key . 'info.php');
 		$key = str_replace('/', '', $key);

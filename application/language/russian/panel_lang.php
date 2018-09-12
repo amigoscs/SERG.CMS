@@ -74,6 +74,7 @@ $lang['INFO_DEL_CACHE_DELETE_COMPLITE'] = 'Кеш успешно удален';
 $lang['INFO_SITEMAP_CREATE_COMPLITE'] = 'Файл Sitemap успешно создан';
 $lang['INFO_INDEX_SITE_COMPLITE'] = 'Сайт проиндексирован';
 $lang['INFO_INDEX_SITE_ERROR'] = 'Ошибка индексации сайта';
+$lang['INFO_SITE_TEMPLATE_NOT_ERROR'] = 'Шаблоны сайта не найдены. Загрузите шаблон в папку, чтобы продолжить';
 
 /*
 * Admin - users

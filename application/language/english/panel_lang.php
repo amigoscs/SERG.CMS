@@ -74,6 +74,7 @@ $lang['INFO_DEL_CACHE_DELETE_COMPLITE'] = 'Cache deleted successfully';
 $lang['INFO_SITEMAP_CREATE_COMPLITE'] = 'Sitemap successfully created';
 $lang['INFO_INDEX_SITE_COMPLITE'] = 'The site is indexed';
 $lang['INFO_INDEX_SITE_ERROR'] = 'Error indexing the site';
+$lang['INFO_SITE_TEMPLATE_NOT_ERROR'] = 'No site templates found. Download the template to the folder to continue';
 
 /*
 * Admin - users

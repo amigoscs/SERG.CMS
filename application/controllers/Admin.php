@@ -520,14 +520,16 @@ class Admin extends CI_Controller {
 		$this->pageContentDescription = $this->lang->line('descr_site_setting');
 
 		// все шаблоны
-		$templates_array = app_get_site_templates();
+		if(!$templates_array = app_get_site_templates()) {
+			$this->pageErrorMessage = $this->lang->line('INFO_SITE_TEMPLATE_NOT_ERROR');
+			$this->pageContent = '';
+			return $this->_render_content();
+		}
 
 		$data['site_template_options'] = array();
 		foreach($templates_array as $key => $value) {
 			$data['site_template_options'][$key] = $value['info']['name'];
 		}
-
-		$data['SERGCMS'] = &$this;
 
 		$this->pageContent = $this->load->view('admin/front-setting', $data, true);
 		return $this->_render_content();
