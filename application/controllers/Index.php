@@ -416,6 +416,11 @@ class Index extends CI_Controller {
 
 	public function _render_content()
 	{
+		# проверка на наличие шаблона
+		if(!file_exists(APP_SITE_TEMPLATES_PATH . APP_SITE_TEMPLATE)) {
+			exit('Unable to load site template!');
+		}
+
 		$this->dataTemplate['CONTENT'] = '';
 
 		# загрузка хуков в начале генерации контента
