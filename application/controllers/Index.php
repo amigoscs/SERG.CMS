@@ -680,7 +680,7 @@ class Index extends CI_Controller {
 		}
 
 		# загрузим главную БИБЛИОТЕКУ шаблона
-		$pathFile = APP_SITE_TEMPLATES_PATH . APP_SITE_TEMPLATE . '/Libraries/Contents/TemplatesLib.php';
+		$pathFile = APP_SITE_TEMPLATES_PATH . APP_SITE_TEMPLATE . '/Libraries/Templates/TemplatesLib.php';
 		if(file_exists($pathFile)) {
 			require_once($pathFile);
 			$this->TemplatesLib = new TemplatesLib();
