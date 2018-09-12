@@ -1,0 +1,203 @@
+ul.jqtree-tree {
+  list-style: none outside;
+  margin-left: 0;
+  margin-bottom: 0;
+  padding: 0; }
+  ul.jqtree-tree ul.jqtree_common {
+    list-style: none outside;
+    margin-left: 12px;
+    margin-right: 0;
+    margin-bottom: 0;
+    padding: 0;
+    display: block; }
+  ul.jqtree-tree li.jqtree-closed > ul.jqtree_common {
+    display: none; }
+  ul.jqtree-tree li.jqtree_common {
+    clear: both;
+    list-style-type: none; }
+  ul.jqtree-tree .jqtree-toggler {
+    border-bottom: none;
+    color: #333;
+    text-decoration: none;
+    vertical-align: middle; }
+    ul.jqtree-tree .jqtree-toggler:hover {
+      color: #000;
+      text-decoration: none; }
+    ul.jqtree-tree .jqtree-toggler.jqtree-closed {
+      background-position: 0 0; }
+    ul.jqtree-tree .jqtree-toggler.jqtree-toggler-left {/*margin-right: 0.5em;*/ margin-right: -14px }
+    ul.jqtree-tree .jqtree-toggler.jqtree-toggler-right {
+      margin-left: 0.5em; }
+  ul.jqtree-tree .jqtree-element {cursor: pointer;position: relative; padding-left: 6px}
+  ul.jqtree-tree .jqtree-title {
+    color: #1C4257;
+    vertical-align: middle;
+    margin-left: 0;
+}
+
+    ul.jqtree-tree .jqtree-title.jqtree-title-folder {
+      margin-left: 0; }
+  ul.jqtree-tree li.jqtree-folder {
+    margin-bottom: 4px; }
+    ul.jqtree-tree li.jqtree-folder.jqtree-closed {
+      margin-bottom: 1px; }
+  ul.jqtree-tree li.jqtree-ghost {
+    position: relative;
+    z-index: 10;
+    margin-right: 10px;
+    /* todo: add classes to span? */ }
+    ul.jqtree-tree li.jqtree-ghost span {
+      display: block; }
+    ul.jqtree-tree li.jqtree-ghost span.jqtree-circle {
+      border: solid 2px #0000ff;
+      -webkit-border-radius: 100px;
+      -moz-border-radius: 100px;
+      border-radius: 100px;
+      height: 8px;
+      width: 8px;
+      position: absolute;
+      top: -4px;
+      left: -6px;
+      -webkit-box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      box-sizing: border-box; }
+    ul.jqtree-tree li.jqtree-ghost span.jqtree-line {
+      background-color: #0000ff;
+      height: 2px;
+      padding: 0;
+      position: absolute;
+      top: -1px;
+      left: 2px;
+      width: 100%; }
+    ul.jqtree-tree li.jqtree-ghost.jqtree-inside {
+      margin-left: 48px; }
+  ul.jqtree-tree span.jqtree-border {
+    position: absolute;
+    display: block;
+    left: -2px;
+    top: 0;
+    border: solid 2px #0000ff;
+    border-radius: 6px;
+    margin: 0;
+    box-sizing: content-box; }
+  ul.jqtree-tree li.jqtree-selected > .jqtree-element,
+  ul.jqtree-tree li.jqtree-selected > .jqtree-element:hover {
+    background-color: #c7e4f7;
+    /*background: -webkit-gradient(linear, left top, left bottom, from(#BEE0F5), to(#89AFCA));
+    background: -moz-linear-gradient(top, #BEE0F5, #89AFCA);
+    background: -ms-linear-gradient(top, #BEE0F5, #89AFCA);
+    background: -o-linear-gradient(top, #BEE0F5, #89AFCA);*/
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7); }
+  ul.jqtree-tree .jqtree-moving > .jqtree-element .jqtree-title {
+    outline: dashed 1px #0000ff; }
+
+ul.jqtree-tree.jqtree-rtl {
+  direction: rtl; }
+  ul.jqtree-tree.jqtree-rtl ul.jqtree_common {
+    margin-left: 0;
+    margin-right: 12px; }
+  ul.jqtree-tree.jqtree-rtl .jqtree-toggler {
+    margin-left: 0.5em;
+    margin-right: 0; }
+  ul.jqtree-tree.jqtree-rtl .jqtree-title {
+    margin-left: 0;
+    margin-right: 1.5em; }
+    ul.jqtree-tree.jqtree-rtl .jqtree-title.jqtree-title-folder {
+      margin-right: 0; }
+  ul.jqtree-tree.jqtree-rtl li.jqtree-ghost {
+    margin-right: 0;
+    margin-left: 10px; }
+    ul.jqtree-tree.jqtree-rtl li.jqtree-ghost span.jqtree-circle {
+      right: -6px; }
+    ul.jqtree-tree.jqtree-rtl li.jqtree-ghost span.jqtree-line {
+      right: 2px; }
+    ul.jqtree-tree.jqtree-rtl li.jqtree-ghost.jqtree-inside {
+      margin-left: 0;
+      margin-right: 48px; }
+  ul.jqtree-tree.jqtree-rtl span.jqtree-border {
+    right: -2px; }
+
+span.jqtree-dragging {
+  color: #fff;
+  background: #000;
+  opacity: 0.6;
+  cursor: pointer;
+  padding: 2px 8px; }
+
+/* IE 6, 7, 8 */
+@media \0screen\,screen\9  {
+  ul.jqtree-tree li.jqtree-ghost span.jqtree-circle {
+    background: url(jqtree-circle.png) no-repeat;
+    border: 0 none; } }
+
+ul.jqtree-tree ul.jqtree_common {}
+ul.jqtree-tree ul.jqtree_common > li { position: relative;border-left: 1px dotted #ccc; padding-left: 8px}
+ul.jqtree-tree ul.jqtree_common > li:last-child {border-left: 1px solid #fff}
+ul.jqtree-tree ul.jqtree_common > li:before {width: 12px; height: 13px; border-bottom: 1px dotted #ccc; left: 0; top: 0; content: ''; position: absolute}
+ul.jqtree-tree ul.jqtree_common > li:last-child:before {border-left: 1px dotted #ccc; left: -1px}
+.jqtree-element { font-size: 14px; line-height: 22px; height: 26px}
+.jqtree-element > * {display: inline-block; vertical-align: middle}
+.jqtree-element > img.img-icon {margin-right: 8px; margin-left: 18px}
+
+ul.jqtree-tree > li { position: relative;border-left: 1px dotted #000; padding-left: 8px}
+ul.jqtree-tree > li:last-child {border-left: 1px solid #fff}
+ul.jqtree-tree > li:before {width: 12px; height: 13px; border-bottom: 1px dotted #000; left: 0; top: 0; content: ''; position: absolute}
+ul.jqtree-tree > li:last-child:before {border-left: 1px dotted #000; left: -1px}
+
+#adst-tree > .jqtree-tree > li > div > a {margin-right: 0.5em}
+
+ul.jqtree-tree .jqtree-title[data-type-obj="1"] {color:#000}
+ul.jqtree-tree .jqtree-title[data-type-obj="2"] {color:#0520af}
+ul.jqtree-tree .jqtree-title[data-type-obj="3"] {color:#0520af}
+ul.jqtree-tree .jqtree-title[data-type-obj="4"] {color:#027894}
+ul.jqtree-tree .jqtree-title[data-type-obj="5"] {color:#0520af}
+ul.jqtree-tree .jqtree-title[data-type-obj="6"] {color:#0520af}
+ul.jqtree-tree .jqtree-title[data-type-obj="7"] {color:#cc0000;}
+ul.jqtree-tree .jqtree-title[data-type-obj="8"] {color:#9e5200}
+ul.jqtree-tree .jqtree-title[data-type-obj="9"] {color:#106192}
+
+
+
+ul.jqtree-tree .jqtree-element:hover > .jqtree-title {text-decoration: underline}
+li.status-hidden > div > .jqtree-title {opacity: 0.7; color: #ccc !important}
+
+li.object-copy > div > .jqtree-title::after {content: ' copy'; color: #ccc !important; font-style: italic}
+
+li.jqtree-loading > div {background: url('img/tree-loader.gif') no-repeat 2px 50%;border: 0 none;}
+#adst-tree.jqtree-loading {background: url('img/inline-loader.gif') no-repeat 4px 50%; height: 32px}
+
+/*ul.jqtree-tree li * {-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;}*/
+/*
+ контекстное
+*/
+.tree-context-menu.menu-root, .tree-context-menu.menu-root li.tree-context-menu-submenu > ul {background: #fff; padding: 8px 18px; border: 1px solid #b9b9b9; border-radius: 5px; border-top-left-radius: 0; width: auto; position: absolute;list-style-type: none}
+
+.tree-context-menu.menu-root li.tree-context-menu-submenu > ul:before, .tree-context-menu.menu-root li.tree-context-menu-submenu:after {position: absolute; content: ''; border: 6px solid #b9b9b9;top: 1px; left: -6px;border-right-color: transparent;border-top-color: transparent;transform: rotate(45deg);}
+.tree-context-menu.menu-root li.tree-context-menu-submenu:after {left: auto; right: 2px;transform: rotate(225deg);top: 8px; z-index: 1}
+
+.tree-context-menu.menu-root li {position: relative}
+.tree-context-menu.menu-root li.disabled {opacity: 0.3}
+.tree-context-menu.menu-root li.tree-context-menu-submenu > ul { display: none; position: absolute; top: 5px; left: calc(100% - 8px);z-index: 3}
+.tree-context-menu.menu-root li, .tree-context-menu.menu-root li a {white-space: nowrap}
+.tree-context-menu.menu-root a, .tree-context-menu.menu-root li > i {display: inline-block; vertical-align: middle; font-style: normal}
+.tree-context-menu.menu-root li > i {font-size: 14px; width: 18px;text-align: center;}
+
+.tree-context-menu.menu-root a {font-size: 12px; line-height: 24px; color: #000; text-decoration: none;padding: 0 12px; /*width: calc(100% - 30px)*/}
+.tree-context-menu.menu-root li:hover > a {background: #ccc; color: #fff}
+.tree-context-menu.menu-root li:hover > ul {display: block}
+.tree-context-menu li.divider {font-size: 12px;border-bottom: 1px dotted #b9b9b9;padding: 4px 0;margin: 4px 0;}
+/*.context-menu-submenu:hover > ul {display: block}
+.context-menu-item > .context-menu-list {left: calc(100% - 10px);z-index: 5; right: auto !important}
+.context-menu-item a {white-space: nowrap}*/
+
+
+/*###########################
+# доалоговое окно на странице плагина
+##############*/
+#ui-dialog form * {font-size: 12px}
+#ui-dialog form .mce-toolbar * {font-size: 16px}
+#ui-dialog h1 {margin: 15px 0 25px 0}
+.jqtree-element i {font-style: normal;display: inline-block;margin: 0 5px;font-size: 11px;vertical-align: middle;opacity: 0.3}
+.jqtree-element i.copy {color: #ccc;opacity: 1}
+.jqtree-element:hover i {opacity: 1}
+.jqtree-element i.fa-lock {color: #b20;margin-left: 0;vertical-align: bottom;opacity: 1;font-size: 12px;}
