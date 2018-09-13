@@ -69,8 +69,12 @@
 	* для метода getChildsObjects добавлена возможность сделать ключ объекта = obj_id (ObjectAdmModel->keyIdObject = true)
 	*
 	* UPD 2018-08-01
-	* Version 25
+	* Version 25.0
 	* Добавлено obj_link для объектов
+	*
+	* UPD 2018-08-13
+	* Version 25.1
+	* Исправлена ошибка обработки доступов к странице при обновлении
 */
 
 class ObjectAdmModel extends CI_Model {
@@ -522,15 +526,20 @@ class ObjectAdmModel extends CI_Model {
 		# доступы
 		if(isset($par['ugroups_access']))
 		{
-			// если в массиве есть ALL, то ставим только его
-			if(in_array('ALL', $par['ugroups_access'])){
-				$data['obj_ugroups_access'] = 'ALL';
-			}else if(in_array('LOGIN', $par['ugroups_access'])){
-				// если в массиве зарегистрированные, ставим LOGIN
-				$data['obj_ugroups_access'] = 'LOGIN';
-			}else{
-				$data['obj_ugroups_access'] = implode('|', $par['ugroups_access']);
-				$data['obj_ugroups_access'] = '|' . $data['obj_ugroups_access'] . '|';
+			# если доступы в виде строки, то пишем как есть, иначе обработка
+			if(is_array($par['ugroups_access'])) {
+				// если в массиве есть ALL, то ставим только его
+				if(in_array('ALL', $par['ugroups_access'])){
+					$data['obj_ugroups_access'] = 'ALL';
+				}else if(in_array('LOGIN', $par['ugroups_access'])){
+					// если в массиве зарегистрированные, ставим LOGIN
+					$data['obj_ugroups_access'] = 'LOGIN';
+				}else{
+					$data['obj_ugroups_access'] = implode('|', $par['ugroups_access']);
+					$data['obj_ugroups_access'] = '|' . $data['obj_ugroups_access'] . '|';
+				}
+			} else {
+				$data['obj_ugroups_access'] = $par['ugroups_access'];
 			}
 		}
 
