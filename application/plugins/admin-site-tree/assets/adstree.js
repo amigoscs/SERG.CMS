@@ -33,7 +33,7 @@ $(document).ready(function(e){
 			}
 
 			if(node.copyType == 'copy') {
-				$ElemLiTitle.after('<i class="copy">copy</i>');
+				$ElemLiTitle.addClass('e-copy');
 				//$li.addClass('object-' + node.copyType);
 			}
 

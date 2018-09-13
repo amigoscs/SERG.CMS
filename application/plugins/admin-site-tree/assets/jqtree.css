@@ -34,6 +34,7 @@ ul.jqtree-tree {
     vertical-align: middle;
     margin-left: 0;
 }
+ul.jqtree-tree .jqtree-title.e-copy {font-style: italic;}
 
     ul.jqtree-tree .jqtree-title.jqtree-title-folder {
       margin-left: 0; }
