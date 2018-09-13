@@ -366,9 +366,9 @@ class Index extends CI_Controller {
 	private function run_ajax($args)
 	{
 		# блокировка, если не Ajax
-		if(!is_ajax()) {
+		/*if(!is_ajax()) {
 			exit('No direct script access allowed');
-		}
+		}*/
 
 		$post = $this->input->post();
 		$get = $this->input->get();
@@ -416,11 +416,6 @@ class Index extends CI_Controller {
 
 	public function _render_content()
 	{
-		# проверка на наличие шаблона
-		if(!file_exists(APP_SITE_TEMPLATES_PATH . APP_SITE_TEMPLATE)) {
-			exit('Unable to load site template!');
-		}
-
 		$this->dataTemplate['CONTENT'] = '';
 
 		# загрузка хуков в начале генерации контента
@@ -680,7 +675,7 @@ class Index extends CI_Controller {
 		}
 
 		# загрузим главную БИБЛИОТЕКУ шаблона
-		$pathFile = APP_SITE_TEMPLATES_PATH . APP_SITE_TEMPLATE . '/Libraries/Templates/TemplatesLib.php';
+		$pathFile = APP_SITE_TEMPLATES_PATH . APP_SITE_TEMPLATE . '/Libraries/Contents/TemplatesLib.php';
 		if(file_exists($pathFile)) {
 			require_once($pathFile);
 			$this->TemplatesLib = new TemplatesLib();
