@@ -51,6 +51,9 @@
 	*
 	* 2.57 (2018-09-07)
 	* app_date_convert() вместо date_convert()
+	*
+	* 2.58 (2018-09-13)
+	* Исправлены ошибки поиска шаблонов и плагинов в кталогах
 */
 
 $CI = &get_instance();
@@ -484,7 +487,7 @@ function app_get_site_templates($level = 2)
 	$templates = array();
 	$CI->load->helper('directory');
 	$map_dir_templates = directory_map(info('templates_dir'), $level);
-	
+
 	if(!$map_dir_templates) {
 		return array();
 	}
@@ -552,8 +555,12 @@ function app_get_all_plugins($notLoadPlugins = array())
 
 	foreach($map_dir_plugins as $key => $value)
 	{
-		if(!in_array('autoload.php', $value))
+		if(!is_array($value)) {
 			continue;
+		}
+		if(!in_array('autoload.php', $value)) {
+			continue;
+		}
 
 		require(info('plugins_dir') . '' . $key . 'autoload.php');
 		$key = str_replace('/', '', $key);
