@@ -7,97 +7,61 @@
 
 class Ajax extends CI_Model {
 	
-	/*
-	* $checkAjax - проверять ли запрос на AJAX. TRUE - да, FALSE - нет;
-	* $post - данные, которые идут по POST
-	* $get - данные, которые идут по GET
-	* $urlArg1 - сегменты url - первый сегмент (/ajax/plugin/ПАПКА ПЛАГИНА/первый сегмент)
-	* $urlArg2 - сегменты url - второй сегмент (/ajax/plugin/ПАПКА ПЛАГИНА/первый сегмент/второй сегмент)
-	*
-	*/
-	public $checkAjax;
-	private $post, $get, $urlArg1, $urlArg2; // данные POST и GET
-	
-	function __construct($post, $get, $urlArg1, $urlArg2)
+	private $post, $get; // данные POST и GET
+
+	function __construct($post, $get)
     {
         parent::__construct();
 		$this->post = $post;
 		$this->get = $get;
-		$this->urlArg1 = $urlArg1;
-		$this->urlArg2 = $urlArg2;
-		
-		# поставьте необходимое значение. Можно написать условие
-		$this->checkAjax = FALSE;
     }
-	/*
-	* функция вызывается для запуска методов
-	*/
-	public function ajaxRun()
-	{
-		$CI = &get_instance();
-		switch($this->urlArg1)
-		{
-			case 'create':
-				return $this->connectorElfinder();
-				break;
-		}
-	}
-	
+
 	/*
 	* коннектор файлового менеджера для сайта (front-end)
 	*/
-	public function connectorElfinder()
+	public function create()
 	{
-		$CI = &get_instance();
-		
-		$path_plugin = info('plugins_dir') . 'elfinder/';
 		error_reporting(0); // Set E_ALL for debuging
-		
+		$CI = &get_instance();
+
+		//pr($CI);
+
+		$path_plugin = info('plugins_dir') . 'elfinder/';
+
+		# папка пользователя
 		$folderFiles = $this->post['elfFolder'];
-		$path = APPPATH;
-		$pathUrl = '';
-		
+
+		if(!$folderFiles){
+			exit('Directory error');
+		}
+
+		$pathUrl = info('base_url') . 'uploads/'. app_get_option("el_userfolder_path", "elfinder", "tempuserfiles") . '/' . $folderFiles;;
+		$path = APP_BASE_PATH . 'uploads/'. app_get_option("el_userfolder_path", "elfinder", "tempuserfiles") . '/' . $folderFiles;
+
 		if($this->post['cmd'] == 'open')
 		{
-			if(!$folderFiles){
-				echo 'Directory error';
-				return;
-			}
-			
-			$path = str_replace('application/', '', $path) . 'uploads/tempuserfiles/' . $folderFiles;
-			$pathUrl = info('base_url') . 'uploads/tempuserfiles/' . $folderFiles;
-
 			# если папки нет, пробуем создать
 			if(!file_exists($path))
 				@mkdir($path, 0777);
 
 			# если  директория не создалась - значит что-то не так. Сворачиваемся
 			if(!file_exists($path)){
-				echo 'Directory create error. Contact administrator';
-				return;
+				exit('Directory create error. Contact administrator');
 			}
 		}
-		else
-		{
-			$path = str_replace('application/', '', $path) . 'uploads/tempuserfiles/' . $folderFiles;
-			$pathUrl = info('base_url') . 'uploads/tempuserfiles/' . $folderFiles;
-			
-		}
-		
-		
+
 		// elFinder autoload
 		require $path_plugin . 'common/php/autoload.php';
 		// ===============================================
-		
+
 		// Enable FTP connector netmount
 		elFinder::$netDrivers['ftp'] = 'FTP';
 		// ===============================================
-		
+
 		// Documentation for connector options:
 		// https://github.com/Studio-42/elFinder/wiki/Connector-configuration-options
-		
+
 		$replaces = elfinder_replaceChars();
-		
 		$opts = array(
 			'debug' => TRUE,
 			'bind' => array(
@@ -118,10 +82,9 @@ class Ajax extends CI_Model {
 					'path'          => $path,                		// path to files (REQUIRED)
 					'URL'           => $pathUrl, 					// URL to files (REQUIRED)
 					'uploadDeny'    => array('all'),                // All Mimetypes not allowed to upload
-					'uploadAllow'   => elfinder_mimeAllowUpload('default'),	// Mimetype `image` and `text/plain` allowed to upload
+					'uploadAllow'   => elfinder_mimeAllowUpload('users'),	// Mimetype `image` and `text/plain` allowed to upload
 					'uploadOrder'   => array('deny', 'allow'),      // allowed Mimetype `image` and `text/plain` only
 					'accessControl' => 'elfinder_connector_access',	// disable and hide dot starting files (OPTIONAL)
-					//'defaults' => array('read' => true, 'write' => true),
 					'plugin' => array(
 								'Sanitizer' => array(
 		 						'enable' => TRUE,
@@ -132,16 +95,9 @@ class Ajax extends CI_Model {
 				)
 			)
 		);
-		
-		// run elFinder
+
 		$connector = new elFinderConnector(new elFinder($opts));
 		$connector->run();
 	}
-	
-	
-	/*
-	* функция вызывается для возврата результата в front-end контроллере
-	*/
-	public function getResult(){}
-	
+
 }

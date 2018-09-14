@@ -1,4 +1,6 @@
-$(document).ready(function(){
+$(document).ready(function() {
+	var ELFCONNECTOR = '/admin/elfinder/admin_connector';
+
 	if($('.field-image').length)
 	{
 		ElfinderViewImgInit();
@@ -54,7 +56,7 @@ $(document).ready(function(){
 
 		setTimeout(function(){
 			$('#elfinder-dialog-container').elfinder({
-				url : '/admin/elfinder/connector',
+				url : ELFCONNECTOR,
 				lang: cmsGetLang('scriptLangShort'),
 				getFileCallback: function(data) {
 					if(InputPatch.val()) {
@@ -137,7 +139,7 @@ $(document).ready(function(){
 		if($('#elfinder').length)
 		{
 			$('#elfinder').elfinder({
-				url : '/admin/elfinder/connector',
+				url : ELFCONNECTOR,
 				lang: cmsGetLang('scriptLangShort'),
 			}).elfinder('instance');
 

@@ -7,7 +7,7 @@
 $info = array(
 		'name' => 'Менеджер файлов',
 		'descr' => 'Менеджер файлов для сайта',
-		'version' => '2.5',
+		'version' => '2.6',
 		'author' => 'Сергей Будников',
 		'url' => 'http://site.ru',
 	);
@@ -42,6 +42,9 @@ $info = array(
 *
 * 2.5
 * Введена поддержка языков
+*
+* 2.6
+* Правки в коде
 */
 
 $admin_menu = TRUE; // отображать в списке меню
@@ -83,19 +86,10 @@ $load_site = array(
 );
 
 # файлы скриптов и стилей сайта в секцию HEAD
-$load_site['assets']['top'] = array(
-	//'0' => '<link rel="stylesheet" type="text/css" href="'.info('plugins_url').'elfinder/common/css/elfinder.min.css">',
-	//'1' => '<link rel="stylesheet" type="text/css" href="'.info('plugins_url').'elfinder/common/css/theme.css">',
-);
+$load_site['assets']['top'] = array();
 
 # файлы скриптов и стилей сайта в секцию BODY
-$load_site['assets']['bottom'] = array(
-	//'0' => '<script src="'.info('plugins_url').'elfinder/common/js/elfinder.min.js"></script>',
-	//'0' => '<script src="'.info('plugins_url').'elfinder/common/js/elfinder.full.js"></script>',
-	//'1' => '<script src="'.info('plugins_url').'elfinder/assets/elfinder-site.js"></script>',
-);
-
-
+$load_site['assets']['bottom'] = array();
 
 
 # $load_site_admin - автозагрузка моделей и хелперов для сайта, ЕСЛИ ПОЛЬЗОВАТЕЛЬ ВОШЕЛ КАК Admin
@@ -136,3 +130,9 @@ $options['el_placehold_path']['type'] = 'text';
 $options['el_placehold_path']['default'] = 'uploads/placeholder/';
 $options['el_placehold_path']['values'] = array();
 $options['el_placehold_path']['description'] = 'Например: « uploads/placeholder/ »';
+
+$options['el_userfolder_path']['name'] = 'Название папки для юзеров';
+$options['el_userfolder_path']['type'] = 'text';
+$options['el_userfolder_path']['default'] = 'tempuserfiles';
+$options['el_userfolder_path']['values'] = array();
+$options['el_userfolder_path']['description'] = 'Название латиницей! Например: "tempuserfiles". В этой папке будут хранить файлы юзеров, которые могут загружать файлы на сайт';
