@@ -11,11 +11,11 @@
         <li><a href="#tabs-4"><?= app_lang('TAB_OTHER') ?></a></li>
 	</ul>
 
-    <form action="<?=info('base_url')?>admin/front_setting" method="post">
+    <form action="<?= info('base_url') ?>admin/front_setting" method="post">
     <!--основное-->
     <div id="tabs-1">
     <div class="form-group">
-     	<label for="select01"><?=$this->lang->line('input_label_site_template')?></label>
+     	<label for="select01"><?= app_lang('input_label_site_template') ?></label>
 	<?
 		$args = array(
 			'class' => 'form-control',
@@ -42,7 +42,7 @@
     </div>
 
       <div class="form-group">
-     	<label for="input01"><?=$this->lang->line('input_label_not_found_template')?></label>
+     	<label for="input01"><?= app_lang('input_label_not_found_template') ?></label>
 		<input type="text" class="form-control" id="input01" placeholder="<?=$this->lang->line('input_label_not_found_template')?>" name="option_update[site][not_found_template]" value="<?= app_get_option('not_found_template', 'site', '') ?>">
         <span class="help-block sub-little-text">Code option <i>app_get_option('not_found_template', 'site', '')</i></span>
       </div>
@@ -53,33 +53,50 @@
 		<span class="help-block sub-little-text">Составьте здесь текст о пользовательском соглашении при регистрации на сайте. Простой HTML, включая ссылку на страницу с соглашением при необходимости.<br /> Code option <i>app_get_option('site_user_agreement', 'site', '')</i></span>
 	</div>
 
-	<button type="submit" class="btn btn-primary ng-scope"><?=$this->lang->line('button_save')?></button>
+	<button type="submit" class="btn btn-primary ng-scope"><?= app_lang('button_save') ?></button>
    </div>
    <!--//основное-->
 
    <!--seo-->
 	<div id="tabs-2">
 		<div class="form-group">
-		<label for="input11"><?=$this->lang->line('input_label_sitename')?></label>
-		<input type="text" class="form-control" id="input11" placeholder="<?=$this->lang->line('input_label_sitename')?>" name="option_update[site][site_name]" value="<?= app_get_option('site_name', 'site', '') ?>">
+		<label for="input11"><?= app_lang('input_label_sitename') ?></label>
+		<input type="text" class="form-control" id="input11" placeholder="<?= app_lang('input_label_sitename') ?>" name="option_update[site][site_name]" value="<?= app_get_option('site_name', 'site', '') ?>">
         <span class="help-block sub-little-text">Code option <i>app_get_option('site_name', 'site', '')</i></span>
         </div>
         <div class="form-group">
-            <label for="input12"><?=$this->lang->line('input_label_sitetitle')?></label>
-            <input type="text" class="form-control" id="input12" placeholder="<?=$this->lang->line('input_label_sitetitle')?>" name="option_update[site][site_title_default]" value="<?= app_get_option('site_title_default', 'site', '') ?>">
+            <label for="input12"><?= app_lang('input_label_sitetitle') ?></label>
+            <input type="text" class="form-control" id="input12" placeholder="<?= app_lang('input_label_sitetitle') ?>" name="option_update[site][site_title_default]" value="<?= app_get_option('site_title_default', 'site', '') ?>">
             <span class="help-block sub-little-text">Code option <i>app_get_option('site_title_default', 'site', '')</i></span>
         </div>
         <div class="form-group">
-            <label for="textarea11"><?=$this->lang->line('input_label_sitedescr')?></label>
-            <textarea placeholder="<?=$this->lang->line('input_label_sitedescr')?>" class="form-control" id="textarea11" name="option_update[site][site_description_default]"><?= app_get_option('site_description_default', 'site', '') ?></textarea>
+            <label for="textarea11"><?= app_lang('input_label_sitedescr') ?></label>
+            <textarea placeholder="<?= app_lang('input_label_sitedescr') ?>" class="form-control" id="textarea11" name="option_update[site][site_description_default]"><?= app_get_option('site_description_default', 'site', '') ?></textarea>
             <span class="help-block sub-little-text">Code option <i>app_get_option('site_description_default', 'site', '')</i></span>
         </div>
         <div class="form-group">
-            <label for="textarea12"><?=$this->lang->line('input_label_sitekeywords')?></label>
-            <textarea placeholder="<?=$this->lang->line('input_label_sitekeywords')?>" class="form-control" id="textarea12"  name="option_update[site][site_keywords_default]"><?= app_get_option('site_keywords_default', 'site', '') ?></textarea>
+            <label for="textarea12"><?= app_lang('input_label_sitekeywords') ?></label>
+            <textarea placeholder="<?= app_lang('input_label_sitekeywords') ?>" class="form-control" id="textarea12"  name="option_update[site][site_keywords_default]"><?= app_get_option('site_keywords_default', 'site', '') ?></textarea>
             <span class="help-block sub-little-text">Code option <i>app_get_option('site_keywords_default', 'site', '')</i></span>
         </div>
-        <button type="submit" class="btn btn-primary ng-scope"><?=$this->lang->line('button_save')?></button>
+
+		<div class="form-group">
+		<label for="select11">Включить сжатие стилей и скриптов</label>
+		 <?
+			 $args = array(
+				 'class' => 'form-control',
+				 'id' => 'select11',
+				 'name' => 'option_update[site][compress_style]',
+				 );
+				 $options = array('no' => 'Не включать', 'yes' => 'Включить');
+				echo form_dropdown($args, $options, app_get_option('compress_style', 'site', 'no'))
+		 ?>
+			 <span class="help-block sub-little-text">Code option <i>app_get_option('compress_style', 'site', 'no')</i></span>
+			 </div>
+
+
+
+        <button type="submit" class="btn btn-primary ng-scope"><?= app_lang('button_save') ?></button>
 
     </div>
 	<!--//seo-->
@@ -158,7 +175,7 @@
         <span class="help-block sub-little-text">Code option <i>app_get_option('option12', 'site', '')</i></span>
     </div>
 
-        <button type="submit" class="btn btn-primary ng-scope"><?=$this->lang->line('button_save')?></button>
+        <button type="submit" class="btn btn-primary ng-scope"><?= app_lang('button_save') ?></button>
     </div>
      <!--//tab custom-->
 
@@ -175,7 +192,7 @@
 	        <span class="help-block sub-little-text">Code option <i>app_get_option('login_custom_css', 'site', '')</i>. CSS будет добавлен в тег head.</span>
 	    </div>
 
-        <button type="submit" class="btn btn-primary ng-scope"><?=$this->lang->line('button_save')?></button>
+        <button type="submit" class="btn btn-primary ng-scope"><?= app_lang('button_save') ?></button>
     </div>
      <!--//tab other-->
 
