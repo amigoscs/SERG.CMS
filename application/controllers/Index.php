@@ -62,6 +62,10 @@ class Index extends CI_Controller {
 	 * Version 14.31
 	 * UPD 2018-08-30
 	 * Правки в работе с Ajax
+	 *
+	 * Version 14.4
+	 * UPD 2018-09-14
+	 * Поддержка библиотеки сжатия файлов стилей
 	 */
 
 	// Шаблон страницы
@@ -414,8 +418,38 @@ class Index extends CI_Controller {
 		}
 	}
 
+	/*
+	* Сжатие файлов
+	*/
+	private function _compressStyles()
+	{
+		# если сжатие не включено, отдаем как есть
+		if(app_get_option('compress_style', 'site', 'no') === 'no') {
+			$this->dataTemplate['TOP_ASSETS_ARRAY'] = $this->top_assets;
+			$this->dataTemplate['BOTTOM_ASSETS_ARRAY'] = $this->bottom_assets;
+		} else {
+			$libName = 'CompressStyles';
+			if(file_exists(APPPATH . 'libraries/' . $libName . '.php')) {
+				require_once(APPPATH . 'libraries/' . $libName . '.php');
+				$CompressClass = new $libName;
+				$this->dataTemplate['TOP_ASSETS_ARRAY'] = $CompressClass->compressHeadAssets($this->top_assets);
+				$this->dataTemplate['BOTTOM_ASSETS_ARRAY'] = $CompressClass->compressBodyAssets($this->top_assets);
+			} else {
+				$this->dataTemplate['TOP_ASSETS_ARRAY'] = $this->top_assets;
+				$this->dataTemplate['BOTTOM_ASSETS_ARRAY'] = $this->bottom_assets;
+			}
+
+		}
+
+	}
+
 	public function _render_content()
 	{
+		# проверка на наличие шаблона
+		if(!file_exists(APP_SITE_TEMPLATES_PATH . APP_SITE_TEMPLATE)) {
+			exit('Unable to load site template!');
+		}
+		
 		$this->dataTemplate['CONTENT'] = '';
 
 		# загрузка хуков в начале генерации контента
@@ -517,9 +551,6 @@ class Index extends CI_Controller {
 		$this->dataTemplate['TEMPLATE_CSS_URL'] = $this->dataTemplate['TEMPLATE_ASSETS_URL'] . 'css/';
 		$this->dataTemplate['TEMPLATE_IMG_URL'] = $this->dataTemplate['TEMPLATE_ASSETS_URL'] . 'img/';
 
-		$this->dataTemplate['TOP_ASSETS_ARRAY'] = $this->top_assets;
-		$this->dataTemplate['BOTTOM_ASSETS_ARRAY'] = $this->bottom_assets;
-
 		isset($this->dataTemplate['PAGE_TITLE']) ?: $this->dataTemplate['PAGE_TITLE'] = app_get_option('site_title_default', 'site', '');
 		isset($this->dataTemplate['PAGE_DESCRIPTION']) ?: $this->dataTemplate['PAGE_DESCRIPTION'] = app_get_option('site_description_default', 'site', '');
 		isset($this->dataTemplate['PAGE_KEYWORDS']) ?: $this->dataTemplate['PAGE_KEYWORDS'] = app_get_option('site_keywords_default', 'site', '');
@@ -605,6 +636,7 @@ class Index extends CI_Controller {
 		# !УСТАРЕЛО в версии 6.0
 		###########################################
 
+		$this->_compressStyles();
 		$this->dataTemplate['COMPLITECONTENT'] = $this->load->view('templates/' . APP_SITE_TEMPLATE . '/' . $this->page_template, $this->dataTemplate, TRUE);
 		# парсер контента
 		if(isset($this->ParserContentModel)) {
@@ -626,9 +658,6 @@ class Index extends CI_Controller {
 		$this->dataTemplate['TEMPLATE_JS_URL'] = $this->dataTemplate['TEMPLATE_ASSETS_URL'] . 'js/';
 		$this->dataTemplate['TEMPLATE_CSS_URL'] = $this->dataTemplate['TEMPLATE_ASSETS_URL'] . 'css/';
 		$this->dataTemplate['TEMPLATE_IMG_URL'] = $this->dataTemplate['TEMPLATE_ASSETS_URL'] . 'img/';
-
-		$this->dataTemplate['TOP_ASSETS_ARRAY'] = $this->top_assets;
-		$this->dataTemplate['BOTTOM_ASSETS_ARRAY'] = $this->bottom_assets;
 
 		isset($this->dataTemplate['PAGE_TITLE']) ?: $this->dataTemplate['PAGE_TITLE'] = '404 - page not found';
 		isset($this->dataTemplate['PAGE_DESCRIPTION']) ?: $this->dataTemplate['PAGE_DESCRIPTION'] = '404 - page not found';
@@ -675,7 +704,7 @@ class Index extends CI_Controller {
 		}
 
 		# загрузим главную БИБЛИОТЕКУ шаблона
-		$pathFile = APP_SITE_TEMPLATES_PATH . APP_SITE_TEMPLATE . '/Libraries/Contents/TemplatesLib.php';
+		$pathFile = APP_SITE_TEMPLATES_PATH . APP_SITE_TEMPLATE . '/Libraries/Templates/TemplatesLib.php';
 		if(file_exists($pathFile)) {
 			require_once($pathFile);
 			$this->TemplatesLib = new TemplatesLib();
@@ -744,6 +773,7 @@ class Index extends CI_Controller {
 		# !УСТАРЕЛО в версии 6.0
 		#########################################################################
 
+		$this->_compressStyles();
 		$CONTENT = $this->load->view($this->viewsTemplatePath . APP_SITE_404_TEMPLATE, $this->dataTemplate, TRUE);
 		$this->load->view('application', array('CONTENT' => $CONTENT));
 	}

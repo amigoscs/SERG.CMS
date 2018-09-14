@@ -85,6 +85,10 @@
 	* version 16.6
 	* Переделан Ajax сортировщик списков
 	*
+	* UPD 2018-09-14
+	* version 16.61
+	* Добавлена метка времени при сбросе кэша
+	*
 */
 
 class Admin extends CI_Controller {
@@ -430,6 +434,7 @@ class Admin extends CI_Controller {
 		if($post = $this->input->post('delete_cache')) {
 			app_delete_cash();
 			$this->pageCompliteMessage = app_lang('INFO_DEL_CACHE_DELETE_COMPLITE');
+			app_add_option('update_cash_time', time(), 'general');
 		}
 
 		if($post = $this->input->post('create_sitemap')) {
