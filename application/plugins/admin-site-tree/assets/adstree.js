@@ -345,6 +345,7 @@ $(document).ready(function(e){
 										ElfinderViewImgInit();
 										tinymceRun();
 										admin_InitFieldsDate();
+										appShSwitch();
 									},500);
 								}
 							});
@@ -357,6 +358,7 @@ $(document).ready(function(e){
 					ElfinderViewImgInit();
 					tinymceRun();
 					admin_InitFieldsDate();
+					appShSwitch();
 				},500);
 
 			  }
