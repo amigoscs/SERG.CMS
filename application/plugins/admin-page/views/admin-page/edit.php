@@ -5,7 +5,7 @@
 
 <form action="<?=$form_action?>" method="post" enctype="multipart/form-data" class="page-editor">
 
-<div class="col-inner-2 show-hide-switch">
+<div class="col-inner-2 show-hide-switch" data-sh-id="ap_1">
 <h2>Основное</h2>
 
 	 <div class="form-group">
@@ -25,10 +25,6 @@
 
 	   		echo form_dropdown($args, $all_types, $tree_type_object)
 			?>
-           <!-- <select class="form-control" id="select01" name="obj[type]">
-                 <option value="page" selected="selected">Страница</option>
-                  <option value="catalog">Каталог</option>
-            </select>-->
     </div>
 
      <div class="form-group">
@@ -48,11 +44,6 @@
 
 	   		echo form_dropdown($args, $options, $obj_data_type)
 			?>
-
-          <!-- <select class="form-control" id="select01" name="obj[type]">
-                 <option value="1" selected="selected">Страница</option>
-                  <option value="catalog">Каталог</option>
-            </select>-->
     </div>
 
     <div class="form-group">
@@ -64,8 +55,6 @@
         <label for="input03">Поле H1 страницы</label>
         <input type="text" class="form-control" id="input03" placeholder="H1 страницы" name="obj[<?=$obj_id?>][h1]" value="<?= htmlspecialchars($obj_h1) ?>">
     </div>
-
-
 
     <div class="form-group">
         <label for="input04">Поле TITLE страницы</label>
@@ -88,11 +77,9 @@
         <button type="submit" class="btn btn-success ng-scope" style="width:100%; max-width:800px; display:block; margin:0 auto"><?= app_lang('button_save') ?></button>
     </div>
 
-
-
 </div>
 
-<div class="show-hide-switch col-inner-2">
+<div class="show-hide-switch col-inner-2" data-sh-id="ap_2">
 <h2>Дополнительно</h2>
     <div class="form-group">
         <label for="select11">Владелец</label>
@@ -156,7 +143,7 @@
     </div>
 </div>
 
-<div class="show-hide-switch">
+<div class="show-hide-switch" data-sh-id="ap_3">
 <h2>Адреса страницы</h2>
     <div class="form-group">
 	<?
@@ -182,7 +169,7 @@
 
 </div>
 
-<div class="show-hide-switch">
+<div class="show-hide-switch" data-sh-id="ap_4">
 <h2>Контент</h2>
     <div class="form-group">
             <label for="textarea04">Анонс</label>
@@ -195,7 +182,7 @@
     </div>
 </div>
 
-<div class="col-inner-2 show-hide-switch">
+<div class="col-inner-2 show-hide-switch" data-sh-id="ap_5">
 <h2>Шаблон</h2>
     <div class="form-group">
         <label for="select101">Шаблон страницы</label>
