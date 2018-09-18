@@ -276,3 +276,38 @@ function appJsTranslit(str) {
 	}
 	return newStr;
 }
+
+/*
+	* Обработка show-hide-switch
+*/
+var appShSwKey = 'shSwitch';
+var appShSwitch = function() {
+	allItems = localStorage.getItem(appShSwKey);
+	if(!allItems) {
+		return false;
+	}
+	allItems = JSON.parse(allItems);
+	var Elements = '';
+
+	// раскроем элементы
+	$.each(allItems.open, function(elemData, el) {
+		Elements += '[data-sh-id="'+elemData+'"],';
+	});
+
+	if(Elements) {
+		Elements = Elements.substring(0, Elements.length - 1);
+		$(Elements).removeClass('hide');
+	}
+
+	Elements = '';
+
+	// закроем элементы
+	$.each(allItems.closed, function(elemData, el) {
+		Elements += '[data-sh-id="'+elemData+'"],';
+	});
+
+	if(Elements) {
+		Elements = Elements.substring(0, Elements.length - 1);
+		$(Elements).addClass('hide');
+	}
+}

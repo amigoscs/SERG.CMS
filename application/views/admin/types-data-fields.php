@@ -37,9 +37,9 @@ function confirm_delete()
 <? foreach($fields_array as $key => $val): ?>
 	<li data-id="<?= $key ?>">
 	<? if(isset($val['data_types'][$type_fields])): ?>
-     <div class="col-inner-2 show-hide-switch hide green">
+     <div class="col-inner-2 show-hide-switch hide green" data-sh-id="tdf_<?= $key ?>">
     <? else: ?>
-    <div class="col-inner-2 show-hide-switch hide">
+    <div class="col-inner-2 show-hide-switch hide" data-sh-id="tdf_<?= $key ?>">
     <? endif; ?>
 
     <h2 class="s-handle"><?=$val['types_fields_name']?> [ID = <?=$key?>]</h2>

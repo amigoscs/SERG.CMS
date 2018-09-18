@@ -142,12 +142,35 @@ jQuery(document).ready(function() {
 	 });
 
 	 /*show hide*/
-	$('body').on('click', '.show-hide-switch > h2', function(){
+	$('body').on('click', '.show-hide-switch > h2', function() {
 		var Parent = $(this).parent('.show-hide-switch');
+		var shID = Parent.data('sh-id');
+		var allItems = null;
+		if(shID) {
+			allItems = localStorage.getItem(appShSwKey);
+			if(!allItems) {
+				allItems = {'open': {}, 'closed': {}};
+			} else {
+				allItems = JSON.parse(allItems);
+			}
+		}
+
 		if(Parent.hasClass('hide')) {
 			Parent.removeClass('hide');
+			if(shID) {
+				allItems['open'][shID] = true;
+				delete allItems['closed'][shID];
+			}
 		}else{
 			Parent.addClass('hide');
+			if(shID) {
+				allItems['closed'][shID] = true;
+				delete allItems['open'][shID];
+			}
+		}
+
+		if(allItems) {
+			localStorage.setItem(appShSwKey, JSON.stringify(allItems));
 		}
 	});
 
@@ -469,6 +492,9 @@ jQuery(document).ready(function() {
 
 	/* поля типа DATE*/
 	admin_InitFieldsDate();
+
+	/*переключател show-hidden*/
+	appShSwitch();
 
 
 }); // end document ready

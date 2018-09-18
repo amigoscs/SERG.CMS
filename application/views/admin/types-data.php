@@ -24,7 +24,7 @@ function confirm_delete()
 <ul class="list-draggable" data-sort-table="data_types" data-sort-field="data_types_order">
 <? foreach($types_array as $key => $val): ?>
 <li data-id="<?= $key ?>">
-	<div class="show-hide-switch hide">
+	<div class="show-hide-switch hide" data-sh-id="tde_<?= $key ?>">
 	<h2 class="s-handle"><?=$val['data_types_name']?> [ID = <?= $key ?> FIELDS = <?=count($val['fields'])?>]</h2>
 	    <div class="col-inner-2">
 	        <div class="form-group">
