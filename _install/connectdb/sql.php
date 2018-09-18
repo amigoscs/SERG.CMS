@@ -65,7 +65,7 @@ $tablesArray[$tablePrefix . 'tree']['insert'] = "INSERT INTO __TABLE__
 // objects
 $tablesArray[$tablePrefix . 'objects']['create'] = "CREATE TABLE __TABLE__ (
 		obj_id BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT 'object id',
-		obj_data_type INT(3),
+		obj_data_type VARCHAR(15),
 		obj_canonical TEXT,
 		obj_name VARCHAR(255),
 		obj_h1 VARCHAR(255),
