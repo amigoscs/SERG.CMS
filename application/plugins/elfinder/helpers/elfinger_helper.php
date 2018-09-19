@@ -91,14 +91,22 @@ function elfinder_replaceChars()
 * разрешенные MIME типы файлов
 *
 */
-function elfinder_mimeAllowUpload($mimeType = 'default')
+function elfinder_mimeAllowUpload($mimeType = 'admin')
 {
-	if($mimeType == 'default')
-	{
+	$mimeArray = array();
+	if($mimeType == 'admin') {
 		$mimeArray = array(
 			'image', // изображения
 			'text/plain', // текст
 			'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // docx
+			'application/pdf', // pdf
+			'application/msword', // doc
+			'text/rtf', // rtf
+			'text/csv', // csv
+		);
+	} else if($mimeType == 'users') {
+		$mimeArray = array(
+			'image', // изображения
 			'application/pdf', // pdf
 			'application/msword', // doc
 			'text/rtf', // rtf
