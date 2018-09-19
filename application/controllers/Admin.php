@@ -89,6 +89,10 @@
 	* version 16.61
 	* Добавлена метка времени при сбросе кэша
 	*
+	* UPD 2018-09-19
+	* version 16.62
+	* Правки
+	*
 */
 
 class Admin extends CI_Controller {
@@ -144,6 +148,7 @@ class Admin extends CI_Controller {
 		define("APP_SITE_TEMPLATE", app_get_option('site_template', 'site', 'default'));
 		define("APP_SITE_404_TEMPLATE", app_get_option('not_found_template', 'site', ''));
 		define("APP_CMS_TEMPLATE", app_get_option('admin_template', 'general', 'default'));
+		define("APP_SITE_TEMPLATE_URL", APP_BASE_URL . 'application/views/templates/' . APP_SITE_TEMPLATE);
 
 		$this->LoginAdmModel->userData();
 		$this->pathRobots = APP_BASE_PATH . 'robots.txt';
