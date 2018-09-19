@@ -14,17 +14,22 @@
 	version 8.1. Добавлена выгрузка вложенных объектов. Правки в JS. Перевод. 2018-06-25
 	version 8.2. НА странице импорта можно передать путь до файла через GET параметр file
 	version 9.0. совместимость с версией 6.0
+
+	* UPD 2018-09-19
+	* Version 9.1
+	* Совместимость с возможностью подключения нескольких типов данных
+	*
 */
 
 $info = array(
 		'name' => app_lang('EXPCSV_AUTOLOAD_PLUGIN_NAME'),
 		'descr' => app_lang('EXPCSV_AUTOLOAD_PLUGIN_DESCRIPTION'),
-		'version' => '9.0',
+		'version' => '9.1',
 		'author' => app_lang('EXPCSV_AUTOLOAD_AUTHOR'),
 		'url' => '//sergcms.ru',
 	);
 
-$admin_menu = TRUE; // отображать в списке меню
+$admin_menu = true; // отображать в списке меню
 
 # $load_admin - автозагрузка моделей и хелперов для админ панели
 $load_admin = array(
@@ -46,7 +51,7 @@ $load_admin['assets']['plugin']['top'] = array(
 
 # файлы скриптов и стилей для СТРАНИЦЫ ПЛАГИНА в секцию BODY
 $load_admin['assets']['plugin']['bottom'] = array(
-	'0' => '<script src="'.info('plugins_url').'exp-csv/assets/exp-csv-script.js?20180625"></script>',
+	'0' => '<script src="'.info('plugins_url').'exp-csv/assets/exp-csv-script.js"></script>',
 	);
 
 

@@ -592,7 +592,7 @@ class ExpCsvModel extends CI_Model {
 		$this->db->select('tree.*, objects.*');
 		$this->db->join('objects', 'objects.obj_id = tree.tree_object');
 		$this->db->where('tree_type', 'orig');
-		$this->db->where('obj_data_type', $dataTypeID);
+		$this->db->like('obj_data_type', '|' . $dataTypeID . '|');
 		$query = $this->db->get('tree');
 
 		$rowsExport = array();

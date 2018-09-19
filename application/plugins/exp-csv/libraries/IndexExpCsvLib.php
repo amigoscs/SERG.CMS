@@ -119,6 +119,7 @@ class IndexExpCsvLib {
 							} else {
 								continue;
 							}
+
 							$isUpdate = $CI->ObjectAdmModel->updateObject(array($fieldName => $fieldVal), $objID);
 						}
 					}
@@ -180,15 +181,20 @@ class IndexExpCsvLib {
 
 		# получим типы данных для объектов
 		// по умолчанию - ID = 1
-		$dataTypesID = array(1 => 1);
-		$dataTypes = array();
+		$dataTypesID = array();
 		foreach($objects as $value) {
-			$dataTypesID[$value['obj_data_type']] = $value['obj_data_type'];
+			$tmp = explode('|', trim($value['obj_data_type'], '|'));
+			foreach($tmp as $val) {
+				$dataTypesID[$val] = $val;
+			}
+
 		}
 
 		// поля для типов данных
 		$CI->CommonModel->reset();
 		$CI->CommonModel->getOnlyPublish = TRUE;
+
+		$dataTypes = array();
 		$dataTypes = $CI->CommonModel->getAllDataTypesFields($dataTypesID);
 
 		# все активные поля
@@ -343,6 +349,7 @@ class IndexExpCsvLib {
 
 		if($typeDataID = $CI->input->post('active_type'))
 		{
+
 			$fileFirstRow = $fileSecondRow = '';
 			$allObjects = $CI->ExpCsvModel->getObjectsDataType($typeDataID);
 
@@ -437,7 +444,7 @@ class IndexExpCsvLib {
 
 			// запрошенные типы данных
 			if($dataTypes) {
-				$allDataTypes = $CI->CommonModel->getAllDataTypesFields(FALSE, $dataTypes);
+				$allDataTypes = $CI->CommonModel->getAllDataTypesFields(false, $dataTypes);
 			}
 
 			$OBJS = $CI->ExpCsvModel->getObjectsFromType($typeObjects, $dataTypes); // объекты
