@@ -7,7 +7,7 @@
 $info = array(
 		'name' => 'Редактор страниц',
 		'descr' => 'Плагин создания редактирования страниц',
-		'version' => '5.2',
+		'version' => '6.0',
 		'author' => 'Сергей Будников',
 		'url' => '//sergcms.ru',
 	);
@@ -19,9 +19,16 @@ VERSION 4.0. Совместимость с 4.0
 VERSION 5.0. Совместимость с 5.0
 VERSION 5.1. Добавлена функция генерирующая ссылку на редактирование страницы
 VERSION 5.2. Исправлена ошибка при редактировании несуществующего объекта
+
+	* UPD 2018-09-19
+	* Version 6.0
+	* Теперь можно подключать к страницам несколько типов данных. Подключены языковые файлы
+	* Для перехода выполнить SQL комнаду:
+	* ALTER TABLE  `{DBPREFIX}objects` CHANGE `obj_data_type` `obj_data_type` VARCHAR( 15 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ;
+	*
 */
 
-$admin_menu = FALSE; // отображать в списке меню
+$admin_menu = false; // отображать в списке меню
 
 # $load_admin - автозагрузка моделей и хелперов для админ панели
 $load_admin = array(
@@ -44,9 +51,6 @@ $load_admin['assets']['admin']['bottom'] = array(
 );
 
 
-
-
-
 # $load_site - автозагрузка моделей и хелперов для сайта
 $load_site = array(
 		'helper' => array('admpage'), // автозагрузка хелперов
@@ -57,8 +61,7 @@ $load_site = array(
 $load_site['assets']['top'] = array();
 
 # файлы скриптов и стилей сайта в секцию BODY
-$load_site['assets']['bottom'] = array(
-	);
+$load_site['assets']['bottom'] = array();
 
 
 # $load_site_admin - автозагрузка моделей и хелперов для сайта, ЕСЛИ ПОЛЬЗОВАТЕЛЬ ВОШЕЛ КАК Admin

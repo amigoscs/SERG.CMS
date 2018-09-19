@@ -31,18 +31,16 @@
             <label for="select01">Тип данных объекта</label>
             <?
 			$options = array();
-			foreach($all_data_types as $key => $val)
-			{
+			foreach($all_data_types as $key => $val) {
 				$options[$key] = $val['data_types_name'];
 			}
 
 			$args = array(
 					'class' => 'form-control',
 					'id' => 'select02',
-					'name' => 'obj['.$obj_id.'][data_type]',
+					'name' => 'obj['.$obj_id.'][data_type][]',
 				);
-
-	   		echo form_dropdown($args, $options, $obj_data_type)
+	   		echo form_multiselect($args, $options, $obj_data_type)
 			?>
     </div>
 
