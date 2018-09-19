@@ -66,6 +66,12 @@ class Index extends CI_Controller {
 	 * Version 14.4
 	 * UPD 2018-09-14
 	 * Поддержка библиотеки сжатия файлов стилей
+	 *
+	 * Version 14.5
+	 * UPD 2018-09-19
+	 * Теперь шаблон сайта в файле info.php может содержать массив стилей и скриптов для подключения на сайта
+	 * Массив assets теперь: $headAssets и $bodyAssets
+	 *
 	 */
 
 	// Шаблон страницы
@@ -75,7 +81,7 @@ class Index extends CI_Controller {
 	public $content_template;
 
 	// стили, подключаемые в шапке и в футере сайта. Массивы.
-	public $top_assets, $bottom_assets;
+	public $headAssets, $bodyAssets;
 
 	// массив сегментов URL. По нему идет ориентир, какую страницу отдавать в браузер
 	public $urls;
@@ -113,11 +119,12 @@ class Index extends CI_Controller {
 		$this->content_template = $this->page_template = $this->viewsTemplatePath = '';
 		$this->BreakRemap = $this->BreakRender = FALSE;
 		$this->hooksPlugin = $this->urls = $this->loading = array();
-		$this->top_assets = $this->bottom_assets = array();
+		$this->headAssets = $this->bodyAssets = array();
 		$this->dataTemplate = array();
 
 		define("APP_SITE_TEMPLATE", app_get_option('site_template', 'site', 'default'));
 		define("APP_SITE_404_TEMPLATE", app_get_option('not_found_template', 'site', ''));
+		define("APP_SITE_TEMPLATE_URL", APP_BASE_URL . 'application/views/templates/' . APP_SITE_TEMPLATE);
 
 		$this->LoginAdmModel->userData();
 
@@ -134,6 +141,19 @@ class Index extends CI_Controller {
 		}
 
 		$this->lang->load('site', $activeLang);
+
+		# assets шаблона
+		$pathFile = APPPATH . 'views/' . $this->viewsTemplatePath . 'info.php';
+		if(file_exists($pathFile)) {
+			require_once($pathFile);
+			if(isset($info['assets']['head'])) {
+				$this->headAssets = $info['assets']['head'];
+			}
+
+			if(isset($info['assets']['body'])) {
+				$this->bodyAssets = $info['assets']['body'];
+			}
+		}
 
 		// автозагрузка плагинов
 		if($plugins = plugin_load())
@@ -155,11 +175,11 @@ class Index extends CI_Controller {
 
 				# подключение js и css
 				if(isset($load_site['assets']['top']) and $load_site['assets']['top']) {
-					$this->top_assets = array_merge($this->top_assets, $load_site['assets']['top']);
+					$this->headAssets = array_merge($this->headAssets, $load_site['assets']['top']);
 				}
 
 				if(isset($load_site['assets']['bottom']) and $load_site['assets']['bottom']) {
-					$this->bottom_assets = array_merge($this->bottom_assets, $load_site['assets']['bottom']);
+					$this->bodyAssets = array_merge($this->bodyAssets, $load_site['assets']['bottom']);
 				}
 
 				# подключение js и css для АДМИНА
@@ -173,11 +193,11 @@ class Index extends CI_Controller {
 
 
 					if(isset($load_site_admin['assets']['top']) and $load_site_admin['assets']['top']) {
-						$this->top_assets = array_merge($this->top_assets, $load_site_admin['assets']['top']);
+						$this->headAssets = array_merge($this->headAssets, $load_site_admin['assets']['top']);
 					}
 
 					if(isset($load_site_admin['assets']['bottom']) and $load_site_admin['assets']['bottom']) {
-						$this->bottom_assets = array_merge($this->bottom_assets, $load_site_admin['assets']['bottom']);
+						$this->bodyAssets = array_merge($this->bodyAssets, $load_site_admin['assets']['bottom']);
 					}
 					$load_site_admin = array();
 				}
@@ -425,18 +445,18 @@ class Index extends CI_Controller {
 	{
 		# если сжатие не включено, отдаем как есть
 		if(app_get_option('compress_style', 'site', 'no') === 'no') {
-			$this->dataTemplate['TOP_ASSETS_ARRAY'] = $this->top_assets;
-			$this->dataTemplate['BOTTOM_ASSETS_ARRAY'] = $this->bottom_assets;
+			$this->dataTemplate['TOP_ASSETS_ARRAY'] = $this->headAssets;
+			$this->dataTemplate['BOTTOM_ASSETS_ARRAY'] = $this->bodyAssets;
 		} else {
 			$libName = 'CompressStyles';
 			if(file_exists(APPPATH . 'libraries/' . $libName . '.php')) {
 				require_once(APPPATH . 'libraries/' . $libName . '.php');
 				$CompressClass = new $libName;
-				$this->dataTemplate['TOP_ASSETS_ARRAY'] = $CompressClass->compressHeadAssets($this->top_assets);
-				$this->dataTemplate['BOTTOM_ASSETS_ARRAY'] = $CompressClass->compressBodyAssets($this->top_assets);
+				$this->dataTemplate['TOP_ASSETS_ARRAY'] = $CompressClass->compressHeadAssets($this->headAssets);
+				$this->dataTemplate['BOTTOM_ASSETS_ARRAY'] = $CompressClass->compressBodyAssets($this->headAssets);
 			} else {
-				$this->dataTemplate['TOP_ASSETS_ARRAY'] = $this->top_assets;
-				$this->dataTemplate['BOTTOM_ASSETS_ARRAY'] = $this->bottom_assets;
+				$this->dataTemplate['TOP_ASSETS_ARRAY'] = $this->headAssets;
+				$this->dataTemplate['BOTTOM_ASSETS_ARRAY'] = $this->bodyAssets;
 			}
 
 		}
@@ -449,7 +469,7 @@ class Index extends CI_Controller {
 		if(!file_exists(APP_SITE_TEMPLATES_PATH . APP_SITE_TEMPLATE)) {
 			exit('Unable to load site template!');
 		}
-		
+
 		$this->dataTemplate['CONTENT'] = '';
 
 		# загрузка хуков в начале генерации контента
