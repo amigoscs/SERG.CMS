@@ -163,6 +163,7 @@ function tinymceRun()
 			{title: 'Right', value: 'right'},
 			{title: 'Center', value: 'center'},
 		],
+		extended_valid_elements : 'img[class|src|alt|align]',
 		pagebreak_split_block: true,
 		templates: [
 
