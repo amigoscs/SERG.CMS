@@ -1,7 +1,13 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 /**
-	 * version 2.0
-	 * UPD 2017-11-23
+	*
+	* version 2.0
+	* UPD 2017-11-23
+	*
+	* version 2.1
+	* UPD 2018-09-20
+	* Правки в коде - неверные ключи для создания нового поля
+	*
 */
 
 $fieldsTypes = info('typesFields');
@@ -18,14 +24,7 @@ function confirm_delete()
 }
 </script>
 
-
-<? //pr($types_array) ?>
-<? //pr($fields_array) ?>
-
-
-
-
-<h1><?=$this->lang->line('h1_types_data_fields_setting')?> - <?=$type_info['data_types_name']?></h1>
+<h1><?= app_lang('h1_types_data_fields_setting') ?> - <?=$type_info['data_types_name']?></h1>
 <p><a href="/admin/types_data/">Вернуться к типам данных</a>
 <?=$message?>
 
@@ -260,52 +259,52 @@ function confirm_delete()
 
 
      <div class="form-group">
-		<label for="select3">Флажок 1</label>
+		<label for="select41">Флажок 1</label>
 		<?
 		$options = array('0'  => 'Нет', '1'  => 'Да');
 		$args = array(
 			'class' => 'form-control',
-			'id' => 'select3' . $key,
-			'name' => 'edit_fields[' . $key . '][flag1]',
+			'id' => 'select41',
+			'name' => 'new_field[flag1]',
 		);
 		echo form_dropdown($args, $options, 0);
 		?>
     </div>
 
      <div class="form-group">
-		<label for="select3">Флажок 2</label>
+		<label for="select42">Флажок 2</label>
 		<?
 		$options = array('0'  => 'Нет', '1'  => 'Да');
 		$args = array(
 			'class' => 'form-control',
-			'id' => 'select3' . $key,
-			'name' => 'edit_fields[' . $key . '][flag2]',
+			'id' => 'select42',
+			'name' => 'new_field[flag2]',
 		);
 		echo form_dropdown($args, $options, 0);
 		?>
     </div>
 
      <div class="form-group">
-		<label for="select3">Флажок 3</label>
+		<label for="select43">Флажок 3</label>
 		<?
 		$options = array('0'  => 'Нет', '1'  => 'Да');
 		$args = array(
 			'class' => 'form-control',
-			'id' => 'select3' . $key,
-			'name' => 'edit_fields[' . $key . '][flag3]',
+			'id' => 'select43',
+			'name' => 'new_field[flag3]',
 		);
 		echo form_dropdown($args, $options, 0);
 		?>
     </div>
 
      <div class="form-group">
-		<label for="select3">Флажок 4</label>
+		<label for="select44">Флажок 4</label>
 		<?
 		$options = array('0'  => 'Нет', '1'  => 'Да');
 		$args = array(
 			'class' => 'form-control',
-			'id' => 'select3' . $key,
-			'name' => 'edit_fields[' . $key . '][flag4]',
+			'id' => 'select44',
+			'name' => 'new_field[flag4]',
 		);
 		echo form_dropdown($args, $options, 0);
 		?>
@@ -318,10 +317,10 @@ function confirm_delete()
       </div>
 
 
-</div>  <!--//--end col-inner-2 show-hide-switch-->
+</div>  <!--// end col-inner-2 show-hide-switch-->
 
 </form>
-         <!--//--новое поле-->
+         <!--// новое поле-->
 
 
 <? ############################################################# ?>
