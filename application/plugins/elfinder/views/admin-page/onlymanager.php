@@ -30,7 +30,7 @@
 	}
 
 	var ELF = $('#elfinder').elfinder({
-		url : '/admin/elfinder/connector',
+		url : '/admin/elfinder/admin_connector',
 		lang: 'ru',
 		getFileCallback: function(data) {
 			tmceCallbackObj.mySubmit(data, ELF)
