@@ -38,6 +38,10 @@
 	* Version 5.1
 	* UPD 2018-09-06
 	* исправлена ошибка формирования url в методе loadAllChildsTree
+	*
+	* Version 5.2
+	* UPD 2018-09-24
+	* исправлена ошибка в формировании axis
 */
 
 class TreelibAdmModel extends CI_Model {
@@ -750,7 +754,7 @@ class TreelibAdmModel extends CI_Model {
 		$link = app_create_canonical_links($canonicalInfo);
 
 		if(isset($canonicalInfo['id'])) {
-			$axis = implode('|', $canonicalInfo['id']);
+			$axis = '|' . implode('|', $canonicalInfo['id']) . '|';
 			if($nodeID) {
 				$this->db->where('tree_id', $nodeID);
 				$this->db->update('tree', array('tree_axis' => $axis));
@@ -761,7 +765,7 @@ class TreelibAdmModel extends CI_Model {
 	}
 
 	/*
-	* назначить новый row_id оригиналом для объекта
+	* назначить новый NODE ID оригиналом для объекта
 	*/
 	public function changeCanonicalObject($objectID = 0, $rowID = 0, $newRowID)
 	{

@@ -32,6 +32,10 @@
 	* UPD 2018-08-29
 	* Version 6.4
 	* Добавлен метод runIndexesSite() индексации сайта для обновления полей AXIS и CANONICAL
+	*
+	* UPD 2018-09-24
+	* Version 6.5
+	* Ошибка вычисления axis при индексации сайта
 */
 
 class CommonModel extends CI_Model {
@@ -564,7 +568,7 @@ class CommonModel extends CI_Model {
 			unset($axis[0]);
 
 			// сначала обновим AXIS
-			$data = array('tree_axis' => implode('|', $axis));
+			$data = array('tree_axis' => '|' . implode('|', $axis) . '|');
 			$this->db->where('tree_id', $nodeID);
 			$this->db->update('tree', $data);
 
