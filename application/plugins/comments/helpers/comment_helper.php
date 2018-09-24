@@ -107,7 +107,7 @@ function comment_create_ul($objects = array(), $parent_id = 0, $count = 0)
 		foreach($objects[$parent_id] as $object)
 		{
 			++$i;
-			$tree .= '<li>' . N;
+			$tree .= '<li id="comment#' . $object['comments_id'] . '">' . N;
 			$tree .= '<div class="ctop-item">';
 			$tree .= $object['comments_author'];
 			$tree .= ' <span class="time">'.date_convert('d.m.Y в H:i', $object['comments_date']).'</span>';

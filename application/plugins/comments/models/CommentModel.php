@@ -5,10 +5,14 @@
 
 	* UPD 2017-11-30
 	* Version 2.11
-
+	*
 	* UPD 2018-03-16
 	* Version 3.0
 	* переделана логика работы
+	*
+	* UPD 2018-09-24
+	* Version 3.1
+	* Убраны теги в отправке комментария
 
 */
 
@@ -67,8 +71,8 @@ class CommentModel extends CI_Model {
 		$paramsComment['comments_parent'] = isset($postValue['parent']) ? $postValue['parent'] : 0;
 		$paramsComment['comments_object'] = $postValue['object'];
 		$paramsComment['comments_user'] = 0;
-		$paramsComment['comments_author'] = isset($postValue['author']) ? $postValue['author'] : '';
-		$paramsComment['comments_content'] = $postValue['text'];
+		$paramsComment['comments_author'] = isset($postValue['author']) ? strip_tags($postValue['author']) : '';
+		$paramsComment['comments_content'] = htmlspecialchars($postValue['text']);
 		$paramsComment['comments_ratup'] = isset($postValue['ratup']) ? $postValue['ratup'] : 0;
 		$paramsComment['comments_ratdown'] = isset($postValue['ratdown']) ? $postValue['ratdown'] : 0;
 		$paramsComment['comments_stars'] = isset($postValue['stars']) ? $postValue['stars'] : 0;
