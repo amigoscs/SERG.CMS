@@ -45,8 +45,7 @@ $load_admin['assets']['admin']['bottom'] = array();
 
 # файлы скриптов и стилей для СТРАНИЦЫ ПЛАГИНА в секцию HEAD
 $load_admin['assets']['plugin']['top'] = array(
-	'0' => '<script src="'.info('plugins_url').'exp-csv/assets/exp-csv-func.js"></script>',
-	'1' => '<link rel="stylesheet" href="'.info('plugins_url').'exp-csv/assets/exp-csv-style.css">',
+	'0' => '<link rel="stylesheet" href="'.info('plugins_url').'exp-csv/assets/exp-csv-style.css">',
 	);
 
 # файлы скриптов и стилей для СТРАНИЦЫ ПЛАГИНА в секцию BODY
