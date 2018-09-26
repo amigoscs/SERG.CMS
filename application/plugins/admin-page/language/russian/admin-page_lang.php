@@ -9,3 +9,4 @@ $lang['ADMP_INFO_CREATE_COMPLITE'] = 'Страница успешно созда
 $lang['ADMP_INFO_UPDATE_COMPLITE'] = 'Страница успешно обновлена';
 $lang['ADMP_INFO_UPDATE_ERROR'] = 'Ошибка обновления';
 $lang['ADMP_INFO_NOT_FOUND'] = 'Объект не найден';
+$lang['ADMP_INFO_DN_DEL_FOUND'] = 'Удалены неиспользуемые ноды: ';

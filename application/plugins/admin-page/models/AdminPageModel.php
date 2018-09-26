@@ -147,10 +147,20 @@ class AdminPageModel extends CI_Model {
 			$nodesArray[] = $row['tree_id'];
 		}
 
-		$treeArray = $tree = array();
+		$treeArray = $tree = $deletedNodes = array();
 		$this->TreelibAdmModel->reset();
+
+		$i = 0;
 		foreach($nodesArray as $row) {
 			$tree = $this->TreelibAdmModel->loadAllParentsTree($row);
+			// все ветки ведут к родителю с parentID == 0
+			// если в ветке родителей отсутствует $tree[0], то все элементы следует удалить из системы
+			if(!isset($tree[0])) {
+				$deletedNodes[$i] = array_keys($tree);
+				$deletedNodes[$i] = $row;
+				continue;
+			}
+
 			$treeArray[$row]['node_tree_type'] = 'orig';
 			$treeArray[$row]['nodes'] = $this->_helpGetAllTreeObject(0, $tree);
 
@@ -160,6 +170,17 @@ class AdminPageModel extends CI_Model {
 
 			$this->TreelibAdmModel->reset();
 			$tree = array();
+			++$i;
+		}
+
+		// если есть ноды на удаление
+		if($deletedNodes) {
+			$CI = &get_instance();
+			$CI->pageErrorMessage = app_lang('ADMP_INFO_DN_DEL_FOUND');
+			$CI->pageErrorMessage .= implode(', ', $deletedNodes);
+
+			$this->db->where_in('tree_id', $deletedNodes);
+			$this->db->delete('tree');
 		}
 
 		return $treeArray;

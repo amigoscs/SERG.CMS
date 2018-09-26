@@ -9,3 +9,4 @@ $lang['ADMP_INFO_CREATE_COMPLITE'] = 'Page successfully created';
 $lang['ADMP_INFO_UPDATE_COMPLITE'] = 'Page successfully updated';
 $lang['ADMP_INFO_UPDATE_ERROR'] = 'Upgrade failed';
 $lang['ADMP_INFO_NOT_FOUND'] = 'Object not found';
+$lang['ADMP_INFO_DN_DEL_FOUND'] = 'Removed unused nodes: ';
