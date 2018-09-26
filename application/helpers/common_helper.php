@@ -54,6 +54,10 @@
 	*
 	* 2.58 (2018-09-13)
 	* Исправлены ошибки поиска шаблонов и плагинов в кталогах
+	*
+	* 2.59 (2018-09-26)
+	* Добавлены две функции app_data_type_decode и app_data_type_encode для кодирования и декодирования ID data-полей
+	*
 */
 
 $CI = &get_instance();
@@ -1377,4 +1381,26 @@ function app_pagination_create($pagArray = array(), $countPagesViews = 5, $getVa
 		$out['nextLink']['name'] = '&raquo';
 	}
 	return $out;
+}
+
+# преобразет строку data_type в массив: |1|2|5| вернет array(1 => 1, 2 => 2, 5 => 5)
+function app_data_type_decode($dataTypeString = '')
+{
+	if(!$dataTypeString) {
+		return array();
+	}
+	$out = array();
+	foreach(explode('|', trim($dataTypeString, '|')) as $id) {
+		$out[$id] = $id;
+	}
+	return $out;
+}
+
+# преобразет в массив data_type в строку: array(1 => 1, 2 => 2, 5 => 5) вернет |1|2|5|
+function app_data_type_encode($dataTypeArray = array())
+{
+	if(!$dataTypeArray) {
+		return '';
+	}
+	return '|' . implode('|', $dataTypeArray) . '|';
 }
