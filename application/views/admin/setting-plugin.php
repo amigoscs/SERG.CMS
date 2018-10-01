@@ -8,6 +8,10 @@
 	* version 1.4
 	* Правки HTML
 	*
+	* UPD 2018-10-01
+	* version 1.5
+	* htmlspecialchars для input
+	*
 */
 ?>
 
@@ -27,7 +31,7 @@
 			echo '<label for="input' . $i . '">' . $value['name'] . '</label>';
 			echo '<input type="text" class="form-control" id="input' . $i . '" ';
 			echo 'name="option_update[' . $plugin_folder . '][' . $key . ']" ';
-			echo 'value="' . $value['value'] . '"/>';
+			echo 'value="' . htmlspecialchars($value['value']) . '"/>';
 			echo '<span class="help-block sub-little-text"><strong>app_get_option("'.$key.'", "'.$plugin_folder.'", "' . $value['default'] . '")</strong> ';
 			if($value['description']) {
 				echo '<br />' . $value['description'];
