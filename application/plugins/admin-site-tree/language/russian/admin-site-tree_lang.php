@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin site tree lang file
+ * Admin site tree lang file (russian)
  *
  */
 $lang['ADST_TITLE_INDEX'] = 'Структура сайта';
@@ -24,7 +24,9 @@ $lang['ADST_MENU_CR_COPY_CH'] = 'Создать копию и копии под�
 $lang['ADST_MENU_CRNEW_COPY'] = 'Как новый объект';
 $lang['ADST_MENU_CRNEW_COPY_ALL'] = 'Как новый объект с подразделами';
 $lang['ADST_MENU_OPEN_SITE'] = 'Открыть на сайте';
-$lang['ADST_MENU_EXPORT'] = 'Экспорт выделенных';
+$lang['ADST_MENU_EXPORT'] = 'Экспорт';
+$lang['ADST_MENU_EXPORT_SELECTED'] = 'Экспорт выделенных';
+$lang['ADST_MENU_EXPORT_CHILD'] = 'Экспорт дочерних';
 $lang['ADST_MENU_CR_GROUP'] = 'Сгрупировать для отправки';
 $lang['ADST_MENU_CR_ORIG'] = 'Сделать оригиналами';
 $lang['ADST_MENU_DEL'] = 'Удалить объект';

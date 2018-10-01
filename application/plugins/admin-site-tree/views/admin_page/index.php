@@ -7,7 +7,7 @@
 
 <script>
 	var TreeDATA;
-	
+
 
 	// иконки типов данных и патч до иконок
 	var TreeDataTypesIcons = {};
@@ -38,7 +38,14 @@
 			</ul>
 		</li>
 	<li class="on-site tree-context-menu-item"><i class="fa fa-external-link" aria-hidden="true"></i> <a href="#on-site"><?= app_lang('ADST_MENU_OPEN_SITE') ?></a></li>
-	<li class="export-nodes tree-context-menu-item"><i class="fa fa-file-text-o" aria-hidden="true"></i> <a href="#export-nodes"><?= app_lang('ADST_MENU_EXPORT') ?></a></li>
+
+	<li class="export-nodes tree-context-menu-item tree-context-menu-submenu"><i class="fa fa-file-text-o" aria-hidden="true"></i> <a href="#export-nodes"><?= app_lang('ADST_MENU_EXPORT') ?></a>
+		<ul class="tree-context-menu-list">
+			<li><i class="fa fa-file-text-o" aria-hidden="true"></i> <a href="#export_selected"><?= app_lang('ADST_MENU_EXPORT_SELECTED') ?></a></li>
+			<li><i class="fa fa-file-text-o" aria-hidden="true"></i> <a href="#export_childs"><?= app_lang('ADST_MENU_EXPORT_CHILD') ?></a></li>
+		</ul>
+	</li>
+
 	<li class="group-nodes tree-context-menu-item"><i class="fa fa-paper-plane-o" aria-hidden="true"></i> <a href="#group-nodes"><?= app_lang('ADST_MENU_CR_GROUP') ?></a></li>
 	<li class="group-nodes tree-context-menu-item"><i class="fa fa-diamond" aria-hidden="true"></i> <a href="#orig-nodes"><?= app_lang('ADST_MENU_CR_ORIG') ?></a></li>
 	<li class="divider tree-context-menu-item"><?= app_lang('ADST_MENU_OTHER') ?></li>

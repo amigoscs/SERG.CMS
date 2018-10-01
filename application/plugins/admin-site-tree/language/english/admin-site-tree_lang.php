@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin site tree lang file
+ * Admin site tree lang file (english)
  *
  */
 $lang['ADST_TITLE_INDEX'] = 'Site structure';
@@ -24,7 +24,9 @@ $lang['ADST_MENU_CR_COPY_CH'] = 'Create a copy and copies of subsections';
 $lang['ADST_MENU_CRNEW_COPY'] = 'As a new object';
 $lang['ADST_MENU_CRNEW_COPY_ALL'] = 'As a new object with subsections';
 $lang['ADST_MENU_OPEN_SITE'] = 'Open on the site';
-$lang['ADST_MENU_EXPORT'] = 'Export selected';
+$lang['ADST_MENU_EXPORT'] = 'Export';
+$lang['ADST_MENU_EXPORT_SELECTED'] = 'Exporting selected nodes';
+$lang['ADST_MENU_EXPORT_CHILD'] = 'Exporting child nodes';
 $lang['ADST_MENU_CR_GROUP'] = 'Group to send';
 $lang['ADST_MENU_CR_ORIG'] = 'Set as originals';
 $lang['ADST_MENU_DEL'] = 'Delete item';

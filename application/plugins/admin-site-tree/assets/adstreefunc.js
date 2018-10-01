@@ -1,7 +1,7 @@
 // объект дерево
 var $TREE = $('#adst-tree');
 var TreeDataUrl = '/admin/admin-site-tree/loadNodesData';
-var TreeExportUrl = '/admin/exp-csv/export_row_id';
+var TreeExportUrl = '/admin/exp-csv/export_node_id';
 var IDGroupNode = '9999999998'; // ID групповой ноды
 
 // упорядочить ноды на сервере

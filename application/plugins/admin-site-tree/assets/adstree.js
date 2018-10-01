@@ -118,15 +118,19 @@ $(document).ready(function(e){
 				}
 			});
 		},
-		// экспорт всех нод
-		"export-nodes": function(node){
+		// экспорт всех выделенных нод
+		"export_selected": function(node){
 			AllNodes = $TREE.tree('getSelectedNodes');
 			var UrlNodes = [];
 			$.each(AllNodes, function(idx, elem){
 				UrlNodes[UrlNodes.length] = elem.id;
 			});
 
-			window.open(TreeExportUrl + '/' + UrlNodes.join('+'), '_blank');
+			window.open(TreeExportUrl + '?node_id=' + UrlNodes.join('-'), '_blank');
+		},
+		// экспорт всех вложенных нод
+		"export_childs": function(node){
+			window.open(TreeExportUrl + '?parent_node_id=' + node.id, '_blank');
 		},
 		// техническая информация о ноде
 		"get-info": function (node){
