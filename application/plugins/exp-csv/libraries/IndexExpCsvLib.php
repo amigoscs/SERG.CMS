@@ -6,20 +6,15 @@
 	* version 1.0
 	* UPD 2018-08-02
 	* Библиотека для версии системы 6.0 +
+	*
+	* version 2.0
+	* UPD 2018-10-02
+	* Переделка
 
 
 */
 
 class IndexExpCsvLib {
-
-	// разделитель полей
-	public $csvDelimiterField;
-
-	// разделитель строк
-	public $csvDelimiterRows;
-
-	// разделитель строк (визуальное представление)
-	public $csvDelimiterRowsTextInfo;
 
 	// кодировка файла
 	public $csvCharset;
@@ -27,27 +22,48 @@ class IndexExpCsvLib {
 	// лимит превью
 	public $limitPreview;
 
+	// библиотека работы с csv-файлом
+	public $CSVLIB;
+
+	// AJAX ответ
+	public $ajaxResponse;
+
 	public function __construct()
 	{
 		$CI = &get_instance();
-		$this->csvCharset = 'utf-8';
-		$this->csvDelimiterField = $CI->ExpCsvModel->csvDelimiterField;
-		$this->csvDelimiterRows = app_get_option("csv_fields_rows", "exp-csv", "");
-		$this->limitPreview = app_get_option("csv_count_prev", "exp-csv", "20");
-		if(!$this->csvDelimiterRows) {
-			$this->csvDelimiterRows = "\r\n";
-			$this->csvDelimiterRowsTextInfo = '¶';
-		} else {
-			$this->csvDelimiterRowsTextInfo = $this->csvDelimiterRows;
+		try {
+			$this->csvCharset = 'utf-8';
+			$this->limitPreview = app_get_option("csv_count_prev", "exp-csv", "20");
+			$this->ajaxResponse = array('status' => 'ERROR', 'info' => '');
+
+			$pathCsvLib = APP_PLUGINS_DIR_PATH . 'exp-csv/libraries/CsvFileLib.php';
+			if(!file_exists($pathCsvLib)) {
+				$this->CSVLIB = null;
+				throw new Exception('Ошибка подключения библиотеки CSV');
+			} else {
+				require_once($pathCsvLib);
+				$this->CSVLIB = new csvFileLib($CI->ExpCsvModel->csvDelimiterField, $CI->ExpCsvModel->csvEnclosure, $CI->ExpCsvModel->noValue);
+			}
+
+			// проверим директорию
+			if(!file_exists($CI->ExpCsvModel->exportFilePath)) {
+				if(!mkdir($CI->ExpCsvModel->exportFilePath)) {
+					throw new Exception('Ошибка: директория не может быть создана');
+				}
+			}
+
+		} catch (Exception $e) {
+			$this->_error($e->getMessage());
 		}
 	}
 
+	# все незарегистрированные адреса отправляем на index
 	public function __call($method, $par)
 	{
 		return $this->index();
 	}
 
-
+	# главная страница
 	public function index()
 	{
 		$CI = &get_instance();
@@ -55,6 +71,8 @@ class IndexExpCsvLib {
 		$CI->pageContentDescription = $CI->pageContentTitle;
 
 		$data = array('h1' => app_lang('EXPCSV_TITLE_INDEX'));
+		$data['notSave'] = $CI->ExpCsvModel->noValue;
+		$data['dataPrefix'] = $CI->ExpCsvModel->prefixDataFields;
 		$CI->pageContent = $CI->load->view('admin_page/index', $data, true);
 	}
 
@@ -69,206 +87,435 @@ class IndexExpCsvLib {
 		switch($seg['ajax'])
 		{
 			case 'savevalue':
-				$isUpdate = FALSE;
-				parse_str($post['field_name'] . '=' . $post['field_value'], $fieldParam);
-				# обновление data-параметра
-				if(isset($fieldParam['data'])) {
-					foreach($fieldParam['data'] as $objID => $value)
-					{
-						foreach($value as $fieldID => $fieldVal) {
-							$isUpdate = $CI->ObjectAdmModel->updateDataField($objID, $fieldID, $fieldVal);
-						}
-					}
-				}
+				$tableUpdate = $post['res_table'];
+				$tableKeyUpdate = $post['res_table_key'];
+				$tableValue = $post['res_value'];
+				$nodeID = $post['res_node_id'];
 
-				# обновление таблицы объектов
-				if(isset($fieldParam['objects']))
+
+				$isUpdate = false;
+				//parse_str($post['field_name'] . '=' . $post['field_value'], $fieldParam);
+				try
 				{
-					$fieldsAvailable = explode(',', app_get_option('fields_edit', 'exp-csv', 'obj_anons, obj_content'));
-					$fieldsAvailable = array_map("trim", $fieldsAvailable);
-					$aliasArray = array(
-							'obj_data_type' => 'data_type',
-							'obj_canonical' => 'canonical',
-							'obj_name' => 'name',
-							'obj_h1' => 'h1',
-							'obj_title' => 'title',
-							'obj_description' => 'description',
-							'obj_keywords' => 'keywords',
-							'obj_anons' => 'anons',
-							'obj_content' => 'content',
-							'obj_date_publish' => 'date_publish',
-							'obj_cnt_views' => 'cnt_views',
-							'obj_rating_up' => 'rating_up',
-							'obj_rating_down' => 'rating_down',
-							'obj_rating_count' => 'rating_count',
-							'obj_user_author' => 'user_author',
-							'obj_status' => 'status',
-							'obj_ugroups_access' => 'ugroups_access',
-							'obj_tpl_content' => 'tpl_content',
-							'obj_tpl_page' => 'tpl_page'
-					);
-
-					foreach($fieldParam['objects'] as $objID => $value)
-					{
-						foreach($value as $fieldName => $fieldVal) {
-							# пробежимся по разрешенным полям и получим их алиасы
-							if(in_array($fieldName, $fieldsAvailable)) {
-								# если поле есть в списке алиасов
-								if(isset($aliasArray[$fieldName]))
-									$fieldName = $aliasArray[$fieldName];
-							} else {
-								continue;
-							}
-
-							$isUpdate = $CI->ObjectAdmModel->updateObject(array($fieldName => $fieldVal), $objID);
+					# обновление data-параметра
+					if($tableUpdate == 'objects_data') {
+						$objID = $CI->ExpCsvModel->getObjID($nodeID);
+						if(!$objID) {
+							throw new Exception('Объект не найден');
 						}
-					}
-				}
 
-				if($isUpdate) {
-					$report['status'] = 'complite';
-					$report['text'] = 'Обновление успешно';
-				}else{
-					# обновление таблицы структуры сайта
-					if(isset($fieldParam['tree'])) {
-						$report['text'] = 'Обновлять поля структуры сайта запрещено!';
-					} else {
-						$report['text'] = 'Ошибка обновления';
+						$tableKeyUpdate = str_replace($CI->ExpCsvModel->prefixDataFields, '', $tableKeyUpdate);
+						$isUpdate = $CI->ObjectAdmModel->updateDataField($objID, $tableKeyUpdate, $tableValue);
+
 					}
+
+					# обновление таблицы объектов
+					if($tableUpdate == 'objects') {
+						if($tableKeyUpdate == 'obj_id') {
+							throw new Exception('Нельзя обновлять ключевые поля');
+						}
+
+						$objID = $CI->ExpCsvModel->getObjID($nodeID);
+						if(!$objID) {
+							throw new Exception('Объект не найден');
+						}
+
+						$isUpdate = $CI->ObjectAdmModel->updateObject(array(str_replace('obj_', '', $tableKeyUpdate) => $tableValue), $objID);
+					}
+
+					# обновление таблицы структуры
+					if($tableUpdate == 'tree') {
+
+						if($tableKeyUpdate == 'tree_folow') {
+							if($tableValue != 1 && $tableValue != 0) {
+								throw new Exception('Неверное значение');
+							}
+						}
+
+						if($tableKeyUpdate == 'tree_type') {
+							if($tableValue != 'copy' && $tableValue != 'orig') {
+								throw new Exception('Неверное значение');
+							}
+						}
+
+						if($tableKeyUpdate == 'tree_id') {
+							throw new Exception('Нельзя обновлять ключевые поля');
+						}
+
+						$CI->db->where('tree_id', $nodeID);
+						$isUpdate = $CI->db->update('tree', array($tableKeyUpdate => $tableValue));
+					}
+
+					if(!$isUpdate) {
+						throw new Exception('Ошибка обновления');
+					}
+
+					$this->ajaxResponse['status'] = 'OK';
+					$this->ajaxResponse['info'] = 'Обновление успешно';
+					$this->ajaxResponse['new_value'] = $tableValue;
 				}
+				catch (Exception $e)
+				{
+					$this->ajaxResponse['status'] = 'ERROR';
+					$this->ajaxResponse['new_value'] = '';
+					$this->ajaxResponse['info'] = $e->getMessage();
+				}
+				$this->_ajaxResponse();
 				break;
 			# старт импорта товара
 			case 'runimport':
-				$path = base64_decode($post['file']);
-				$res = $CI->ExpCsvModel->csvReadFile($path);
-				if($res !== FALSE) {
-					$report['status'] = 'complite';
-					$report['text'] = 'Обновление выполнено успешно. Обновлено - ' . $res;
-				} else {
-					$report['text'] = 'Ошибка обновления';
+				try
+				{
+					$this->_ajaxImportObjects($post);
+				} catch (Exception $e) {
+					$this->ajaxResponse['status'] = 'ERROR';
+					$this->ajaxResponse['flag_update'] = 'STOP';
+					$this->ajaxResponse['info'] = $e->getMessage();
 				}
+
+				$this->_ajaxResponse();
+				break;
+			# старт выгрузки по типам объектов
+			case 'exporttype':
+				try
+				{
+					parse_str($post['form_values'], $post['form_values']);
+					$this->_ajaxExportObjectsFromType($post);
+				} catch (Exception $e) {
+					$this->ajaxResponse['status'] = 'ERROR';
+					$this->ajaxResponse['flag_update'] = 'STOP';
+					$this->ajaxResponse['info'] = $e->getMessage();
+				}
+				$this->_ajaxResponse();
 				break;
 		}
-		echo json_encode($report);
-		exit();
+	}
+
+	# AJAX - экспорт объектов
+	private function _ajaxExportObjectsFromType($post = array())
+	{
+		$CI = &get_instance();
+		$dataTypes = array();
+		$dataTypesID = array();
+		$limitExport = app_get_option("csv_limit_import", "exp-csv", 300);
+		$this->ajaxResponse['file_name'] = $post['file_name'];
+		$this->ajaxResponse['info'] = '';
+		$formParams = $post['form_values'];
+		if(!isset($formParams['active_types'])) {
+			throw new Exception("Выберите один или несколько типов объектов");
+		}
+
+		// смещение, которое пришло от javascript
+		$sqlOffset = $post['sql_offset'];
+
+		// запрошенные типы данных
+		if(isset($formParams['active_data_types_fields']) && $formParams['active_data_types_fields']) {
+			$dataTypes = $CI->CommonModel->getAllDataTypesFields(false, $formParams['active_data_types_fields']);
+			$dataTypesID = array_keys($dataTypes);
+		}
+
+		$typeObjects = false;
+		if($formParams['active_obj_type']) {
+			$typeObjects = $formParams['active_obj_type'];
+		}
+
+		$CI->db->limit($limitExport, $sqlOffset);
+		$OBJS = $CI->ExpCsvModel->getObjectsFromType($formParams['active_types'], $dataTypesID, $typeObjects); // объекты
+
+		if(!$OBJS && $sqlOffset < 1) {
+			throw new Exception('Нет объектов для выгрузки');
+		}
+
+		if($OBJS) {
+			$this->ajaxResponse['status'] = 'OK';
+			$this->ajaxResponse['flag_update'] = 'CONTINUE';
+			$this->ajaxResponse['offset'] = $sqlOffset + $limitExport;
+			$this->ajaxResponse['count_rows'] = $sqlOffset + count($OBJS);
+
+			$this->ajaxResponse['info'] = 'Записано объектов: ' . $this->ajaxResponse['count_rows'];
+
+			if(!$this->ajaxResponse['file_name']) {
+				$this->ajaxResponse['file_name'] = 'expdata_' . time() . '.csv';
+			}
+
+			$filePath = $CI->ExpCsvModel->exportFilePath . $this->ajaxResponse['file_name'];
+
+			# сформируем ключи. Массив состоит из разрешенных полей + запрошенные data-поля
+			$head = array();
+			$writeHeaders = false;
+			$stream = false;
+
+			// возможно файл уже есть, который надо дописать. Если он есть, то ключи в нем во 2-й строке
+			if(file_exists($filePath)) {
+				//$stream = new ReadFileLib($filePath, 'a+');
+				$this->CSVLIB->init($filePath, 'a+');
+				$this->CSVLIB->SetOffset(0);
+				$result = array();
+				$result = $this->CSVLIB->Read(2);
+				$tmp = array();
+				foreach($result as $value) {
+					if(!$value) {
+						throw new Exception("Empty file");
+					}
+					$tmp[] = str_getcsv($value, $CI->ExpCsvModel->csvDelimiterField, $CI->ExpCsvModel->csvEnclosure);
+				}
+				$head = array_combine($tmp[1], $tmp[0]);
+			} else {
+				//$stream = new ReadFileLib($filePath, 'w');
+				$this->CSVLIB->init($filePath, 'w');
+				$writeHeaders = true;
+				// основные таблицы
+				foreach($CI->ExpCsvModel->activeFieldsExport as $key => $value) {
+					$head[$key] = $value['name'];
+				}
+				// data-поля
+				if($dataTypesID) {
+					foreach($dataTypes as $value) {
+						$head[$CI->ExpCsvModel->prefixDataFields . $value['types_fields_id']] = $value['types_fields_name'];
+					}
+				}
+
+				// в новом файле запишем заголовки
+				$this->CSVLIB->write(array_values($head), $CI->ExpCsvModel->csvDelimiterField);
+				$this->CSVLIB->write(array_keys($head), $CI->ExpCsvModel->csvDelimiterField);
+			}
+
+			// для записи объектов ставим курсор в конец файла
+			$this->CSVLIB->SetOffset(0, true);
+
+			foreach($OBJS as $objValue) {
+				$tmp = array();
+				foreach($head as $keyHead => $valHead) {
+					if(isset($objValue[$keyHead])) {
+						$tmp[$keyHead] = $objValue[$keyHead];
+					} else {
+						$tmp[$keyHead] = $CI->ExpCsvModel->noValue;
+					}
+
+				}
+
+				$this->CSVLIB->write(array_values($tmp), $CI->ExpCsvModel->csvDelimiterField);
+			}
+		} else {
+			$this->ajaxResponse['status'] = 'OK';
+			$this->ajaxResponse['flag_update'] = 'STOP';
+			$this->ajaxResponse['info'] = 'Файл успешно создан. <a href="' . str_replace(APP_BASE_PATH, APP_BASE_URL, $CI->ExpCsvModel->exportFilePath) . $this->ajaxResponse['file_name']. '" title="Скачать файл экспорта" download>Скачать »</a>';
+		}
+	}
+
+	/*
+	* AJAX - импорт/обновление объектов
+	*
+	*/
+	private function _ajaxImportObjects($post = array())
+	{
+		$CI = &get_instance();
+		$offset = 0;
+		$getCountRows = false;
+
+		if(isset($post['upd_offset'])) {
+			$offset = $post['upd_offset'];
+		}
+
+		if(isset($post['get_count_rows'])) {
+			$getCountRows = $post['get_count_rows'];
+		}
+
+		if(!isset($post['file'])) {
+			throw new Exception("Не указан файл");
+		}
+
+		$path = base64_decode($post['file']);
+
+		if(!file_exists($path)) {
+			throw new Exception("Файл не найден");
+		}
+
+		# init файла
+		$this->CSVLIB->init($path);
+
+		# получим обновляемые ключи
+		$arrayKeys = array();
+		$this->CSVLIB->SetOffset(1);
+
+		$resultRead = array();
+		$resultRead = $this->CSVLIB->Read(1);
+
+		if(!$resultRead) {
+			throw new Exception('Некорректный файл');
+		}
+
+		$arrayKeys = str_getcsv($resultRead[0], $CI->ExpCsvModel->csvDelimiterField, $CI->ExpCsvModel->csvEnclosure);
+
+		if(!$arrayKeys[0]) {
+			throw new Exception('Некорректный файл: ключи не найдены');
+		}
+
+		// если true - то обновление, иначе insert
+		$isUpdate = false;
+
+		// если true - то обновление по data-полю
+		$isUpdateData = false;
+
+		if(in_array('obj_id', $arrayKeys) || in_array('tree_id', $arrayKeys)) {
+			$isUpdate = true;
+		} else if(!strpos($arrayKeys['0'], $CI->ExpCsvModel->prefixDataFields) !== false) {
+			$isUpdateData = true;
+		}
+
+		# теперь читаем файл для обновления/добавления позиций. Пропустим 2 строки - там заголовки
+		# если нет смещения по POST, то это первое чтение файла. Пропустим заголовки
+		if(!$offset) {
+			$offset = 2;
+		}
+
+		//$getCountRows = false;
+		if($getCountRows) {
+			$this->CSVLIB->SetOffset($offset);
+			$cntRows = $this->CSVLIB->countRows();
+			$this->ajaxResponse['status'] = 'OK';
+			$this->ajaxResponse['count_rows'] = $cntRows;
+			$this->ajaxResponse['info'] = 'Найдено строк в файле: ' . $this->ajaxResponse['count_rows'] . ' (+2)';
+			$this->ajaxResponse['flag_update'] = 'CONTINUE';
+			return true;
+		}
+
+		# читаем позиции в файле
+		$limit = app_get_option("csv_limit_import", "exp-csv", 300);
+		$this->CSVLIB->SetOffset($offset);
+		$resultRead = $this->CSVLIB->Read($limit);
+
+		// результатов нет, а смещение меньше 3-х - файл пуст
+		if(isset($resultRead[0]) && !$resultRead[0] && $offset < 3) {
+			throw new Exception('Файл не имеет позиций для обновления');
+		} else if(!$resultRead) {
+			// результата нет, а смещение есть - значить конец файла
+			$this->ajaxResponse['status'] = 'OK';
+			//$this->ajaxResponse['count_rows'] = $cntRows;
+			$this->ajaxResponse['info'] = 'Обновление завершено';
+			$this->ajaxResponse['flag_update'] = 'STOP';
+			return true;
+		}
+
+		$fieldsAllows = array();
+		foreach($CI->ExpCsvModel->activeFieldsExport as $key => $value) {
+			if($key == 'tree_id' || $key == 'obj_id') {
+				continue;
+			}
+			$fieldsAllows[$value['table']][] = $key;
+		}
+
+		if($isUpdate) {
+			$updRes = $CI->ExpCsvModel->_csvReadFileUpdate($arrayKeys, $resultRead, $isUpdateData, $fieldsAllows);
+		} else {
+			$updRes = $CI->ExpCsvModel->_csvReadFileInsert($arrayKeys, $resultRead, $fieldsAllows);
+		}
+
+		if(!$updRes) {
+			$this->ajaxResponse['status'] = 'OK';
+			$this->ajaxResponse['flag_update'] = 'STOP';
+			$this->ajaxResponse['offset'] = $offset + $limit;
+			$this->ajaxResponse['info'] = 'Обновление завершено';
+		} else {
+			$this->ajaxResponse['status'] = 'OK';
+			$this->ajaxResponse['flag_update'] = 'CONTINUE';
+			$this->ajaxResponse['offset'] = $offset + $limit;
+			$this->ajaxResponse['info'] = 'Обновлено позиций: ' . $updRes;
+		}
+
+
+		return true;
 	}
 
 	/*
 	* создание экспортной таблицы для row_id
 	* разделитель для множества row_id - "+"
 	*/
-	public function export_row_id()
+	public function export_node_id()
 	{
 		$CI = &get_instance();
 		$CI->pageContentTitle = app_lang('EXPCSV_TITLE_ROW_ID');
 		$CI->pageContentDescription = $CI->pageContentTitle;
-
-		$id = $CI->uri->segment(4, 0);
-
-		if(!$id) {
-			return $this->_error(app_lang('EXPCSV_INFO_ERROR'), app_lang('EXPCSV_INFO_ERROR_NO_ID'));
-		}
-
-		$idArray = explode('+', $id);
-		$data = array('obj_fields' => array(), 'fields' => array());
-
-		# выгружаемые объекты
-		$objects = array();
-		$objects = $CI->ExpCsvModel->exportRowId($idArray);
-		if(!$objects) {
-			return $this->_error(app_lang('EXPCSV_INFO_ERROR'), app_lang('EXPCSV_INFO_ERROR_NO_OBJECTS'));
-		}
-
-		# получим типы данных для объектов
-		// по умолчанию - ID = 1
-		$dataTypesID = array();
-		foreach($objects as $value) {
-			$tmp = explode('|', trim($value['obj_data_type'], '|'));
-			foreach($tmp as $val) {
-				$dataTypesID[$val] = $val;
-			}
-
-		}
-
-		// поля для типов данных
-		$CI->CommonModel->reset();
-		$CI->CommonModel->getOnlyPublish = TRUE;
-
-		$dataTypes = array();
-		$dataTypes = $CI->CommonModel->getAllDataTypesFields($dataTypesID);
-
-		# все активные поля
-		$fields = $CI->ExpCsvModel->activeFieldsExport;
-		foreach($dataTypes as $key => $value) {
-			$fields[$CI->ExpCsvModel->prefixDataFields . $key] = array('table' => 'objects_data', 'name' => $value['types_fields_name']);
-		}
-
-		$CI->CommonModel->reset();
-		$noValue = $CI->ExpCsvModel->noValue;
-		# старт выгрузки
-		if($csvOpt = $CI->input->post('run_export'))
+		$data['objects'] = array();
+		$data['exportFormAction'] = $_SERVER['REQUEST_URI'];
+		try
 		{
-			$fieldValue = '';
-			$rowFirst = '';
-			$rowSecond = '';
+			if($nodes = $CI->input->get('node_id')) {
+				$nodeArray = explode('-', $nodes);
+				$data['objects'] = $CI->ExpCsvModel->exportNodeId($nodeArray);
 
-			# формируем заголовки
-			foreach($fields as $key => $value) {
-				$rowFirst .= '"' . trim($value['name']) . '"' . $this->csvDelimiterField;
-				$rowSecond .= '"' . trim($key) . '"' . $this->csvDelimiterField;
+			} else if($parentNode = $CI->input->get('parent_node_id')) {
+				$data['objects'] = $CI->ExpCsvModel->getAllChilds($parentNode);
+			} else {
+				throw new Exception('Нет параметров');
 			}
 
-			$rowFirst = rtrim($rowFirst, $this->csvDelimiterField);
-			$rowSecond = rtrim($rowSecond, $this->csvDelimiterField);
-			$fileName = app_translate(app_get_option('site_name', 'site', 'export') . '_' . time());
-			if(!$fileName) {
-				$fileName = 'no_name';
+			if(!$data['objects']) {
+				throw new Exception('Объекты не найдены');
 			}
 
-			header("Content-type: application/download; charset=" . $this->csvCharset);
-			header("Content-Disposition: attachment; filename*={$this->csvCharset}''{$fileName}.csv");
-			header("Pragma: no-cache");
-			header("Expires: 0");
-
-			echo $rowFirst . $this->csvDelimiterRows;
-			echo $rowSecond . $this->csvDelimiterRows;
-
-			# вывод объектов
-			foreach($objects as $Obj)
-			{
-				$objRow = '';
-				foreach($fields as $key => $value)
-				{
-					if(isset($Obj[$key])) {
-						$fieldValue = trim($Obj[$key]);
-						$fieldValue = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $fieldValue);
-						$fieldValue = str_replace(array("\r\n", "\r", "\n", "\t", '  ', '    ', '    '), ' ', $fieldValue);
-						$objRow .= '"' . $fieldValue . '"' . $this->csvDelimiterField;
-					} else {
-						$objRow .= $noValue . $this->csvDelimiterField;
-					}
+			// получем все id типов данных
+			$dataTypesID = array();
+			$i = 0;
+			foreach($data['objects'] as $value) {
+				$tmp = app_data_type_decode($value['obj_data_type']);
+				foreach($tmp as $val) {
+					$dataTypesID[$val] = $val;
 				}
-				$objRow = rtrim($objRow, $this->csvDelimiterField);
-				echo $objRow . $this->csvDelimiterRows;
+				++$i;
 			}
-			die();
+
+			$data['countObjects'] = $i;
+
+			// все поля типов данных
+			$CI->CommonModel->getOnlyPublish = true;
+			$dataTypesFields = $CI->CommonModel->getAllDataTypesFields($dataTypesID);
+
+			// заголовки таблицы
+			$data['tableHead'] = $CI->ExpCsvModel->activeFieldsExport;
+			foreach($data['tableHead'] as $key => &$value) {
+				$value = $value['name'];
+			}
+			unset($value);
+
+			// добавим к заголовкам DATA-поля
+			if($dataTypesFields) {
+				foreach($dataTypesFields as $key => $value) {
+					// если поле не подключено к типам данных, то пропускаем
+					if(!$value['data_types']) {
+						continue;
+					}
+					$data['tableHead'][$CI->ExpCsvModel->prefixDataFields . $key] = $value['types_fields_name'];
+				}
+			}
+
+			##
+			# запрос на создание файла
+			##
+			if($CI->input->post('run_export')) {
+				$filePath = $CI->ExpCsvModel->exportFilePath . 'expnodes_' . time() . '.csv';
+				$this->CSVLIB->init($filePath, 'w');
+				$this->CSVLIB->createFileCSV($data['tableHead'], $data['objects']);
+
+				$fileURl = str_replace(APP_BASE_PATH, APP_BASE_URL, $filePath);
+				$this->ajaxResponse['status'] = 'OK';
+				$this->ajaxResponse['info'] = 'Файл сформирован. <a href="' . $fileURl .'" title="Download file" download>Скачать файл »</a>';
+				$this->_ajaxResponse();
+			}
+
+			$data['activeFields'] = $CI->ExpCsvModel->activeFieldsExport;
+			$data['parefixDataField'] = $CI->ExpCsvModel->prefixDataFields;
+			$data['novalueField'] = $CI->ExpCsvModel->noValue;
+
+			$data['infoDelimiterField'] = $CI->ExpCsvModel->csvDelimiterField;
+			$data['infoEnclosure'] = $CI->ExpCsvModel->csvEnclosure;
+
+			$CI->pageContent = $CI->load->view('admin_page/export-node', $data, true);
+
 		}
-		else
+		catch (Exception $e)
 		{
-			$data['objects'] = $objects; // объекты
-			$data['fields'] = $fields;
-			$data['noValue'] = $noValue;
-
-			# массив ключей, доступных для редактирования
-			$keysToEdit = explode(',', app_get_option('fields_edit', 'exp-csv', 'tree_order, obj_anons, obj_content'));
-			$keysToEdit = array_map("trim", $keysToEdit);
-			$data['keysToEdit'] = $keysToEdit;
-
-			$data['exportInfo'] = app_lang('EXPCSV_INFO_DEL_FIELDS') . ' - «' . $this->csvDelimiterField . '». ';
-			$data['exportInfo'] .= app_lang('EXPCSV_INFO_DEL_ROWS') . ' - «' . $this->csvDelimiterRowsTextInfo . '». ';
-			$data['exportInfo'] .= '<a href="/admin/setting_plugin/exp-csv">' . app_lang('EXPCSV_INFO_CHANGE_SETTING') . ' »</a>.';
-
-			$CI->pageContent = $CI->load->view('admin_page/export-row', $data, true);
+			$this->_error($e->getMessage());
 		}
 	}
 
@@ -282,19 +529,17 @@ class IndexExpCsvLib {
 		$CI->pageContentDescription = $CI->pageContentTitle;
 
 		$data = array('h1' => $CI->pageContentTitle);
-		$data['importInfo'] = app_lang('EXPCSV_INFO_MAX_FILE_SIZE') . ' 8 Mb. ' . app_lang('EXPCSV_INFO_FILE_ENCODING') . ' - «' . $this->csvCharset . '». <br />';
-		$data['importInfo'] .= app_lang('EXPCSV_INFO_DEL_FIELDS') . ' - «' . $this->csvDelimiterField . '». ';
-		$data['importInfo'] .= app_lang('EXPCSV_INFO_DEL_ROWS') . ' - «' . $this->csvDelimiterRowsTextInfo . '». ';
-		$data['importInfo'] .= '<a href="/admin/setting_plugin/exp-csv">' . app_lang('EXPCSV_INFO_CHANGE_SETTING') . '</a>';
 
-		$data['viewUploader'] = true;
+		$data['infoCharset'] = $this->csvCharset;
+		$data['infoDelimiterField'] = $CI->ExpCsvModel->csvDelimiterField;
+		$data['infoEnclosure'] = $CI->ExpCsvModel->csvEnclosure;
 
-		$config['upload_path'] = './uploads/tmp/';
+		$data['viewUploader'] = false;
+		$config['upload_path'] = $CI->ExpCsvModel->exportFilePath;
 		$config['allowed_types'] = 'csv';
 		$config['max_size']	= '8000';
 		$CI->load->library('upload', $config);
-		$data['read_file'] = '';
-		$data['button_start'] = '';
+
 		$pathFile = '';
 
 		if($CI->upload->do_upload('file_import')) {
@@ -310,114 +555,51 @@ class IndexExpCsvLib {
 			}
 		}
 
-		if($pathFile) {
-			$data['viewUploader'] = false;
-			$data['read_file'] = '<div class="form-group">';
-			$data['read_file'] .= $CI->ExpCsvModel->csvReadFileToTable($pathFile, $this->limitPreview);
-			$data['read_file'] .= '</div>';
-			$data['button_start'] = '<div class="form-group">';
-			$data['button_start'] .= '<button id="run_import" data-file-path="'.base64_encode($pathFile).'" class="btn btn-primary">'.app_lang('EXPCSV_BUTTON_RUN_IMPORT').'</button>';
-			$data['button_start'] .= '</div>';
+		if(!$pathFile) {
+			$data['viewUploader'] = true;
+			return $CI->pageContent = $CI->load->view('admin_page/import', $data, true);
 		}
 
-		$CI->pageContent = $CI->load->view('admin_page/import', $data, true);
-	}
-
-	/*
-	* выгрузка объектов по типам данных
-	*/
-	public function export_object_datatypes()
-	{
-		$CI = &get_instance();
-		$CI->pageContentTitle = app_lang('EXPCSV_TITLE_EXPORT_DATA_TYPES');
-		$CI->pageContentDescription = $CI->pageContentTitle;
-
-		$data = array();
-		$data['h1'] = $CI->pageContentTitle;
-
-		$allTypesData = $CI->CommonModel->getAllDataTypesFull(); // все типы данных
-		$data['allTypesDataDropdown'] = array();
-
-		foreach($allTypesData as $key => $value) {
-			$data['allTypesDataDropdown'][$key] = $value['data_types_name'];
-		}
-
-		# разрешенные поля для выгрузки
-		foreach($CI->ExpCsvModel->activeFieldsExport as $key => $value) {
-			$fieldsObjectExport[$key] = $value['name'];
-		}
-
-		if($typeDataID = $CI->input->post('active_type'))
+		try
 		{
 
-			$fileFirstRow = $fileSecondRow = '';
-			$allObjects = $CI->ExpCsvModel->getObjectsDataType($typeDataID);
-
-			# формируем файл
-			$fileName = 'data_type_' . time();
-
-			header("Content-type: application/download; charset=" . $CI->ExpCsvModel->csvCharset);
-			header("Content-Disposition: attachment; filename*={$CI->ExpCsvModel->csvCharset}''{$fileName}.csv");
-			header("Pragma: no-cache");
-			header("Expires: 0");
-
-			# заголовки файла
-			// основной таблицы
-			foreach($fieldsObjectExport as $key => $value) {
-				$fileFirstRow .= '"' . $value . '"' . $CI->ExpCsvModel->csvDelimiterField;
-				$fileSecondRow .= '"' . $key . '"' . $CI->ExpCsvModel->csvDelimiterField;
-			}
-			// таблицы data полей
-			foreach($allTypesData[$typeDataID]['fields'] as $key => $value) {
-				$fileFirstRow .= '"' . $value['types_fields_name'] . '"' . $CI->ExpCsvModel->csvDelimiterField;
-				$fileSecondRow .= '"' . $CI->ExpCsvModel->prefixDataFields . $key . '"' . $CI->ExpCsvModel->csvDelimiterField;
+			$this->CSVLIB->init($pathFile);
+			$data['countAllRows'] = $this->CSVLIB->countRows();
+			// из общего числа отнимем две строки - заголовки и ключи
+			if($data['countAllRows'] > 2) {
+				$data['countAllRows'] = $data['countAllRows'] - 2;
+			} else {
+				throw new Exception('Позиции в файле не найдены');
 			}
 
-			$fileFirstRow = rtrim($fileFirstRow, $CI->ExpCsvModel->csvDelimiterField);
-			$fileSecondRow = rtrim($fileSecondRow, $CI->ExpCsvModel->csvDelimiterField);
-
-			echo $fileFirstRow . $CI->ExpCsvModel->csvDelimiterRows;
-			echo $fileSecondRow . $CI->ExpCsvModel->csvDelimiterRows;
-
-			foreach($allObjects as $objValue)
-			{
-				$tmp = array();
-				// поля таблицы objects
-				foreach($fieldsObjectExport as $key => $value)
-				{
-					if(isset($objValue[$key])) {
-						$fieldValue = $objValue[$key];
-						$fieldValue = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $fieldValue);
-						$fieldValue = str_replace(array("\r\n", "\r", "\n", "\t", '  ', '    ', '    ', '&nbsp;'), ' ', $fieldValue);
-						$fieldValue = str_replace('"', '""', $fieldValue);
-					} else {
-						$fieldValue = $CI->ExpCsvModel->noValue;
-					}
-					$tmp[] = $fieldValue;
+			$this->CSVLIB->SetOffset(0);
+			$data['tableHeaders'] = $this->CSVLIB->getHeadersCSV();
+			$data['readResult'] = $this->CSVLIB->Read($this->limitPreview);
+			$tmp = array();
+			foreach($data['readResult'] as $value) {
+				if(!$value) {
+					continue;
 				}
-				// поля data полей
-				foreach($allTypesData[$typeDataID]['fields'] as $key => $value)
-				{
-					if(isset($objValue[$CI->ExpCsvModel->prefixDataFields . $key])) {
-						$fieldValue = $objValue[$CI->ExpCsvModel->prefixDataFields . $key];
-						$fieldValue = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $fieldValue);
-						$fieldValue = str_replace(array("\r\n", "\r", "\n", "\t", '  ', '    ', '    ', '&nbsp;'), ' ', $fieldValue);
-						$fieldValue = str_replace('"', '""', $fieldValue);
-					} else {
-						$fieldValue = $CI->ExpCsvModel->noValue;
-					}
-					$tmp[] = $fieldValue;
-				}
-
-				echo '"' . implode('"' . $CI->ExpCsvModel->csvDelimiterField . '"', $tmp) . '"' . $CI->ExpCsvModel->csvDelimiterRows;
+				$tmp[] = str_getcsv($value, $CI->ExpCsvModel->csvDelimiterField, $CI->ExpCsvModel->csvEnclosure);
 			}
-			exit();
+
+			if(!$tmp) {
+				throw new Exception('Позиции в файле не найдены');
+			}
+
+			$data['viewUploader'] = false;
+			$data['readResult'] = $tmp;
+			unset($tmp);
+
+			$data['pathFile'] = base64_encode($pathFile);
+			$data['limitPreview'] = $this->limitPreview;
+
+			$CI->pageContent = $CI->load->view('admin_page/import', $data, true);
 		}
-
-		$data['exportInfo'] = app_lang('EXPCSV_INFO_DEL_FIELDS') . ' - «' . $this->csvDelimiterField . '». ';
-		$data['exportInfo'] .= app_lang('EXPCSV_INFO_DEL_ROWS') . ' - «' . $this->csvDelimiterRowsTextInfo . '». ';
-		$data['exportInfo'] .= '<a href="/admin/setting_plugin/exp-csv">' . app_lang('EXPCSV_INFO_CHANGE_SETTING') . ' ».</a>';
-		$CI->pageContent = $CI->load->view('admin_page/export_type_data', $data, true);
+		catch(Exception $e)
+		{
+			$this->_error($e->getMessage());
+		}
 	}
 
 	/*
@@ -436,77 +618,6 @@ class IndexExpCsvLib {
 			$fieldsObjectExport[$key] = $value['name'];
 		}
 
-		if($typeObjects = $CI->input->post('active_types'))
-		{
-			$fileFirstRow = $fileSecondRow = '';
-			$dataTypes = $CI->input->post('active_data_types');
-			$allDataTypes = array();
-
-			// запрошенные типы данных
-			if($dataTypes) {
-				$allDataTypes = $CI->CommonModel->getAllDataTypesFields(false, $dataTypes);
-			}
-
-			$OBJS = $CI->ExpCsvModel->getObjectsFromType($typeObjects, $dataTypes); // объекты
-
-			$fileName = 'type_objects_' . time();
-
-			header("Content-type: application/download; charset=" . $CI->ExpCsvModel->csvCharset);
-			header("Content-Disposition: attachment; filename*={$CI->ExpCsvModel->csvCharset}''{$fileName}.csv");
-			header("Pragma: no-cache");
-			header("Expires: 0");
-
-			# заголовки файла
-			// основной таблицы
-			foreach($fieldsObjectExport as $key => $value) {
-				$fileFirstRow .= '"' . $value . '"' . $CI->ExpCsvModel->csvDelimiterField;
-				$fileSecondRow .= '"' . $key . '"' . $CI->ExpCsvModel->csvDelimiterField;
-			}
-
-			// таблицы data полей
-			foreach($allDataTypes as $key => $value) {
-				$fileFirstRow .= '"' . $value['types_fields_name'] . '"' . $CI->ExpCsvModel->csvDelimiterField;
-				$fileSecondRow .= '"' . $CI->ExpCsvModel->prefixDataFields . $key . '"' . $CI->ExpCsvModel->csvDelimiterField;
-			}
-
-			$fileFirstRow = rtrim($fileFirstRow, $CI->ExpCsvModel->csvDelimiterField);
-			$fileSecondRow = rtrim($fileSecondRow, $CI->ExpCsvModel->csvDelimiterField);
-
-			echo $fileFirstRow . $CI->ExpCsvModel->csvDelimiterRows;
-			echo $fileSecondRow . $CI->ExpCsvModel->csvDelimiterRows;
-
-			foreach($OBJS as $objValue)
-			{
-				$tmp = array();
-				// поля таблицы objects
-				foreach($fieldsObjectExport as $key => $value){
-					if(isset($objValue[$key])) {
-						$fieldValue = $objValue[$key];
-						$fieldValue = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $fieldValue);
-						$fieldValue = str_replace(array("\r\n", "\r", "\n", "\t", '  ', '    ', '    ', '&nbsp;'), ' ', $fieldValue);
-						$fieldValue = str_replace('"', '""', $fieldValue);
-					} else {
-						$fieldValue = $CI->ExpCsvModel->noValue;
-					}
-					$tmp[] = $fieldValue;
-				}
-				// поля data полей
-				foreach($allDataTypes as $key => $value) {
-					if(isset($objValue[$CI->ExpCsvModel->prefixDataFields . $key])) {
-						$fieldValue = $objValue[$CI->ExpCsvModel->prefixDataFields . $key];
-						$fieldValue = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $fieldValue);
-						$fieldValue = str_replace(array("\r\n", "\r", "\n", "\t", '  ', '    ', '    ', '&nbsp;'), ' ', $fieldValue);
-						$fieldValue = str_replace('"', '""', $fieldValue);
-					} else {
-						$fieldValue = $CI->ExpCsvModel->noValue;
-					}
-					$tmp[] = $fieldValue;
-				}
-				echo '"' . implode('"' . $CI->ExpCsvModel->csvDelimiterField . '"', $tmp) . '"' . $CI->ExpCsvModel->csvDelimiterRows;
-			}
-			exit();
-		}
-
 		$data['allTypesObjects'] = $CI->CommonModel->getAllObjTypes(); // все типы объектов
 
 		foreach($data['allTypesObjects'] as $key => &$value)
@@ -520,113 +631,30 @@ class IndexExpCsvLib {
 		}
 		unset($value);
 
-		$data['exportInfo'] = app_lang('EXPCSV_INFO_DEL_FIELDS') . ' - «' . $this->csvDelimiterField . '». ';
-		$data['exportInfo'] .= app_lang('EXPCSV_INFO_DEL_ROWS') . ' - «' . $this->csvDelimiterRowsTextInfo . '». ';
-		$data['exportInfo'] .= '<a href="/admin/setting_plugin/exp-csv">' . app_lang('EXPCSV_INFO_CHANGE_SETTING') . ' ».</a>';
+		# типы объектов в структуре сайта
+		$data['allObjTypes'] = array(0 => 'Все типы', 'orig' => 'Оригиналы', 'copy' => 'Копии');
+
+		$data['infoDelimiterField'] = $CI->ExpCsvModel->csvDelimiterField;
+		$data['infoEnclosure'] = $CI->ExpCsvModel->csvEnclosure;
+		$data['exportLimit'] = app_get_option("csv_limit_import", "exp-csv", 300);
+
 		$CI->pageContent = $CI->load->view('admin_page/export_type_object', $data, true);
-	}
-
-	/*
-	* выгрузка всех вложенных объектов
-	*/
-	public function export_childs_objects()
-	{
-		$CI = &get_instance();
-		$CI->pageContentTitle = app_lang('EXPCSV_TITLE_EXPORT_TYPE_OBJECTS');
-		$CI->pageContentDescription = $CI->pageContentTitle;
-
-		$data = array(
-			'parentObject' => 0,
-			'dataTypesFields' => array(),
-			'exportObjects' => array(),
-			'objectsFields' => array(),
-			'exportInfo' => ''
-		);
-
-		if($parentObject = $CI->input->get('node_id')) {
-			$data['parentObject'] = $parentObject;
-		}
-
-		if($data['parentObject']) {
-			$data['exportObjects'] = $CI->TreelibAdmModel->loadAllChildsTree($data['parentObject'], array(), 0, FALSE, true);
-			$data['noValue'] = $CI->ExpCsvModel->noValue;
-			if($data['exportObjects']) {
-				$data['objectsFields'] = $CI->ExpCsvModel->activeFieldsExport;
-
-				# достанем все типы данных. Тип данных ПО-УМОЛЧАНИЮ тоже включаем
-				$objDataTypes = array(1 => 1);
-				foreach($data['exportObjects'] as $value) {
-					foreach($value as $val) {
-						$objDataTypes[$val['obj_data_type']] = $val['obj_data_type'];
-					}
-				}
-
-				$data['dataTypesFields'] = $CI->CommonModel->getAllDataTypesFields($objDataTypes, array());
-				$data['exportInfo'] .= '<p style="color: #b20;font-weight: 600;">Краткий обзор. Показано объектов: ' . app_get_option("csv_count_prev", "exp-csv", "10") . '</p>';
-			}
-
-			# заявка на формироване файла выгрузки
-			if($CI->input->post('create_file')) {
-				$fileName = 'export_childs_' . $data['parentObject'] . '_' . time();
-
-				header("Content-type: application/download; charset=" . $this->csvCharset);
-				header("Content-Disposition: attachment; filename*={$this->csvCharset}''{$fileName}.csv");
-				header("Pragma: no-cache");
-				header("Expires: 0");
-
-				$outHeader = $outKeys = '';
-				// сформирекм заголовки. Сначала основные таблицы
-				foreach($data['objectsFields'] as $key => $value) {
-					$outHeader .= $value['name'] . $this->csvDelimiterField;
-					$outKeys .= $key . $this->csvDelimiterField;
-				}
-				// потом DATA-поля
-				foreach($data['dataTypesFields'] as $value) {
-					$outHeader .= $value['types_fields_name'] . $this->csvDelimiterField;
-					$outKeys .= $CI->ExpCsvModel->prefixDataFields . $value['types_fields_id'] . $this->csvDelimiterField;
-				}
-
-				echo rtrim($outHeader, $this->csvDelimiterField) . $this->csvDelimiterRows;
-				echo rtrim($outKeys, $this->csvDelimiterField) . $this->csvDelimiterRows;
-
-				# дальше пишем сами объекты
-				foreach($data['exportObjects'] as $value) {
-					foreach($value as $object) {
-						$rowObject = '';
-						foreach($data['objectsFields'] as $key => $field) {
-							$fieldValue = trim($object[$key]);
-							$fieldValue = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $fieldValue);
-							$fieldValue = str_replace(array("\r\n", "\r", "\n", "\t", '  ', '    ', '    '), ' ', $fieldValue);
-							$rowObject .= '"' . $fieldValue . '"' . $this->csvDelimiterField;
-						}
-						foreach($data['dataTypesFields'] as $field) {
-							if(isset($object['data_fields'][$field['types_fields_id']])) {
-								$rowObject .= '"' . $object['data_fields'][$field['types_fields_id']]['objects_data_value'] . '"' . $this->csvDelimiterField;
-							} else {
-								$rowObject .= $data['noValue'] . $this->csvDelimiterField;
-							}
-						}
-						echo rtrim($rowObject, $this->csvDelimiterField) . $this->csvDelimiterRows;
-					}
-				}
-				exit();
-			}
-		}
-
-		$data['exportInfo'] .= '<p>' . app_lang('EXPCSV_INFO_DEL_FIELDS') . ' - «' . $this->csvDelimiterField . '». ';
-		$data['exportInfo'] .= app_lang('EXPCSV_INFO_DEL_ROWS') . ' - «' . $this->csvDelimiterRowsTextInfo . '». ';
-		$data['exportInfo'] .= '<a href="/admin/setting_plugin/exp-csv">' . app_lang('EXPCSV_INFO_CHANGE_SETTING') . ' ».</a></p>';
-
-		$CI->pageContent = $CI->load->view('admin_page/export_childs_objects', $data, true);
 	}
 
 	/*
 	* Ошибка
 	*/
-	private function _error($title = 'Error', $text = 'Error')
+	private function _error($text = 'Error')
 	{
 		$CI = &get_instance();
 		$CI->pageErrorMessage = $text;
-		$CI->pageContent = '';
+		$CI->pageContent = $CI->load->view('admin_page/units/menu', array(), true);;
+	}
+
+	# вывод ajax
+	private function _ajaxResponse()
+	{
+		echo json_encode($this->ajaxResponse);
+		exit();
 	}
 }

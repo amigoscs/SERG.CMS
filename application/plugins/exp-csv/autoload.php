@@ -19,12 +19,16 @@
 	* Version 9.1
 	* Совместимость с возможностью подключения нескольких типов данных
 	*
+	* UPD 2018-10-02
+	* Version 10.0
+	* Переписана логика работы экспорта. Экспорт теперь лимитируется
+	*
 */
 
 $info = array(
 		'name' => app_lang('EXPCSV_AUTOLOAD_PLUGIN_NAME'),
 		'descr' => app_lang('EXPCSV_AUTOLOAD_PLUGIN_DESCRIPTION'),
-		'version' => '9.1',
+		'version' => '10.0',
 		'author' => app_lang('EXPCSV_AUTOLOAD_AUTHOR'),
 		'url' => '//sergcms.ru',
 	);
@@ -45,12 +49,13 @@ $load_admin['assets']['admin']['bottom'] = array();
 
 # файлы скриптов и стилей для СТРАНИЦЫ ПЛАГИНА в секцию HEAD
 $load_admin['assets']['plugin']['top'] = array(
-	'0' => '<link rel="stylesheet" href="'.info('plugins_url').'exp-csv/assets/exp-csv-style.css">',
+	'0' => '<link rel="stylesheet" href="'.info('plugins_url').'exp-csv/assets/exp-csv-style.css?10">',
+	'1' => '<script src="'.info('plugins_url').'exp-csv/assets/exp-csv-func.js?10"></script>',
 	);
 
 # файлы скриптов и стилей для СТРАНИЦЫ ПЛАГИНА в секцию BODY
 $load_admin['assets']['plugin']['bottom'] = array(
-	'0' => '<script src="'.info('plugins_url').'exp-csv/assets/exp-csv-script.js"></script>',
+	'0' => '<script src="'.info('plugins_url').'exp-csv/assets/exp-csv-script.js?10"></script>',
 	);
 
 
@@ -99,26 +104,26 @@ $load_site_admin['assets']['bottom'] = array();
 */
 $options = array();
 
-$options['fields_edit']['name'] = app_lang('EXPCSV_AUTOLOAD_FIELDS_FAST_EDIT');
-$options['fields_edit']['type'] = 'textarea';
-$options['fields_edit']['default'] = 'obj_anons, obj_content';
-$options['fields_edit']['values'] = array();
-$options['fields_edit']['description'] = app_lang('EXPCSV_AUTOLOAD_FIELDS_FAST_EDIT_DESCR');
-
 $options['csv_fields_delimiter']['name'] = app_lang('EXPCSV_AUTOLOAD_FIELDS_DELIMITER');
 $options['csv_fields_delimiter']['type'] = 'text';
 $options['csv_fields_delimiter']['default'] = ';';
 $options['csv_fields_delimiter']['values'] = array();
 $options['csv_fields_delimiter']['description'] = app_lang('EXPCSV_AUTOLOAD_FIELDS_DELIMITER_DESCR');
 
-//$options['csv_fields_rows']['name'] = app_lang('EXPCSV_AUTOLOAD_ROWS_DELIMITER');
-//$options['csv_fields_rows']['type'] = 'text';
-//$options['csv_fields_rows']['default'] = '';
-//$options['csv_fields_rows']['values'] = array();
-//$options['csv_fields_rows']['description'] = app_lang('EXPCSV_AUTOLOAD_ROWS_DELIMITER_DESCR');
+$options['csv_fields_enclosure']['name'] = app_lang('EXPCSV_AUTOLOAD_ROWS_ENCLOSURE');
+$options['csv_fields_enclosure']['type'] = 'text';
+$options['csv_fields_enclosure']['default'] = '"';
+$options['csv_fields_enclosure']['values'] = array();
+$options['csv_fields_enclosure']['description'] = app_lang('EXPCSV_AUTOLOAD_ROWS_ENCLOSURE_DESCR');
 
 $options['csv_count_prev']['name'] = app_lang('EXPCSV_AUTOLOAD_ROWS_PREVIEW');
 $options['csv_count_prev']['type'] = 'text';
 $options['csv_count_prev']['default'] = '20';
 $options['csv_count_prev']['values'] = array();
 $options['csv_count_prev']['description'] = app_lang('EXPCSV_AUTOLOAD_ROWS_PREVIEW_DESCR');
+
+$options['csv_limit_import']['name'] = app_lang('EXPCSV_AUTOLOAD_LIMIT_IMPORT');
+$options['csv_limit_import']['type'] = 'text';
+$options['csv_limit_import']['default'] = '300';
+$options['csv_limit_import']['values'] = array();
+$options['csv_limit_import']['description'] = app_lang('EXPCSV_AUTOLOAD_LIMIT_IMPORT_DESCR');

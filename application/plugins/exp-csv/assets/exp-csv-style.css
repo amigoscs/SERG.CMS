@@ -1,7 +1,19 @@
 .simple-table * {font-size:11px}
-.simple-table textarea, .simple-table input[type="text"] {width:100%; min-width:100px}
+.simple-table textarea, .simple-table input[type="text"] {width:100%; min-width:200px}
 .simple-table tr {border-bottom:1px solid #ccc}
 .simple-table th, .simple-table td {padding:8px; vertical-align: top;}
-.simple-table .block-value { display:block; max-height:65px; min-height:64px;overflow:hidden}
+.simple-table tr.selected {background-color: #c8e4f5}
+
+/*.simple-table .block-value { display:block; max-height:65px; min-height:64px;overflow:hidden}
 .simple-table .block-value * {margin:0 !important; padding:0 !important}
-.simple-table .block-value + textarea {display:none}
+.simple-table .block-value + textarea {display:none}*/
+.edit-value {display: none;}
+.block-value {height: 50px;overflow: hidden;width: 100%;max-width: 250px;text-overflow: ellipsis;font-size: 12px;}
+.active .edit-value {display: block;}
+.active .block-value {display: none}
+
+#ui-dialog .complite-info, #ui-dialog .error-info {display: block;text-align: center;margin: 12px 0;padding: 8px;background: #3ab16a;color: #fff;}
+#ui-dialog .error-info {background: #f37f73}
+#ui-dialog .complite-info a {color: #fff;text-decoration: underline;}
+#ui-dialog .complite-info a:hover {text-decoration: none;}
+#ui-dialog .upd-loader {margin:25px 0;text-align:center}

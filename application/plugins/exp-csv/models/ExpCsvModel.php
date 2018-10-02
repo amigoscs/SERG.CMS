@@ -27,7 +27,11 @@
 	*
 	* version 3.0
 	* UPD 2018-08-01
-	* Совменстимость с версией 6.0. tree_axis и obj_link
+	* Совместимость с версией 6.0. tree_axis и obj_link
+	*
+	* version 4.0
+	* UPD 2018-10-02
+	* Переделка
 */
 
 class ExpCsvModel extends CI_Model {
@@ -37,6 +41,9 @@ class ExpCsvModel extends CI_Model {
 
 	// разделитель строк
 	public $csvDelimiterRows;
+
+	// ограничитель полей
+	public $csvEnclosure;
 
 	// кодировка файла
 	public $csvCharset;
@@ -55,15 +62,16 @@ class ExpCsvModel extends CI_Model {
 	// префикс для Data-полей
 	public $prefixDataFields;
 
+	// путь до папки с экспортным файлом
+	public $exportFilePath;
+
 	public function __construct()
     {
         parent::__construct();
 		$this->csvCharset = 'utf-8';
 		$this->csvDelimiterField = app_get_option("csv_fields_delimiter", "exp-csv", ";");
-		$this->csvDelimiterRows = app_get_option("csv_fields_rows", "exp-csv", "");
-		if(!$this->csvDelimiterRows) {
-			$this->csvDelimiterRows = "\r\n";
-		}
+		$this->csvDelimiterRows = '\n';
+		$this->csvEnclosure = app_get_option("csv_fields_enclosure", "exp-csv", '"');
 
 		$this->prefixDataFields = 'isdata_';
 
@@ -71,6 +79,8 @@ class ExpCsvModel extends CI_Model {
 		$this->keyField = '';
 		$this->delimiter = ';';
 		$this->noValue = '_NOTSAVE_';
+		$this->exportFilePath = APP_BASE_PATH . 'uploads/tmp/';
+
 		$this->activeFieldsExport = array(
 				'tree_id' 				=> array('table' => 'tree', 'name' => 'ID строки'),
 				'tree_parent_id' 		=> array('table' => 'tree', 'name' => 'ID родительской строки'),
@@ -101,38 +111,17 @@ class ExpCsvModel extends CI_Model {
 				'obj_rating_count' 		=> array('table' => 'objects', 'name' => 'Рейтинг участники'),
 				'obj_user_author' 		=> array('table' => 'objects', 'name' => 'ID автора'),
 				'obj_ugroups_access' 	=> array('table' => 'objects', 'name' => 'Доступ'),
+				'obj_link' 			=> array('table' => 'objects', 'name' => 'Связи'),
 				'obj_tpl_content' 		=> array('table' => 'objects', 'name' => 'Шаблон контента'),
 				'obj_tpl_page' 			=> array('table' => 'objects', 'name' => 'Шаблон страницы'),
-				'obj_link' 			=> array('table' => 'objects', 'name' => 'Связи'),
 				'obj_status' 			=> array('table' => 'objects', 'name' => 'Статус страницы'),
 			);
     }
 
 	/*
-	* загрузка всех дата-полей
-	*/
-	public function loadDataFields()
-	{
-		# data поля
-		$dataFields = array();
-		$this->db->select('types_fields_id, types_fields_name, objects_data_obj, objects_data_value');
-		$this->db->join('data_types_fields', 'data_types_fields.types_fields_id = objects_data.objects_data_field');
-		$this->db->order_by('types_fields_order', 'ASC');
-		$query = $this->db->get('objects_data');
-		if($query->num_rows())
-		{
-			foreach($query->result_array() as $row) {
-				$this->activeFieldsExport[$this->prefixDataFields . $row['types_fields_id']] = array('table' => 'objects_data', 'name' => $row['types_fields_name']);
-				$dataFields[$row['objects_data_obj']][$this->prefixDataFields . $row['types_fields_id']] = $row['objects_data_value'];
-			}
-		}
-		return $dataFields;
-	}
-
-	/*
 	* экспорт объектов по нодам
 	*/
-	public function exportRowId($idArray = array())
+	public function exportNodeId($idArray = array())
 	{
 		$rowsExport = array();
 		$this->keyField = 'tree_id';
@@ -178,461 +167,290 @@ class ExpCsvModel extends CI_Model {
 		return $rowsExport;
 	}
 
-
 	/*
-	* чтение файла и формирование результирующей таблицы
+	* Обновление полей по ключам
 	*/
-	public function csvReadFileToTable($filePath = '', $limit = 20)
+	public function _csvReadFileUpdate($keysUpdate = array(), $keysValues = array(), $keyDataField = false, $fieldsAllows = array())
 	{
-		$activeFile = fopen($filePath, "r");
-		$i = 0; // строки
-		$startRow = 0;
-		$fieldsKey = array();
-		$outHtml = '';
-		$strResult = '<h3>' . app_lang('EXPCSV_INFO_TABLE_PREVIEW') . '</h3>';
-		$strResult .= '<table class="simple-table">';
-		while(($dataCSV = fgetcsv($activeFile, 10000, $this->csvDelimiterField)) !== FALSE)
-		{
-			++$i;
-			if($i < $startRow) // работаем после определенной строки
-				continue;
+		// ключ, где хранится в строке CSV id объекта
+		$keyObjID = false;
 
-			$strResult .= '<tr>';
-			foreach($dataCSV as $key => $val)
-			{
-				if($i <= 2) {
-					$strResult .= '<th>';
-						$strResult .= '<input type="text" value="' . htmlspecialchars($val) . '"/>';
-						//$strResult .= $val;
-					$strResult .= '</th>';
+		// ключи значений для таблицы объектов
+		$dataFieldObjID = array();
 
-					if($i == 2) { // вторая строка - ключи полей
-						@$fieldsKey[$key] = $val;
-					}
-				}else{
+		// ключ, где хранится в строке CSV tree_id объекта
+		$keyTreeID = false;
 
-					$strResult .= '<td>';
-						$strResult .= '<textarea name="csvrow[' . $i . '][' . @$fieldsKey[$key] . ']">';
-							$strResult .= $val;
-						$strResult .= '</textarea>';
-					$strResult .= '</td>';
+		// ключи значений для таблицы tree
+		$dataFieldTreeID = array();
 
-				}
+		// Ключи для data-полей
+		$dataFieldsID = array();
+
+		foreach($keysUpdate as $key => $value) {
+			if($value == 'obj_id') {
+				$keyObjID = $key;
 			}
-			$strResult .= '</tr>';
 
-			# ограничение для HTML вывода
-			if($i >= ($limit + 2)) {
-				$strResult .= '<tr>';
-					$strResult .= '<td colspan="'.count($dataCSV).'">';
-						$strResult .= $limit . ' ' . app_lang('EXPCSV_INFO_ROWS_SHOWN');
-					$strResult .= '</td>';
-				$strResult .= '</tr>';
-				break;
+			if(in_array($value, $fieldsAllows['objects'])) {
+				$dataFieldObjID[$key] = $value;
+			}
+
+			if($value == 'tree_id') {
+				$keyTreeID = $key;
+			}
+
+			if(in_array($value, $fieldsAllows['tree'])) {
+				$dataFieldTreeID[$key] = $value;
+			}
+
+			if(strpos($value, $this->prefixDataFields) === 0) {
+				$dataFieldsID[$key] = str_replace($this->prefixDataFields, '', $value);
 			}
 		}
-		fclose($activeFile);
-
-		$strResult .= '</table>';
-
-		if(!in_array('obj_id', $fieldsKey) and !in_array('tree_id', $fieldsKey)) {
-			$outHtml = '<div class="error">' . app_lang('EXPCSV_INFO_CREATE_NEW_OBJECT') . '</div>';
-		}else{
-			$outHtml = '<div class="update">' . app_lang('EXPCSV_INFO_UPDATE_OBJECT') . '</div>';
-		}
-
-		$outHtml .= $strResult;
-
-		return $outHtml;
-	}
-
-
-	/*
-	* чтение и обработка файла
-	*/
-	public function csvReadFile($filePath = '', $limit = 50)
-	{
-		if(!file_exists($filePath)) {
-			return FALSE;
-		}
-
-		$activeFile = fopen($filePath, "r");
-		$i = $cntObj = 0;
-		$keysArr = array();
-		while(($keysArr = fgetcsv($activeFile, 10000, $this->csvDelimiterField)) !== FALSE)
-		{
-			if(++$i == 2) {
-				break;
-			}
-		}
-
-		if(!in_array('obj_id', $keysArr) and !in_array('tree_id', $keysArr))
-		{
-			// первое поле - data-поле. Скорее всего обновление по нему
-			if(strpos($keysArr['0'], $this->prefixDataFields) !== FALSE) {
-				# обновление по data полю
-				$cntObj = $this->_csvReadFileUpdate($activeFile, $keysArr);
-			}else{
-				# создание новых позиций
-				$cntObj = $this->_csvReadFileInsert($activeFile, $keysArr);
-			}
-		}
-		else
-		{
-			# обновление существующих
-			$cntObj = $this->_csvReadFileUpdate($activeFile, $keysArr);
-		}
-
-		fclose($activeFile);
-
-		return $cntObj;
-	}
-
-	/*
-	* вспомогательная для csvReadFile. Обновление существующих
-	*/
-	public function _csvReadFileUpdate($openFile, $keys)
-	{
-
-		# разрешенные поля для обновления в tree
-		$fieldsTree = array(
-							'tree_parent_id' => '',
-							'tree_url' => '',
-							'tree_order' => '',
-							'tree_type' => '',
-							'tree_type_object' => '',
-							'tree_folow' => '',
-							'tree_short' => '',
-							);
-
-		# разрешенные поля для обновления в objects
-		$fieldsObjects = array(
-							'obj_data_type' => '',
-							'obj_canonical' => '',
-							'obj_name' => '',
-							'obj_h1' => '',
-							'obj_title' => '',
-							'obj_description' => '',
-							'obj_keywords' => '',
-							'obj_anons' => '',
-							'obj_content' => '',
-							'obj_date_publish' => '',
-							'obj_cnt_views' => '',
-							'obj_rating_up' => '',
-							'obj_rating_down' => '',
-							'obj_rating_count' => '',
-							'obj_user_author' => '',
-							'obj_ugroups_access' => '',
-							'obj_tpl_content' => '',
-							'obj_tpl_page' => '',
-							'obj_link' => '',
-							'obj_status' => '',
-							);
-
-		# data поля
-		$dataData = array();
-		$updateTree = FALSE;
-		$updateObjects = FALSE;
-		$dataFieldID = 0;
-
-		# разрешение обновлять tree
-		if(in_array('tree_id', $keys)) {
-			$updateTree = TRUE;
-		}
-
-		# разрешение обновлять objects и data
-		if(in_array('obj_id', $keys)) {
-			$updateObjects = TRUE;
-		}
-
-		# возможно обновление происходит по какому-то полю из data полей, например - коду товара
-		// в этом случае надо вычислить исходя из data-поля ID объекта
-		// если нет tree_id и нет obj_id, надо конвертировать значение data в obj_id
-		if(!$updateTree and !$updateObjects) {
-			$dataFieldID = preg_replace("/".$this->prefixDataFields."/", '', trim($keys['0']));
-			// поля нет или что-то не то. Прерываем.
-			if(!$dataFieldID) {
-				return FALSE;
-			}
-			unset($keys['0']);
-			// возможно что-то придется обновить и в таблице objects
-			$updateObjects = TRUE;
-		}
-
 
 		$i = 0;
-		while(($dataCSV = fgetcsv($openFile, 10000, $this->csvDelimiterField)) !== FALSE)
+		foreach($keysValues as $value)
 		{
-			$objID = 0;
-			$treeID = 0;
-
-			$dataUpdateTree = array();
-			$dataUpdateObject = array();
-			$dataUpdateData = array();
-
-			// есть dataFieldID - значит objID надо вычислять
-			if($dataFieldID) {
-				$this->db->where('objects_data_field', $dataFieldID);
-				$this->db->where('objects_data_value', trim($dataCSV['0']));
-				$this->db->limit(1);
-				$query = $this->db->get('objects_data');
-				$objID = $query->row('objects_data_obj');
+			if(!$value) {
+				continue;
 			}
 
-			# переборка массива файла
-			foreach($keys as $IDField => $keyField)
-			{
-				$valueField = '';
-				# обновляем tree
-				if($updateTree)
-				{
-					if($keyField == 'tree_id') {
-						$treeID = $dataCSV[$IDField];
-					}
+			$arrayValues = str_getcsv($value, $this->csvDelimiterField);
 
-					if(isset($fieldsTree[$keyField])) {
-						$dataUpdateTree[$keyField] = $dataCSV[$IDField];
+			##
+			# если есть ID объекта и поля для objects, то обновляем
+			##
+			if($keyObjID !== false && $dataFieldObjID) {
+				$objID = $arrayValues[$keyObjID];
+				$data = array();
+				foreach($dataFieldObjID as $dk => $dv) {
+					$insVal = trim($arrayValues[$dk]);
+					if($insVal == $this->noValue) {
+						continue;
 					}
+					$data[$dv] = $insVal;
 				}
-
-				# обновляем objects
-				if($updateObjects)
-				{
-					// получим $objID - сработает, даже если есть $dataFieldID
-					if($keyField == 'obj_id') {
-						$objID = trim($dataCSV[$IDField]);
-					}
-
-					if(isset($fieldsObjects[$keyField])) {
-						$valueField = trim($dataCSV[$IDField]);
-						if($valueField != $this->noValue) {
-							$dataUpdateObject[$keyField] = $dataCSV[$IDField];
-						}
-					}
-
-					# data поля
-					if(strpos($keyField, $this->prefixDataFields) !== FALSE) {
-						$valueField = trim($dataCSV[$IDField]);
-						if($valueField != $this->noValue) {
-							$dataUpdateData[preg_replace("/".$this->prefixDataFields."/", '', $keyField)] = $dataCSV[$IDField];
-						}
-					}
+				if($data) {
+					$this->db->where('obj_id', $objID);
+					$this->db->update('objects', $data);
 				}
 			}
 
-			# обновление tree
-			if($updateTree and $treeID and $dataUpdateTree) {
-				$this->db->where('tree_id', $treeID);
-				$this->db->update('tree', $dataUpdateTree);
+			##
+			# если есть TREE_ID объекта и поля для tree, то обновляем
+			##
+			if($keyTreeID !== false && $dataFieldTreeID) {
+				$objID = $arrayValues[$keyTreeID];
+				$data = array();
+				foreach($dataFieldTreeID as $dk => $dv) {
+					$insVal = trim($arrayValues[$dk]);
+					if($insVal == $this->noValue) {
+						continue;
+					}
+					$data[$dv] = $arrayValues[$dk];
+				}
+
+				if($data) {
+					$this->db->where('tree_id', $objID);
+					$this->db->update('tree', $data);
+				}
 			}
 
-			# обновление objects
-			if($updateObjects and $objID and $dataUpdateObject) {
-				$this->db->where('obj_id', $objID);
-				$this->db->update('objects', $dataUpdateObject);
-			}
+			##
+			# если есть data-поля и ID объекта для них, то обновляем
+			##
+			if($keyObjID !== false && $dataFieldsID) {
+				//pr($arrayValues);
+				$objID = $arrayValues[$keyObjID];
+				foreach($dataFieldsID as $dk => $dv) {
+					$insVal = trim($arrayValues[$dk]);
+					if($insVal == $this->noValue) {
+						continue;
+					}
 
-			if($dataUpdateData and $objID)
-			{
-				foreach($dataUpdateData as $key => $val) {
+					# проверим существование строки
 					$this->db->where('objects_data_obj', $objID);
-					$this->db->where('objects_data_field', $key);
-					$qData = $this->db->get('objects_data');
-					if($qData->num_rows()) {
+					$this->db->where('objects_data_field', $dv);
+					$q = $this->db->get('objects_data');
+					if($q->num_rows()) {
 						$this->db->where('objects_data_obj', $objID);
-						$this->db->where('objects_data_field', $key);
-						$this->db->update('objects_data', array('objects_data_value' => $val));
+						$this->db->where('objects_data_field', $dv);
+						$this->db->update('objects_data', array('objects_data_value' => $insVal));
 					} else {
-						$dIns = array('objects_data_obj' => $objID);
-						$dIns['objects_data_field'] = $key;
-						$dIns['objects_data_value'] = $val;
-						$this->db->insert('objects_data', $dIns);
+						$data = array(
+							'objects_data_obj' => $objID,
+							'objects_data_field' => $dv,
+							'objects_data_value' => $insVal
+						);
+						$this->db->insert('objects_data', $data);
 					}
 				}
 			}
 			++$i;
-		}# endwile
+		}
 
 		return $i;
 	}
 
 	/*
-	* вспомогательная для csvReadFile. Добавление новых
+	* Добавление новых позиций
 	*/
-	public function _csvReadFileInsert($openFile, $keys)
+	public function _csvReadFileInsert($keysUpdate = array(), $keysValues = array(), $fieldsAllows = array())
 	{
 		$dateCreate = date('Y-m-d H:i:s');
-		$i = 0;
-		while(($dataCSV = fgetcsv($openFile, 10000, $this->csvDelimiterField)) !== FALSE)
+
+		// ключи значений для таблицы объектов
+		$dataFieldObjID = array();
+
+		// ключи значений для таблицы tree
+		$dataFieldTreeID = array();
+
+		// Ключи для data-полей
+		$dataFieldsID = array();
+
+		foreach($keysUpdate as $key => $value)
 		{
-			# разрешенные поля для импорта в tree
-			$fieldsTree = array(
-								'tree_parent_id' => 0,
-								'tree_object' => 0,
-								'tree_url' => '',
-								'tree_date_create' => $dateCreate,
-								'tree_order' => 0,
-								'tree_type' => 'orig',
-								'tree_type_object' => '1',
-								'tree_folow' => '1',
-								'tree_short' => '',
-								'tree_axis' => '',
-								);
-
-			# разрешенные поля для импорта в objects
-			$fieldsObjects = array(
-								'obj_data_type' => 0,
-								'obj_canonical' => '',
-								'obj_name' => 'NO NAME',
-								'obj_h1' => '',
-								'obj_title' => '',
-								'obj_description' => '',
-								'obj_keywords' => '',
-								'obj_anons' => '',
-								'obj_content' => '',
-								'obj_date_create' => $dateCreate,
-								'obj_date_publish' => $dateCreate,
-								'obj_lastmod' => time(),
-								'obj_cnt_views' => 0,
-								'obj_rating_up' => '0',
-								'obj_rating_down' => '0',
-								'obj_rating_count' => 0,
-								'obj_user_author' => 1,
-								'obj_ugroups_access' => 'ALL',
-								'obj_tpl_content' => 'default',
-								'obj_tpl_page' => 'default',
-								'obj_link' => '',
-								'obj_status' => 'publish',
-								);
-
-			# data поля
-			$dataData = array();
-
-			# переборка массива файла
-			foreach($keys as $IDField => $keyField)
-			{
-				# tree поля
-				if(isset($fieldsTree[$keyField])) {
-					$fieldsTree[$keyField] = $dataCSV[$IDField];
-				}
-
-				# objects поля
-				if(isset($fieldsObjects[$keyField])) {
-					$fieldsObjects[$keyField] = $dataCSV[$IDField];
-				}
-
-				# data поля
-				if(strpos($keyField, $this->prefixDataFields) !== FALSE) {
-					$dataData[preg_replace("/".$this->prefixDataFields."/", '', $keyField)] = $dataCSV[$IDField];
-				}
+			if(in_array($value, $fieldsAllows['objects'])) {
+				$dataFieldObjID[$key] = $value;
 			}
 
-			# сначала вставляем объект
-			$this->db->insert('objects', $fieldsObjects);
-			$objID = $this->db->insert_id();
-
-			# вставляем data
-			$dIns = array('objects_data_obj' => $objID);
-			foreach($dataData as $key => $val) {
-				$dIns['objects_data_field'] = $key;
-				$dIns['objects_data_value'] = $val;
-				$this->db->insert('objects_data', $dIns);
+			if(in_array($value, $fieldsAllows['tree'])) {
+				$dataFieldTreeID[$key] = $value;
 			}
 
+			if(strpos($value, $this->prefixDataFields) === 0) {
+				$dataFieldsID[$key] = str_replace($this->prefixDataFields, '', $value);
+			}
+		}
 
-			# вставляем tree
-			$fieldsTree['tree_object'] = $objID;
+		if(!$dataFieldObjID || !$dataFieldTreeID) {
+			throw new Exception('Ошибка в строке');
+		}
 
-			// если нет ссылки, то делаем ее автоматически
-			$fieldsTree['tree_url'] = str_replace(' ', '', $fieldsTree['tree_url']);
-			if(!$fieldsTree['tree_url']){
-				$fieldsTree['tree_url'] = app_translate($fieldsObjects['obj_name']);
+		$ins = 0;
+		foreach($keysValues as $value)
+		{
+			if(!$value) {
+				continue;
 			}
 
-			// далее формируем родителей. Если в tree_parent_id есть запятая, то надо объект приставить к нескольким родителям
-			if(strpos($fieldsTree['tree_parent_id'], ',') !== FALSE)
-			{
-				$parents = explode(',', $fieldsTree['tree_parent_id']);
-				$cnt = 1;
-				foreach($parents as $pID)
-				{
-					$pID = trim($pID);
+			$arrayValues = str_getcsv($value, $this->csvDelimiterField);
+			$objID = 0;
+			$objName = '';
+			##
+			# пишем значения в objects
+			##
+			$data = array();
+			foreach($dataFieldObjID as $dk => $dv) {
+				$insVal = trim($arrayValues[$dk]);
+				$data[$dv] = $insVal;
+			}
+			if($data) {
+				$objName = $data['obj_name'];
+				$data['obj_date_create'] = $dateCreate;
 
-					if(!$pID)
-						continue;
+				!isset($data['obj_date_publish']) ? $data['obj_date_publish'] = $data['obj_date_create'] : 0;
+				!isset($data['obj_ugroups_access']) ? $data['obj_ugroups_access'] = 'ALL' : 0;
+				!isset($data['obj_data_type']) ? $data['obj_data_type'] = '|1|' : 0;
+				!isset($data['obj_h1']) ? $data['obj_h1'] = $objName : 0;
+				!isset($data['obj_title']) ? $data['obj_title'] = $objName : 0;
+				!isset($data['obj_description']) ? $data['obj_description'] = $objName : 0;
+				!isset($data['obj_keywords']) ? $data['obj_keywords'] = $objName : 0;
+				!isset($data['obj_anons']) ? $data['obj_anons'] = '' : 0;
+				!isset($data['obj_content']) ? $data['obj_content'] = '' : 0;
+				!isset($data['obj_cnt_views']) ? $data['obj_cnt_views'] = 0 : 0;
+				!isset($data['obj_rating_up']) ? $data['obj_rating_up'] = 0 : 0;
+				!isset($data['obj_rating_down']) ? $data['obj_rating_down'] = 0 : 0;
+				!isset($data['obj_rating_count']) ? $data['obj_rating_count'] = 0 : 0;
+				!isset($data['obj_user_author']) ? $data['obj_user_author'] = 1 : 0;
+				!isset($data['obj_link']) ? $data['obj_link'] = '' : 0;
+				!isset($data['obj_tpl_content']) ? $data['obj_tpl_content'] = '' : 0;
+				!isset($data['obj_tpl_page']) ? $data['obj_tpl_page'] = '' : 0;
+				!isset($data['obj_status']) ? $data['obj_status'] = 'hidden' : 0;
 
-					if($cnt < 2) {
-						$fieldsTree['tree_type'] = 'orig';
-					} else {
-						$fieldsTree['tree_type'] = 'copy';
+				$this->db->insert('objects', $data);
+				$objID = $this->db->insert_id();
+			}
+
+			if(!$objID) {
+				throw new Exception('Ошибка добавления строки');
+			}
+
+			##
+			# пишем значения в tree
+			##
+			$data = array();
+			foreach($dataFieldTreeID as $dk => $dv) {
+				$insVal = trim($arrayValues[$dk]);
+				$data[$dv] = $insVal;
+			}
+
+			if($data) {
+
+				$data['tree_object'] = $objID;
+				$data['tree_date_create'] = $dateCreate;
+
+				!isset($data['tree_folow']) ? $data['tree_folow'] = 0 : 0;
+				!isset($data['tree_order']) ? $data['tree_order'] = 1 : 0;
+				!isset($data['tree_url']) ? $data['tree_url'] = app_translate($objName) : 0;
+				!isset($data['tree_short']) ? $data['tree_short'] = '' : 0;
+				!isset($data['tree_type_object']) ? $data['tree_type_object'] = 1 : 0;
+				!isset($data['tree_type']) ? $data['tree_type'] = 'orig' : 0;
+
+				// если добавляется в несколько разделов
+				$parents = $insertData = array();
+				if(strpos($data['tree_parent_id'], '|') !== false) {
+					$parents = explode('|', $data['tree_parent_id']);
+					$i = 0;
+					foreach($parents as $parentID) {
+						$data['tree_parent_id'] = trim($parentID);
+						$i ? $data['tree_type'] = 'copy' : $data['tree_type'] = 'orig';
+
+						$insertData[] = $data;
+						++$i;
 					}
-					$fieldsTree['tree_parent_id'] = $pID;
-
-					// запись в БД
-					$this->db->insert('tree', $fieldsTree);
-					++$cnt;
+				} else {
+					$insertData[] = $data;
 				}
+				$this->db->insert_batch('tree', $insertData);
+				unset($insertData);
 			}
-			else
-			{
-				$this->db->insert('tree', $fieldsTree);
+
+			##
+			# пишем значения в objects_data
+			##
+			if($dataFieldsID) {
+				$data = array();
+				foreach($dataFieldsID as $dk => $dv) {
+					$insVal = trim($arrayValues[$dk]);
+					$data[] = array(
+						'objects_data_obj' => $objID,
+						'objects_data_field' => $dv,
+						'objects_data_value' => $insVal,
+					);
+				}
+				$this->db->insert_batch('objects_data', $data);
 			}
-			++$i;
-		} # endwile
 
-		return $i;
-	}
-
-	/*
-	* возвращает массив объектов по типам данных
-	*/
-	public function getObjectsDataType($dataTypeID = 0)
-	{
-		# сначала из общих таблиц
-		$this->db->select('tree.*, objects.*');
-		$this->db->join('objects', 'objects.obj_id = tree.tree_object');
-		$this->db->where('tree_type', 'orig');
-		$this->db->like('obj_data_type', '|' . $dataTypeID . '|');
-		$query = $this->db->get('tree');
-
-		$rowsExport = array();
-		$objIdArray = array();
-		foreach($query->result_array() as $row) {
-			$rowsExport[$row['obj_id']] = $row;
-			$objIdArray[$row['obj_id']] = $row['obj_id'];
+			++$ins;
 		}
 
-		if(!$rowsExport) {
-			return array();
-		}
-
-		# data поля. Простой SQL для обхода ограничения большого WHERE IN
-		$sql = "SELECT * ";
-		$sql .= "FROM {$this->db->dbprefix}objects_data ";
-		$sql .= "WHERE `objects_data_obj` IN (" . implode(',', $objIdArray) . ")";
-		$query = $this->db->query($sql);
-		if($query->num_rows()) {
-			foreach($query->result_array() as $row) {
-				$rowsExport[$row['objects_data_obj']][$this->prefixDataFields . $row['objects_data_field']] = $row['objects_data_value'];
-			}
-		}
-
-		if($query->num_rows()) {
-			foreach($query->result_array() as $row) {
-				$rowsExport[$row['objects_data_obj']][$this->prefixDataFields . $row['objects_data_field']] = $row['objects_data_value'];
-			}
-		}
-		return $rowsExport;
+		return $ins;
 	}
 
 	/*
 	* возвращает массив объектов по типам объектов. При необходимости их DATA-поля
 	*/
-	public function getObjectsFromType($typeObjects, $dataFieldsID = array())
+	public function getObjectsFromType($typeObjects, $dataFieldsID = array(), $type = false)
 	{
 
 		# сначала из общих таблиц
-		$this->db->select('tree.*, objects.*');
+		$selectListArray = array();
+		foreach($this->activeFieldsExport as $key => $value) {
+			$selectListArray[] = $value['table'] . '.' . $key;
+		}
+		$this->db->select(implode(',', $selectListArray));
 		$this->db->join('objects', 'objects.obj_id = tree.tree_object');
 
 		if(is_array($typeObjects)) {
@@ -641,14 +459,20 @@ class ExpCsvModel extends CI_Model {
 			$this->db->where('tree_type_object', $typeObjects);
 		}
 
-		$this->db->where('tree_type', 'orig');
+		if($type) {
+			$this->db->where('tree_type', $type);
+		}
+
+		$this->db->order_by('objects.obj_id', 'ASC');
+		//pr($this->db->get_compiled_select('tree'));
+
 		$query = $this->db->get('tree');
 
 		$rowsExport = array();
 		$objIdArray = array();
 		foreach($query->result_array() as $row) {
-			$rowsExport[$row['obj_id']] = $row;
-			$objIdArray[$row['obj_id']] = $row['obj_id'];
+			$rowsExport[$row['tree_id']] = $row;
+			$objIdArray[$row['tree_id']] = $row['obj_id'];
 		}
 
 		if(!$rowsExport) {
@@ -665,10 +489,82 @@ class ExpCsvModel extends CI_Model {
 			$query = $this->db->query($sql);
 			if($query->num_rows()) {
 				foreach($query->result_array() as $row) {
-					$rowsExport[$row['objects_data_obj']][$this->prefixDataFields . $row['objects_data_field']] = $row['objects_data_value'];
+					$treeIDArray = array_keys($objIdArray, $row['objects_data_obj']);
+					foreach($treeIDArray as $keyTree) {
+						if(isset($rowsExport[$keyTree])) {
+							$rowsExport[$keyTree][$this->prefixDataFields . $row['objects_data_field']] = $row['objects_data_value'];
+						}
+					}
 				}
 			}
 		}
 		return $rowsExport;
+	}
+
+	# Возвращает массив всех вложенных объектов
+	public function getAllChilds($parentID, $result = array())
+	{
+		// в массиве много объектов. Прерываем
+		if(count($result) > 500) {
+			throw new Exception('Слишком много объектов. Измените параметры');
+		}
+
+		$this->db->join('objects', 'tree.tree_object = objects.obj_id');
+		if(is_array($parentID)) {
+			$this->db->where_in('tree_parent_id', $parentID);
+		} else {
+			$this->db->where('tree_parent_id', $parentID);
+		}
+		$query = $this->db->get('tree');
+		if($cnt = $query->num_rows()) {
+			// если количество больше 300, то возможено превышение тайм-лимита или лимита памяти. Отправляем на другой экспорт
+			if($cnt > 300) {
+				throw new Exception('Превышен лимит вывода. Воспользуйтесь другим экспортом');
+			}
+
+			$parents = array();
+			$objIdArray = array();
+			foreach($query->result_array() as $row) {
+				$result[$row['tree_id']] = $row;
+				$parents[] = $row['tree_id'];
+				$objIdArray[$row['tree_id']] = $row['obj_id'];
+			}
+
+			$dataFields = array();
+			$this->db->select('types_fields_id, types_fields_name, objects_data_obj, objects_data_value');
+			$this->db->join('data_types_fields', 'data_types_fields.types_fields_id = objects_data.objects_data_field');
+			$this->db->where_in('objects_data_obj', $objIdArray);
+			$this->db->order_by('types_fields_order', 'ASC');
+			$query = $this->db->get('objects_data');
+			if($query->num_rows())
+			{
+				foreach($query->result_array() as $row) {
+					$treeIDArray = array_keys($objIdArray, $row['objects_data_obj']);
+					foreach($treeIDArray as $keyTree) {
+						if(isset($result[$keyTree])) {
+							$result[$keyTree][$this->prefixDataFields . $row['types_fields_id']] = $row['objects_data_value'];
+						}
+					}
+				}
+			}
+
+			return $this->getAllChilds($parents, $result);
+		} else {
+			return $result;
+		}
+	}
+
+	# возвращает ID объекта по nodeID
+	public function getObjID($nodeID = 0)
+	{
+		$this->db->select('tree_object');
+		$this->db->where('tree_id', $nodeID);
+		$query = $this->db->get('tree');
+		if($query->num_rows()) {
+			return $query->row('tree_object');
+		} else {
+			return 0;
+		}
+
 	}
 }

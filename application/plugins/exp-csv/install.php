@@ -9,7 +9,7 @@
 function plugin_plugin_install($args = array())
 {
 	$CI = &get_instance();
-	/*$data = array('test_value' => 'Установка плагина admin-site-tree');
+	/*$data = array('test_value' => 'Test value');
 	$CI->db->insert('test', $data);
 	*/
 	return true;
@@ -24,7 +24,7 @@ function plugin_plugin_install($args = array())
 function plugin_plugin_reinstall($args = array())
 {
 	$CI = &get_instance();
-	/*$data = array('test_value' => 'Переустановка плагина admin-site-tree ('.$args['plugin_folder'].')');
+	/*$data = array('test_value' => 'Test value ('.$args['plugin_folder'].')');
 	$CI->db->where('test_id', 1);
 	$CI->db->update('test', $data);
 	*/
@@ -40,9 +40,9 @@ function plugin_plugin_reinstall($args = array())
 function plugin_plugin_uninstall($args = array())
 {
 	$CI = &get_instance();
-	/*$data = array('test_value' => 'Удаление плагина admin-site-tree ('.$args['plugin_folder'].')');
+	/*$data = array('test_value' => 'Test value ('.$args['plugin_folder'].')');
 	$CI->db->where('test_id', 1);
 	$CI->db->update('test', $data);*/
-	
+
 	return true;
 }

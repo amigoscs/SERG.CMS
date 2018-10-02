@@ -1,80 +1,90 @@
 $(document).ready(function(e) {
 	var TextareaValue = TextareaNewValue = '';
-	$('textarea.edit-value').on('focus focusout', function(e) {
 
-		var TextareaName = $(this).attr('name');
-		if(e.type == 'focus') {
-			TextareaValue = $(this).val();
-		}
-		else
-		{
-			TextareaNewValue = $(this).val();
-			if(TextareaNewValue != TextareaValue)
-			{
-				add_loader();
-				$.ajax({
-					url: '/admin/exp-csv/ajax/savevalue',
-					type: 'POST',
-					data: {field_value: TextareaNewValue, field_name: TextareaName},
-					success: function(data){
-						remove_loader();
-						Res = JSON.parse(data);
-						if(Res.status == 'complite'){
-							noty_info('success', Res.text, 'topRight');
-						}else{
-							noty_info('warning', Res.text);
-						}
-					},
-					error: function(a, b, c){
-						noty_info('warning', 'Connect error');
+	$('textarea.edit-value').on('focusout.EXPCSV', function(e) {
+		TextareaNewValue = $(this).val();
+		$(this).parent('td').removeClass('active');
+		var $activeDIV = $(this).parent('td').find('.block-value');
+		if(TextareaValue !== TextareaNewValue) {
+			var table = $(this).data('table');
+			var tableKey = $(this).data('table-key');
+			var nodeID = $(this).data('node-id');
+			var textValue = $(this).val();
+			add_loader();
+			$.ajax({
+				url: '/admin/exp-csv/ajax/savevalue',
+				type: 'POST',
+				data: {res_table: table, res_table_key: tableKey, res_node_id: nodeID, res_value: textValue},
+				dataType: 'json',
+				success: function(DATA){
+					//console.log(DATA);
+					remove_loader();
+					if(DATA.status == 'OK'){
+						noty_info('success', DATA.info, 'topRight');
+						$activeDIV.text(DATA.new_value);
+					}else{
+						noty_info('warning', DATA.info);
 					}
-				});
-			}
-
+				},
+				error: function(a, b, c){
+					remove_loader();
+					noty_info('warning', 'Connect error');
+				}
+			});
 		}
 	});
 
 
-	$('.block-value').on('dblclick', function(e) {
-		var $ObjBlock = $(this);
-		var TextareContent = $ObjBlock.html();
-		var $Textarea = $(this).next('textarea');
-		var SelName = $(this).data('block-name');
-		if(!$Textarea.length) {
-			return false;
-		}
-		$Textarea.val(TextareContent).show().focus();
-		$ObjBlock.hide();
-		$Textarea.on('focusout.Bval', function(e) {
-			//$ObjBlock.empty().html($Textarea.val()).show();
-			$('.block-value[data-block-name="'+SelName+'"]').empty().html($Textarea.val());
-			$ObjBlock.show();
-			$Textarea.hide().val('');
-			$Textarea.off('focusout.Bval');
-		});
+	$('.block-value').on('dblclick.EXPCSV', function(e) {
+		TextareaValue = $(this).parent('td').addClass('active').find('textarea').focus().val();
 	});
 
 	// кнопка старта импорта
-	$('#run_import').on('click', function() {
+	$('#run_import').on('click.EXPCSV', function() {
 		var FilePath = $(this).data('file-path');
 		window.onbeforeunload = function() {
 			return true;
 		}
-		admin_dialog('<p style="margin:25px 0;text-align:center"><img src="/application/plugins/exp-csv/assets/exloader.gif"/></p>', 'Выполняется обновление...', 350);
+		$(this).remove();
+		admin_dialog('<p class="upd-loader"><img src="/application/plugins/exp-csv/assets/exloader.gif"/></p>', 'Выполняется обновление...', 350);
+		updOffset = 0;
+		expfunc_import(FilePath, updOffset, true);
+	});
+
+	// форма экспорта по типам объектов
+	$('form#export_type').on('submit.EXPCSV', function(e){
+		var values = $(this).serialize();
+		admin_dialog('<p class="upd-loader"><img src="/application/plugins/exp-csv/assets/exloader.gif"/></p>', 'Формирование файла...', 350);
+		expfunc_export_type_object(values);
+		return false;
+	});
+
+	// форма экспорта таблицы
+	$('form#export_nodes').on('submit.EXPCSV', function(e) {
+		var formAction = $(this).attr('action');
+		admin_dialog('<p class="upd-loader"><img src="/application/plugins/exp-csv/assets/exloader.gif"/></p>', 'Формирование файла...', 350);
 		$.ajax({
-			url: '/admin/exp-csv/ajax/runimport',
+			url: formAction,
 			type: 'POST',
-			data: {file: FilePath},
+			data: {run_export: 'run'},
 			dataType: 'json',
-			success: function(Res){
-				//console.log(Res);
-				admin_dialog('<p>'+Res.text+'</p>', 'Процесс завершен', 350);
-				window.onbeforeunload = null;
+			success: function(DATA) {
+				if(DATA.status == 'OK') {
+					admin_dialog('<p class="complite-info">' + DATA.info + '</p>', 'Complite', 350);
+				} else {
+					admin_dialog('<p class="error-info">' + DATA.info + '</p>', 'Error', 350);
+				}
 			},
 			error: function(a, b, c){
-				admin_dialog('Response error', 'Error', 350);
-				window.onbeforeunload = null;
+				admin_dialog('<p>Error response', 'Error', 350);
 			}
 		});
+		return false;
+	});
+
+	// выделение строки таблицы
+	$('.simple-table').on('click.EXPCSV', 'tr', function(e){
+		$('.simple-table').find('tr').removeClass('selected');
+		$(this).addClass('selected');
 	});
 });
