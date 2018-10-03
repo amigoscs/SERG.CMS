@@ -1,7 +1,8 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 # файл конфигурации автозагрузки плагина
 /*
-	ссылка на папку плагинов - info('plugins_url')
+	*
+	* ссылка на папку плагинов - info('plugins_url')
 	* UPD 2018-04-17
 	* 0.1
 	* Плагин маркет
@@ -9,13 +10,17 @@
 	* UPD 2018-09-07
 	* 1.0
 	* Первая версия плагина. Тестовая
-
+	*
+	* UPD 2018-09-07
+	* 1.1
+	* сделана выгрузка прайс-листа. Обязательно плагин exp-csv версии 10+
+	*
 */
 
 $info = array(
 		'name' => 'E-market',
 		'descr' => 'Плагин электронной торговли',
-		'version' => '1.0',
+		'version' => '1.1',
 		'author' => 'Сергей Будников',
 		'url' => '//sergcms.ru',
 	);
@@ -65,7 +70,7 @@ $load_site['assets']['top'] = array(
 
 # файлы скриптов и стилей сайта в секцию BODY
 $load_site['assets']['bottom'] = array(
-	//'0' => '<script src="'.info('plugins_url').'e-market/assets/emarket-script.js"></script>',
+	'0' => '<script src="'.info('plugins_url').'e-market/assets/emarket-script.js"></script>',
 );
 
 

@@ -7,4 +7,5 @@
 	<li><a href="/admin/e-market/setting_form"><span>Форма</span></a></li>
 	<li><a href="/admin/e-market/setting_currency"><span>Валюта</span></a></li>
 	<li><a href="/admin/e-market/setting_sales"><span>Скидки</span></a></li>
+	<li><a href="/admin/e-market/price_export"><span>Прайс</span></a></li>
 </ul>

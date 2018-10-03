@@ -32,8 +32,8 @@ class IndexEMarketLib {
 	public function index()
 	{
 		$CI = &get_instance();
-		$CI->data['PAGE_TITLE'] = app_lang('EMARKET_TITLE_INDEX');
-		$CI->data['PAGE_DESCRIPTION'] = $CI->data['PAGE_TITLE'];
+		$CI->pageContentTitle = app_lang('EMARKET_TITLE_INDEX');
+		$CI->pageContentDescription = $CI->pageContentTitle;
 
 		$data = array('h1' => 'E-market');
 		$CI->pageContent = $CI->load->view('admin-pages/index', $data, true);
@@ -45,8 +45,8 @@ class IndexEMarketLib {
 	public function setting_emarket()
 	{
 		$CI = &get_instance();
-		$CI->data['PAGE_TITLE'] = app_lang('EMARKET_TITLE_SETTING');
-		$CI->data['PAGE_DESCRIPTION'] = $CI->data['PAGE_TITLE'];
+		$CI->pageContentTitle = app_lang('EMARKET_TITLE_SETTING');
+		$CI->pageContentDescription = $CI->pageContentTitle;
 		$data = array('h1' => 'Настройка E-market');
 
 		if($options = $CI->input->post('emarket_option')) {
@@ -64,9 +64,9 @@ class IndexEMarketLib {
 	public function setting_currency()
 	{
 		$CI = &get_instance();
-		$CI->data['PAGE_TITLE'] = app_lang('EMARKET_TITLE_SETTING_CURRENCY');
-		$CI->data['PAGE_DESCRIPTION'] = $CI->data['PAGE_TITLE'];
-		$data = array('h1' => $CI->data['PAGE_TITLE']);
+		$CI->pageContentTitle = app_lang('EMARKET_TITLE_SETTING_CURRENCY');
+		$CI->pageContentDescription = $CI->pageContentTitle;
+		$data = array('h1' => $CI->pageContentTitle);
 		if($CI->input->post())
 		{
 			# активная валюта для сайта
@@ -114,9 +114,9 @@ class IndexEMarketLib {
 	public function setting_carts()
 	{
 		$CI = &get_instance();
-		$CI->data['PAGE_TITLE'] = app_lang('EMARKET_TITLE_SETTING_CART');
-		$CI->data['PAGE_DESCRIPTION'] = $CI->data['PAGE_TITLE'];
-		$data = array('h1' => $CI->data['PAGE_TITLE']);
+		$CI->pageContentTitle = app_lang('EMARKET_TITLE_SETTING_CART');
+		$CI->pageContentDescription = $CI->pageContentTitle;
+		$data = array('h1' => $CI->pageContentTitle);
 
 		$upd = false;
 		# пост на обноление типа корзины
@@ -182,9 +182,9 @@ class IndexEMarketLib {
 	public function setting_form()
 	{
 		$CI = &get_instance();
-		$CI->data['PAGE_TITLE'] = app_lang('EMARKET_TITLE_SETTING_FORM');
-		$CI->data['PAGE_DESCRIPTION'] = $CI->data['PAGE_TITLE'];
-		$data = array('h1' => $CI->data['PAGE_TITLE']);
+		$CI->pageContentTitle = app_lang('EMARKET_TITLE_SETTING_FORM');
+		$CI->pageContentDescription = $CI->pageContentTitle;
+		$data = array('h1' => $CI->pageContentTitle);
 
 		if($options = $CI->input->post('updatefield')) {
 			foreach($options as $key => $value) {
@@ -219,9 +219,9 @@ class IndexEMarketLib {
 	public function setting_sales()
 	{
 		$CI = &get_instance();
-		$CI->data['PAGE_TITLE'] = 'Скидки';
-		$CI->data['PAGE_DESCRIPTION'] = $CI->data['PAGE_TITLE'];
-		$data = array('h1' => $CI->data['PAGE_TITLE']);
+		$CI->pageContentTitle = 'Скидки';
+		$CI->pageContentDescription = $CI->pageContentTitle;
+		$data = array('h1' => $CI->pageContentTitle);
 
 		$CI->pageContent = $CI->load->view('admin-pages/setting-sales', $data, TRUE);
 	}
@@ -232,9 +232,9 @@ class IndexEMarketLib {
 	public function order_list()
 	{
 		$CI = &get_instance();
-		$CI->data['PAGE_TITLE'] = app_lang('EMARKET_TITLE_ORDER_LIST');
-		$CI->data['PAGE_DESCRIPTION'] = $CI->data['PAGE_TITLE'];
-		$data = array('h1' => $CI->data['PAGE_TITLE']);
+		$CI->pageContentTitle = app_lang('EMARKET_TITLE_ORDER_LIST');
+		$CI->pageContentDescription = $CI->pageContentTitle;
+		$data = array('h1' => $CI->pageContentTitle);
 
 		$data['filterDateStart'] = $CI->input->get('cart_start_date') ? $CI->input->get('cart_start_date') : date('Y-m') . '-01';
 		$data['filterDateStop'] = $CI->input->get('cart_stop_date') ? $CI->input->get('cart_stop_date') : date('Y-m-d');
@@ -263,9 +263,9 @@ class IndexEMarketLib {
 	public function order_view()
 	{
 		$CI = &get_instance();
-		$CI->data['PAGE_TITLE'] = app_lang('EMARKET_TITLE_ORDER_LIST');
-		$CI->data['PAGE_DESCRIPTION'] = $CI->data['PAGE_TITLE'];
-		$data = array('h1' => $CI->data['PAGE_TITLE']);
+		$CI->pageContentTitle = app_lang('EMARKET_TITLE_ORDER_LIST');
+		$CI->pageContentDescription = $CI->pageContentTitle;
+		$data = array('h1' => $CI->pageContentTitle);
 		$upd = false;
 
 		// разрешение изменить заказ
@@ -348,9 +348,9 @@ class IndexEMarketLib {
 	{
 		$CI = &get_instance();
 
-		$CI->data['PAGE_TITLE'] = app_lang('EMARKET_TITLE_PRODUCT_LIST');
-		$CI->data['PAGE_DESCRIPTION'] = $CI->data['PAGE_TITLE'];
-		$data = array('h1' => $CI->data['PAGE_TITLE']);
+		$CI->pageContentTitle = app_lang('EMARKET_TITLE_PRODUCT_LIST');
+		$CI->pageContentDescription = $CI->pageContentTitle;
+		$data = array('h1' => $CI->pageContentTitle);
 
 		$data['filterViewImage'] = 0;
 		$data['filterTypeObject'] = 8;
@@ -414,6 +414,62 @@ class IndexEMarketLib {
 	}
 
 	/*
+	* просмотр товаров
+	*/
+	public function price_export()
+	{
+		$CI = &get_instance();
+		$CI->pageContentTitle = 'Экспорт прайса';
+		$CI->pageContentDescription = $CI->pageContentTitle;
+		$data['h1'] = $CI->pageContentTitle;
+		$data['dataFieldsID'] = array();
+
+		// код товара
+		if($sku = app_get_option('product_code_field', 'e-market', 0)) {
+			$data['dataFieldsID'][$sku] = 'Код товара';
+		}
+
+		// дата поля со старыми ценами
+		if(app_get_option('product_old_price_field', 'e-market', 0)) {
+			$tmp = app_parse_select_values(app_get_option('product_old_price_field', 'e-market', 0));
+			$dataFields = $CI->CommonModel->getAllDataTypesFields(false, $tmp);
+			foreach($dataFields as $value) {
+				$data['dataFieldsID'][$value['types_fields_id']] = $value['types_fields_name'];
+			}
+		}
+
+		// дата поля с текущими ценами
+		if(app_get_option('product_price_field', 'e-market', 0)) {
+			$tmp = app_parse_select_values(app_get_option('product_price_field', 'e-market', 0));
+			$dataFields = $CI->CommonModel->getAllDataTypesFields(false, $tmp);
+			foreach($dataFields as $value) {
+				$data['dataFieldsID'][$value['types_fields_id']] = $value['types_fields_name'];
+			}
+		}
+
+		// дата поля с наличием товаров
+		if(app_get_option('product_stock', 'e-market', 0)) {
+			$tmp = app_parse_select_values(app_get_option('product_stock', 'e-market', 0));
+			$dataFields = $CI->CommonModel->getAllDataTypesFields(false, $tmp);
+			foreach($dataFields as $value) {
+				$data['dataFieldsID'][$value['types_fields_id']] = $value['types_fields_name'];
+			}
+		}
+
+		$data['allTypesObjects'] = $CI->CommonModel->getAllObjTypes(); // все типы объектов
+		foreach($data['allTypesObjects'] as $key => &$value) {
+			$value = $value['obj_types_name'];
+		}
+		unset($value);
+
+		$data['infoDelimiterField'] = $CI->ExpCsvModel->csvDelimiterField;
+		$data['infoEnclosure'] = $CI->ExpCsvModel->csvEnclosure;
+		$data['exportLimit'] = $CI->ExpCsvModel->limitExport;
+
+		$CI->pageContent = $CI->load->view('admin-pages/price-export', $data, true);
+	}
+
+	/*
 	* Метод принимает Ajax
 	*/
 	public function ajax_request()
@@ -422,7 +478,12 @@ class IndexEMarketLib {
 		$this->ajaxResponse = array('status' => 'ERROR', 'info' => '');
 		$method = '_ajax_' . $CI->input->get('request');
 		if(method_exists($this, $method)) {
-			$this->$method();
+			try {
+				$this->$method();
+			} catch (Exception $e) {
+				$this->ajaxResponse['status'] = 'ERROR';
+				$this->ajaxResponse['info'] = $e->getMessage();
+			}
 		} else {
 			$this->ajaxResponse['info'] = 'Method is not exists';
 		}
@@ -486,6 +547,245 @@ class IndexEMarketLib {
 			$this->ajaxResponse['info'] = 'Пустой массив';
 		}
 		return true;
+	}
+
+	/*
+	* AJAX - экспорт прайса
+	*/
+	private function _ajax_export_price()
+	{
+		$CI = &get_instance();
+
+		if(!$formValues = $CI->input->post('form_values')) {
+			throw new Exception('Нет параметров');
+		}
+
+		parse_str($formValues, $formValues);
+
+		if(!isset($formValues['active_types'])) {
+			throw new Exception('Не указан тип объекта');
+		}
+
+		if(!isset($formValues['active_data_types_fields'])) {
+			throw new Exception('Не указаны типы данных');
+		}
+
+		$limitExport = $CI->ExpCsvModel->limitExport;
+		$sqlOffset = $CI->input->post('sql_offset');
+
+		$OBJS = array();
+		$CI->db->limit($limitExport, $sqlOffset);
+		$OBJS = $CI->EmarketModel->getProductsExport($formValues['active_types']);
+
+		// файл CSV
+		$pathCsvLib = APP_PLUGINS_DIR_PATH . 'exp-csv/libraries/CsvFileLib.php';
+		$exportPath = $CI->ExpCsvModel->exportFilePath;
+		$fileExportName = $CI->input->post('file_name');
+		if(!$fileExportName) {
+			$fileExportName = 'price-list-' . date('Y-m-d') . '.csv';
+		}
+
+		if(!$OBJS && !$sqlOffset) {
+			throw new Exception('Товары не найдены');
+		} else if(!$OBJS) {
+			$this->ajaxResponse['status'] = 'OK';
+			$this->ajaxResponse['flag_update'] = 'STOP';
+			$this->ajaxResponse['info'] = 'Файл сформирован. <a href="'. str_replace(APP_BASE_PATH, APP_BASE_URL, $exportPath) . $fileExportName . '" title="" download>Скачать »</a>';
+			$this->ajaxResponse['file_name'] = $fileExportName;
+			return;
+		}
+
+
+		if(!file_exists($exportPath)) {
+			if(!mkdir($exportPath)) {
+				throw new Exception('Ошибка: директория не может быть создана');
+			}
+		}
+
+		if(!file_exists($pathCsvLib)) {
+			throw new Exception('Ошибка подключения библиотеки CSV');
+		} else {
+			require_once($pathCsvLib);
+			$CSVLIB = new csvFileLib($CI->ExpCsvModel->csvDelimiterField, $CI->ExpCsvModel->csvEnclosure, $CI->ExpCsvModel->noValue);
+		}
+
+		//$this->ajaxResponse['status'] = 'ERROR';
+		//$this->ajaxResponse['info'] = $e->getMessage();
+
+		$prefixData = $CI->ExpCsvModel->prefixDataFields;
+		$prefixCurr = 'cur_';
+		$activeDataTypes = $formValues['active_data_types_fields'];
+
+		// массив валют
+		$currArray = $CI->EmarketModel->EmarketPriceModel->currArray;
+		// Название валюты сайта
+		$currSite = $currArray[$CI->EmarketModel->EmarketPriceModel->currSiteID]['ecartcur_code'];
+
+		$exportHeaders = array(
+			'obj_id' => 'ID товара',
+			'obj_name' => 'Название товара',
+			'link' => 'Ссылка',
+			'category' => 'Категория',
+			'site_currency' => 'Валюта сайта',
+			'product_currency' => 'Валюта товара',
+		);
+
+		// код товара
+		if($sku = app_get_option('product_code_field', 'e-market', 0)) {
+			if(in_array($sku, $activeDataTypes)) {
+				$exportHeaders[$prefixData . $sku] = 'Код товара';
+			}
+		}
+
+		// дата поля со старыми ценами
+		$oldPriceFields = array();
+		if(app_get_option('product_old_price_field', 'e-market', 0)) {
+			$oldPriceFields = app_parse_select_values(app_get_option('product_old_price_field', 'e-market', 0));
+			$dataFields = $CI->CommonModel->getAllDataTypesFields(false, $oldPriceFields);
+			foreach($dataFields as $value) {
+				if(in_array($value['types_fields_id'], $activeDataTypes)) {
+					$exportHeaders[$prefixData . $value['types_fields_id']] = $value['types_fields_name'];
+					$exportHeaders[$prefixCurr . $prefixData . $value['types_fields_id']] = 'Валюта: ' . $value['types_fields_name'];
+				}
+			}
+		}
+
+		// дата поля с текущими ценами
+		$priceFields = array();
+		if(app_get_option('product_price_field', 'e-market', 0)) {
+			$priceFields = app_parse_select_values(app_get_option('product_price_field', 'e-market', 0));
+			$dataFields = $CI->CommonModel->getAllDataTypesFields(false, $priceFields);
+			foreach($dataFields as $value) {
+				if(in_array($value['types_fields_id'], $activeDataTypes)) {
+					$exportHeaders[$prefixData . $value['types_fields_id']] = $value['types_fields_name'];
+					$exportHeaders[$prefixCurr . $prefixData . $value['types_fields_id']] = 'Валюта: ' . $value['types_fields_name'];
+				}
+			}
+		}
+
+		// дата поля с наличием товаров
+		$stockFields = array();
+		if(app_get_option('product_stock', 'e-market', 0)) {
+			$stockFields = app_parse_select_values(app_get_option('product_stock', 'e-market', 0));
+			$dataFields = $CI->CommonModel->getAllDataTypesFields(false, $stockFields);
+			foreach($dataFields as $value) {
+				if(in_array($value['types_fields_id'], $activeDataTypes)) {
+					$exportHeaders[$prefixData . $value['types_fields_id']] = $value['types_fields_name'];
+				}
+			}
+		}
+
+		// создадим цены
+		$OUT = array();
+		foreach($OBJS as $keyProduct => $product) {
+			$emInfo = $CI->EmarketModel->initProduct($product);
+			foreach($exportHeaders as $keyHead => $value) {
+				if(isset($product[$keyHead])) {
+					$OUT[$keyProduct][$keyHead] = $product[$keyHead];
+				} else if($keyHead == 'category') {
+					$cat = $CI->EmarketModel->getCategoryes($product['tree_axis']);
+					$OUT[$keyProduct][$keyHead] = implode('/', array_values($cat));
+					$OUT[$keyProduct]['link'] = implode('/', array_keys($cat));
+
+				} else if($keyHead == 'product_currency') {
+					$OUT[$keyProduct][$keyHead] = $currArray[$emInfo['productCurrency']]['ecartcur_code'];
+				} else if($keyHead == 'site_currency') {
+					$OUT[$keyProduct][$keyHead] = $currSite;
+				}
+				else
+				{
+					# остальное - цены и наличие
+					// код товара
+					if($sku) {
+						$OUT[$keyProduct][$prefixData . $sku] = isset($product['data_fields'][$sku]) ? $product['data_fields'][$sku]['objects_data_value'] : 0;
+					}
+
+					// старые цены
+					if($oldPriceFields)
+					{
+						foreach($oldPriceFields as $kf => $vf) {
+							if(isset($emInfo['oldPriceArray'][$kf])) {
+								$OUT[$keyProduct][$prefixData . $vf] = isset($product['data_fields'][$vf]) ? $product['data_fields'][$vf]['objects_data_value'] : 0;
+								$OUT[$keyProduct][$prefixCurr . $prefixData . $vf] = $emInfo['oldPriceArray'][$kf];
+							}
+						}
+					}
+
+					// цены
+					if($priceFields)
+					{
+						foreach($priceFields as $kf => $vf) {
+							if(isset($emInfo['priceArray'][$kf])) {
+								$OUT[$keyProduct][$prefixData . $vf] = isset($product['data_fields'][$vf]) ? $product['data_fields'][$vf]['objects_data_value'] : 0;
+								$OUT[$keyProduct][$prefixCurr . $prefixData . $vf] = $emInfo['priceArray'][$kf];
+							}
+						}
+					}
+
+					// наличие
+					if($stockFields)
+					{
+						foreach($stockFields as $kf => $vf) {
+							if(isset($emInfo['inStockValueArray'][$kf])) {
+								$OUT[$keyProduct][$prefixData . $vf] = isset($product['data_fields'][$vf]) ? $product['data_fields'][$vf]['objects_data_value'] : 0;
+							}
+						}
+					}
+				}
+			}
+		}
+		unset($OBJS);
+
+		# запись файла. Если есть смещение в запросе объектов, то продолжаем писать файл
+		if($sqlOffset) {
+			$CSVLIB->init($exportPath . $fileExportName, 'a+');
+			$exportHeaders = $CSVLIB->getHeadersCSV();
+			$CSVLIB->SetOffset(0, true);
+			foreach($OUT as $key => $value) {
+				$tmp = array();
+				foreach($exportHeaders as $keyHead => $valHead) {
+					if(isset($value[$keyHead])) {
+						$tmp[$keyHead] = $value[$keyHead];
+					} else {
+						$tmp[$keyHead] = $CI->ExpCsvModel->noValue;
+					}
+				}
+				$CSVLIB->write($tmp);
+			}
+		} else {
+			$CSVLIB->init($exportPath . $fileExportName, 'w');
+			// в новом фале пишем заголовки
+			$CSVLIB->createFileCSV($exportHeaders, $OUT);
+			//$CSVLIB->write(array_values($exportHeaders));
+			//$CSVLIB->write(array_keys($exportHeaders));
+		}
+
+		$totalCount = count($OUT) + $sqlOffset;
+		$this->ajaxResponse['status'] = 'OK';
+		$this->ajaxResponse['flag_update'] = 'CONTINUE';
+		$this->ajaxResponse['info'] = 'Записано объектов: ' . $totalCount;
+		$this->ajaxResponse['offset'] = $limitExport + $sqlOffset;
+		$this->ajaxResponse['file_name'] = $fileExportName;
+
+
+		/*foreach($OUT as $valueObj) {
+			$tmp = array();
+			foreach($exportHeaders as $keyField => $nameField) {
+				if(isset($keyField))
+			}
+		}*/
+
+		//SetOffset($line = 0, $lastLine = false)
+
+		//$this->ajaxResponse['status'] = 'ERROR';
+		//$this->ajaxResponse['info'] = $e->getMessage();
+
+		//pr($oldPriceFields);
+		//pr($emInfo);
+
+		//pr($exportHeaders);
+		//pr($OUT);
+		//pr($OBJS);
 	}
 
 

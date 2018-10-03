@@ -115,12 +115,18 @@ class EmarketModel extends CI_Model
 		$this->PRODUCT['price'] = 0;
 		// валюта товара
 		$this->PRODUCT['productCurrency'] = 0;
+		// флаг перевода валюты
+		$this->PRODUCT['currTransfer'] = 0;
+		// курс перевода валюты
+		$this->PRODUCT['currTransferCost'] = 0;
 		// доступность к заказу
 		$this->PRODUCT['inStock'] = 0;
 		// значение поля НАЛИЧИЕ
 		$this->PRODUCT['inStockValue'] = 0;
 		// вычисленная группа текущего пользователя
 		$this->PRODUCT['userGroup'] = '';
+		// массив всех старых цен товара
+		$this->PRODUCT['oldPriceArray'] = array();
 		// массив всех цен товара
 		$this->PRODUCT['priceArray'] = array();
 		// массив значений поля НАЛИЧИЕ
@@ -130,9 +136,12 @@ class EmarketModel extends CI_Model
 		$this->EmarketPriceModel->initProduct($product);
 
 		$this->PRODUCT['productCurrency'] = $this->EmarketPriceModel->getCurrency();
+		$this->PRODUCT['currTransfer'] = $this->EmarketPriceModel->getCurTransfer();
+		$this->PRODUCT['currTransferCost'] = $this->EmarketPriceModel->getCurTransferCost();
 		$this->PRODUCT['price'] = $this->EmarketPriceModel->getPrice();
 		$this->PRODUCT['oldPrice'] = $this->EmarketPriceModel->getOldPrice();
 		$this->PRODUCT['priceArray'] = $this->EmarketPriceModel->getPriceArray();
+		$this->PRODUCT['oldPriceArray'] = $this->EmarketPriceModel->getOldPriceArray();
 		$this->PRODUCT['userGroup'] = $this->EmarketPriceModel->userGroup;
 
 
@@ -168,7 +177,7 @@ class EmarketModel extends CI_Model
 				$this->PRODUCT['inStockValueArray'][$key] = $product['data_fields'][$value]['objects_data_value'];
 			}
 		}
-		
+
 		return $this->PRODUCT;
 	}
 
@@ -587,5 +596,89 @@ class EmarketModel extends CI_Model
 		} else {
 			return false;
 		}
+	}
+
+
+	/*
+	* ДЛЯ ЭКСПОРТА. Выгрузка товаров
+	*/
+	public function getProductsExport($typeObjects = array(), $dataFieldsID = array())
+	{
+		$this->db->select('obj_id, obj_name, tree_id, tree_axis');
+		$this->db->join('tree', 'objects.obj_id = tree.tree_object');
+		if($typeObjects) {
+			$this->db->where_in('tree_type_object', $typeObjects);
+		}
+		$this->db->where('tree_type', 'orig');
+		$this->db->order_by('obj_id', 'ASC');
+		$query = $this->db->get('objects');
+		if(!$query->num_rows()) {
+			return array();
+		}
+
+		$OBJS = array();
+		foreach($query->result_array() as $row) {
+			$OBJS[$row['obj_id']] = $row;
+			$OBJS[$row['obj_id']]['data_fields'] = array();
+		}
+
+		$this->db->select('
+			objects_data.objects_data_value,
+			objects_data.objects_data_obj,
+			data_types_fields.types_fields_id,
+			data_types_fields.types_fields_type,
+			data_types_fields.types_fields_name,
+			data_types_fields.types_fields_values,
+			data_types_fields.types_fields_default
+			');
+		$this->db->where_in('objects_data_obj', array_keys($OBJS));
+
+		if($dataFieldsID) {
+			$this->db->where_in('types_fields_id', $dataFieldsID);
+		}
+
+		$this->db->where('data_types_fields.types_fields_status', 'publish');
+		$this->db->join('data_types_fields', 'data_types_fields.types_fields_id = objects_data.objects_data_field');
+		$query = $this->db->get('objects_data');
+		foreach($query->result_array() as $row) {
+			$OBJS[$row['objects_data_obj']]['data_fields'][$row['types_fields_id']] = $row;
+		}
+		return $OBJS;
+	}
+
+	/*
+	* ДЛЯ ЭКСПОРТА. Возвращает массив категорий по запросу
+	*/
+	public function getCategoryes($objAxis = '')
+	{
+		$out = array();
+		if(!$objAxis) {
+			return $out;
+		}
+		$axis = explode('|', trim($objAxis, '|'));
+		$this->db->select('tree_id, tree_url, obj_name');
+		$this->db->join('tree', 'objects.obj_id = tree.tree_object');
+		$this->db->where_in('tree_id', $axis);
+		$query = $this->db->get('objects');
+		if(!$query->num_rows()) {
+			return $out;
+		}
+		$tmp = array();
+		foreach($query->result_array() as $row) {
+			$tmp[$row['tree_id']]['link'] = $row['tree_url'];
+			$tmp[$row['tree_id']]['name'] = $row['obj_name'];
+		}
+
+		foreach($axis as $row) {
+			if($row == 1) {
+				$out[APP_BASE_URL_NO_SLASH] = $tmp[$row]['name'];
+			} else {
+				if(!isset($tmp[$row])) {
+					throw new Exception('Ошибка! Возможно сайт не проиндексирован. Проиндексируйте сайт и повторите попытку');
+				}
+				$out[$tmp[$row]['link']] = $tmp[$row]['name'];
+			}
+		}
+		return $out;
 	}
 }

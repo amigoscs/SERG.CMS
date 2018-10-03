@@ -169,17 +169,29 @@ class EmarketPriceModel extends CI_Model {
 			unset($id);
 		}
 
-		$this->productPrices = array('productCurrency' => $this->currProductsID, 'oldPrice' => 0, 'price' => 0, 'priceArray' => array());
+		$this->productPrices = array(
+			'productCurrency' => $this->currProductsID,
+			'currTransfer' => 0, // флаг, что цена - это перевод валюты
+			'currTransferCost' => $rateCurrency, // курс перевода валюты
+			'oldPrice' => 0,
+			'price' => 0,
+			'oldPriceArray' => array(),
+			'priceArray' => array()
+		);
 
 		// если валюта сайта и валюта товара отличаются, то переводим в валюту
 		if($this->currProductsID != $this->currSiteID) {
-			$rateCurrency = $this->currArray[$this->currProductsID]['ecartcur_rate'];
+			$rateCurrency = (float)$this->currArray[$this->currProductsID]['ecartcur_rate'];
+			$this->productPrices['currTransfer'] = 1;
+			$this->productPrices['currTransferCost'] = $rateCurrency;
 		}
+
 
 		$userPriceID = $this->pricesFields[$this->userGroup];
 		if(isset($product['data_fields'][$userPriceID])) {
 			$this->productPrices['price'] = $product['data_fields'][$userPriceID]['objects_data_value'] * $rateCurrency;
 		}
+
 		// массив всех текущих цен товара
 		foreach($this->pricesFields as $keyGroup => $keyField) {
 			if(isset($product['data_fields'][$keyField])) {
@@ -198,6 +210,13 @@ class EmarketPriceModel extends CI_Model {
 			$this->productPrices['oldPrice'] = $product['data_fields'][$userOldPriceID]['objects_data_value'] * $rateCurrency;
 		}
 
+		// массив всех старых цен товара
+		foreach($this->OldPricesFields as $keyGroup => $keyField) {
+			if(isset($product['data_fields'][$keyField])) {
+				$this->productPrices['oldPriceArray'][$keyGroup] = $product['data_fields'][$keyField]['objects_data_value'] * $rateCurrency;
+			}
+		}
+
 		# проверка на старые цены. Если старая цена равна текщей, то старую обнуляем
 		if($this->productPrices['price'] >= $this->productPrices['oldPrice']) {
 			$this->productPrices['oldPrice'] = 0;
@@ -212,17 +231,27 @@ class EmarketPriceModel extends CI_Model {
 		return $this->rulesPrice($this->productPrices['price']);
 	}
 
-	# вовзращает старую цену товара
+	# возвращает старую цену товара
 	public function getOldPrice()
 	{
 		return $this->rulesPrice($this->productPrices['oldPrice']);
 	}
 
-	# возвращает старую цену товара
+	# возвращает массив цен для групп пользователей
 	public function getPriceArray()
 	{
 		$out = array();
 		foreach($this->productPrices['priceArray'] as $key => $value) {
+			$out[$key] = $this->rulesPrice($value);
+		}
+		return $out;
+	}
+
+	# возвращает массив старых цен для групп пользователей
+	public function getOldPriceArray()
+	{
+		$out = array();
+		foreach($this->productPrices['oldPriceArray'] as $key => $value) {
 			$out[$key] = $this->rulesPrice($value);
 		}
 		return $out;
@@ -248,6 +277,18 @@ class EmarketPriceModel extends CI_Model {
 	public function getCurrency()
 	{
 		return $this->productPrices['productCurrency'];
+	}
+
+	# возвращает флаг перевода валюты
+	public function getCurTransfer()
+	{
+		return $this->productPrices['currTransfer'];
+	}
+
+	# возвращает курс перевода валюты
+	public function getCurTransferCost()
+	{
+		return $this->productPrices['currTransferCost'];
 	}
 
 	#######
@@ -299,6 +340,8 @@ class EmarketPriceModel extends CI_Model {
 			return $price;
 		}
 	}
+
+
 
 	###########################
 	###########################

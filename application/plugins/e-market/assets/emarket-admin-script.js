@@ -49,6 +49,10 @@ $(document).ready(function(e) {
                   noty_info('error', Res.info, 'center');
                 }
                   remove_loader();
+              },
+              error: function(a, b, c){
+                remove_loader();
+                admin_dialog('Response error', 'Error', 350);
               }
           });
       }
@@ -73,7 +77,58 @@ $(document).ready(function(e) {
           noty_info('error', Res.info, 'center');
         }
         remove_loader();
+      },
+      error: function(a, b, c){
+        remove_loader();
+        admin_dialog('Response error', 'Error', 350);
       }
+    });
   });
-  });
+
+  var emarketExportPrice = function(formValues, offset, fileName) {
+    if(!offset) {
+      offset = 0;
+    }
+
+    if(!fileName) {
+      fileName = '';
+    }
+
+    $.ajax({
+      url: '/admin/e-market/ajax_request?request=export_price',
+      type: 'POST',
+      data: { form_values: formValues, sql_offset: offset, file_name: fileName },
+      dataType: 'json',
+      success: function(DATA){
+        //var DATA = JSON.parse(DATA);
+        if(DATA.status == 'OK')
+        {
+          if(DATA.flag_update == 'CONTINUE') {
+            $('#ui-dialog').append('<p>' + DATA.info + '</p>');
+            setTimeout(function() {
+              emarketExportPrice(formValues, DATA.offset, DATA.file_name);
+            }, 2000);
+          } else {
+            $('#ui-dialog p.upd-loader').remove();
+            $('#ui-dialog').append('<p class="complite-info">' + DATA.info + '</p>');
+          }
+        }
+        else
+        {
+          admin_dialog('<p class="error-info">' + DATA.info + '</p>', 'Stop', 350);
+        }
+      },
+      error: function(a, b, c){
+        admin_dialog('Response error', 'Error', 350);
+      }
+    });
+  }
+
+  // submit формы выгрузки прайслиста
+  $('form#export_price').on('submit', function(e) {
+    var formValues = $(this).serialize();
+    admin_dialog('<p class="upd-loader"><img src="/application/plugins/exp-csv/assets/exloader.gif"/></p>', 'Выполняется экспорт...', 350);
+    emarketExportPrice(formValues);
+    return false;
+  })
 });

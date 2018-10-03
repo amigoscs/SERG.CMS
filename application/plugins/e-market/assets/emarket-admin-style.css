@@ -26,3 +26,9 @@ table.product-list input[type="checkbox"] {display: none;}
 table.product-list input[type="checkbox"] + label {display: block;font-size: 14px;cursor: pointer;}
 table.product-list input[type="checkbox"] + label::before {content:'';display: inline-block;vertical-align: middle;width: 32px;height: 32px;margin-right: 8px;border-radius: 50%;background: #e2e2e2}
 table.product-list input[type="checkbox"]:checked + label::before {background: url('icon-selected.png') no-repeat 50% 50% #3e3e3e}
+
+#ui-dialog .complite-info, #ui-dialog .error-info {display: block;text-align: center;margin: 12px 0;padding: 8px;background: #3ab16a;color: #fff;}
+#ui-dialog .error-info {background: #f37f73}
+#ui-dialog .complite-info a {color: #fff;text-decoration: underline;}
+#ui-dialog .complite-info a:hover {text-decoration: none;}
+#ui-dialog .upd-loader {margin:25px 0;text-align:center}

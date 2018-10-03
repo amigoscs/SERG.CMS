@@ -90,7 +90,7 @@ function plugin_plugin_install($args = array())
 	) ENGINE = MyISAM CHARACTER SET utf8 COLLATE utf8_general_ci;";
 	$CI->db->query($sql);
 
-	// cart types
+	// type carts
 	$sql = "CREATE TABLE {$prefix}ecart_carts (
 		ecarttypes_id INT(2) NOT NULL AUTO_INCREMENT,
 		ecarttypes_name VARCHAR(255),
@@ -151,7 +151,7 @@ function plugin_plugin_uninstall($args = array())
 {
 	$CI = &get_instance();
 	$prefix = $CI->db->dbprefix;
-	$sql = "DROP TABLE `{$prefix}ecart`, `{$prefix}ecart_currency`, `{$prefix}ecart_fields`, `{$prefix}ecart_fields_values`, `{$prefix}ecart_products`, `{$prefix}ecart_status`, `{$prefix}ecart_types`";
+	$sql = "DROP TABLE `{$prefix}ecart`, `{$prefix}ecart_currency`, `{$prefix}ecart_fields`, `{$prefix}ecart_fields_values`, `{$prefix}ecart_products`, `{$prefix}ecart_status`, `{$prefix}ecart_carts`";
 	$CI->db->query($sql);
 	return TRUE;
 }
