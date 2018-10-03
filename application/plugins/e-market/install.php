@@ -102,7 +102,7 @@ function plugin_plugin_install($args = array())
 
 	# insert
 	$sql = "INSERT INTO {$prefix}ecart_currency
-		(`ecartcur_id`, `ecartcur_site`, `ecartcur_products`, `ecartcur_name`, `ecartcur_code`, `ecartcur_cash`)
+		(`ecartcur_id`, `ecartcur_site`, `ecartcur_products`, `ecartcur_name`, `ecartcur_code`, `ecartcur_rate`)
 		VALUES
 		(NULL, '1', '1', 'Российский рубль', 'RUR', '1.00'),
 		(NULL, '0', '0', 'Евро', 'EUR', '1.00'),
