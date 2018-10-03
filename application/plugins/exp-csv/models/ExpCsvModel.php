@@ -32,6 +32,10 @@
 	* version 4.0
 	* UPD 2018-10-02
 	* Переделка
+	*
+	* version 4.1
+	* UPD 2018-10-03
+	* добавлен параметр limitExport для выгрузки порциями
 */
 
 class ExpCsvModel extends CI_Model {
@@ -44,6 +48,9 @@ class ExpCsvModel extends CI_Model {
 
 	// ограничитель полей
 	public $csvEnclosure;
+
+	// лимит экспорта (при сеансовой выгрузке)
+	public $limitExport;
 
 	// кодировка файла
 	public $csvCharset;
@@ -72,6 +79,7 @@ class ExpCsvModel extends CI_Model {
 		$this->csvDelimiterField = app_get_option("csv_fields_delimiter", "exp-csv", ";");
 		$this->csvDelimiterRows = '\n';
 		$this->csvEnclosure = app_get_option("csv_fields_enclosure", "exp-csv", '"');
+		$this->limitExport = app_get_option("csv_limit_import", "exp-csv", 300);
 
 		$this->prefixDataFields = 'isdata_';
 

@@ -10,8 +10,11 @@
 	* version 2.0
 	* UPD 2018-10-02
 	* Переделка
-
-
+	*
+	* version 2.01
+	* UPD 2018-10-03
+	* добавлен параметр limitExport для выгрузки порциями
+	*
 */
 
 class IndexExpCsvLib {
@@ -197,7 +200,7 @@ class IndexExpCsvLib {
 		$CI = &get_instance();
 		$dataTypes = array();
 		$dataTypesID = array();
-		$limitExport = app_get_option("csv_limit_import", "exp-csv", 300);
+		$limitExport = $CI->ExpCsvModel->limitExport;
 		$this->ajaxResponse['file_name'] = $post['file_name'];
 		$this->ajaxResponse['info'] = '';
 		$formParams = $post['form_values'];
@@ -381,7 +384,7 @@ class IndexExpCsvLib {
 		}
 
 		# читаем позиции в файле
-		$limit = app_get_option("csv_limit_import", "exp-csv", 300);
+		$limit = $CI->ExpCsvModel->limitExport;
 		$this->CSVLIB->SetOffset($offset);
 		$resultRead = $this->CSVLIB->Read($limit);
 
@@ -636,7 +639,7 @@ class IndexExpCsvLib {
 
 		$data['infoDelimiterField'] = $CI->ExpCsvModel->csvDelimiterField;
 		$data['infoEnclosure'] = $CI->ExpCsvModel->csvEnclosure;
-		$data['exportLimit'] = app_get_option("csv_limit_import", "exp-csv", 300);
+		$data['exportLimit'] = $CI->ExpCsvModel->limitExport;
 
 		$CI->pageContent = $CI->load->view('admin_page/export_type_object', $data, true);
 	}
