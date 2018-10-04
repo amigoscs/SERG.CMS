@@ -79,7 +79,7 @@ class EmarketModel extends CI_Model
 		// изображение товара app_get_option('product_image_field', 'e-market', 0);
 		$image = isset($product['data_fields'][app_get_option('product_image_field', 'e-market', 0)])
 			? $product['data_fields'][app_get_option('product_image_field', 'e-market', 0)]['objects_data_value'] : '';
-			
+
 		// очистим от elfinder
 		$image = str_replace(array('##', '_ELF_'), '__EXPLODE__', $image);
 		if(strpos($image, '__EXPLODE__')) {
@@ -179,7 +179,7 @@ class EmarketModel extends CI_Model
 		}
 
 		if(!$cartID) {
-			return false;
+			return array();
 		}
 
 		// если корзина уже загружена, то вернем ее
@@ -191,7 +191,7 @@ class EmarketModel extends CI_Model
 		$this->db->where('ecart_id', $cartID);
 		$query = $this->db->get('ecart');
 		if(!$query->num_rows()) {
-			return false;
+			return array();
 		}
 
 		$this->userCarts[$cartID] = $query->row_array();
@@ -318,12 +318,7 @@ class EmarketModel extends CI_Model
 
 		}
 
-		//pr($this->userCarts[$cartID]);
 		return $this->userCarts[$cartID];
-
-		return $cartID;
-
-
 	}
 
 	/*
@@ -500,15 +495,18 @@ class EmarketModel extends CI_Model
 				if(isset($this->userCarts[$cartID])) {
 					unset($this->userCarts[$cartID]);
 				}
-				return $this->db->insert_id();
+				$insID = $this->db->insert_id();
+				// если товар добавился, зафиксируем изменение
+				$this->db->where('ecart_id', $cartID);
+				$this->db->update('ecart', array('ecart_last_mod' => time()));
+				return $insID;
 			} else {
-				return false;
+				return 0;
 			}
 		}
 		else
 		{
-			//$this->log('Item does not exist');
-			return false;
+			return 0;
 		}
 	}
 
@@ -531,6 +529,10 @@ class EmarketModel extends CI_Model
 
 		$this->db->where('ecartp_id', $rowID);
 		if($this->db->delete('ecart_products')) {
+			// если товар удалился, зафиксируем изменение
+			$this->db->where('ecart_id', $cartID);
+			$this->db->update('ecart', array('ecart_last_mod' => time()));
+
 			if(isset($this->userCarts[$cartID])) {
 				unset($this->userCarts[$cartID]);
 			}
@@ -569,6 +571,11 @@ class EmarketModel extends CI_Model
 				if(isset($this->userCarts[$cartID])) {
 					unset($this->userCarts[$cartID]);
 				}
+
+				// если товар изменился, зафиксируем изменение
+				$this->db->where('ecart_id', $cartID);
+				$this->db->update('ecart', array('ecart_last_mod' => time()));
+
 				return $productID;
 			} else {
 				return false;
@@ -583,9 +590,16 @@ class EmarketModel extends CI_Model
 	/*
 	* ДЛЯ ЭКСПОРТА. Выгрузка товаров
 	*/
-	public function getProductsExport($typeObjects = array(), $dataFieldsID = array())
+	public function getProductsExport($typeObjects = array(), $dataFieldsID = array(), $otherFields = array())
 	{
 		$this->db->select('obj_id, obj_name, tree_id, tree_axis');
+
+		// если требуются еще поля
+		if($otherFields) {
+			foreach($otherFields as $key => $value) {
+				$this->db->select($key);
+			}
+		}
 		$this->db->join('tree', 'objects.obj_id = tree.tree_object');
 		if($typeObjects) {
 			$this->db->where_in('tree_type_object', $typeObjects);
@@ -652,7 +666,7 @@ class EmarketModel extends CI_Model
 
 		foreach($axis as $row) {
 			if($row == 1) {
-				$out[APP_BASE_URL_NO_SLASH] = $tmp[$row]['name'];
+				$out[APP_BASE_URL_NO_SLASH] = 'Главная';
 			} else {
 				if(!isset($tmp[$row])) {
 					throw new Exception('Ошибка! Возможно сайт не проиндексирован. Проиндексируйте сайт и повторите попытку');

@@ -34,6 +34,20 @@
 			?>
 	</div>
 
+	<div class="form-group">
+			<label for="select3">Дополнительно выгрузить</label>
+			<?
+				$args = array(
+					'class' => 'form-control',
+					'id' => 'select3',
+					'name' => 'other_fields[]',
+					'style' => 'height: 240px;'
+					);
+
+			   echo form_multiselect($args, $otherFields);
+			?>
+	</div>
+
 <div class="form-group">
 	<button type="submit" class="btn btn-primary ng-scope">Выгрузить объекты</button>
 	<span class="help-block sub-little-text">Лимит выгрузки за один сеанс: <strong><?= $exportLimit ?></strong> строк.</span>

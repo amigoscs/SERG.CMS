@@ -208,10 +208,6 @@ class EmarketOptionsModel extends CI_Model
 		return $out;
 	}
 
-
-
-
-
 	/*
 	* возвращает все статусы корзин
 	*/

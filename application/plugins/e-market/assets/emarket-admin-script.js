@@ -100,6 +100,7 @@ $(document).ready(function(e) {
       data: { form_values: formValues, sql_offset: offset, file_name: fileName },
       dataType: 'json',
       success: function(DATA){
+        //console.log(DATA);
         //var DATA = JSON.parse(DATA);
         if(DATA.status == 'OK')
         {

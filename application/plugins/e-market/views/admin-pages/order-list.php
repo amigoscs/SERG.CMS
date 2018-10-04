@@ -1,5 +1,7 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 $selected = '';
+$dateFormat = app_get_option('date_format', 'general', 'Y-m-d');
+$dateFormatPHP = str_replace(array('YYYY', 'MM', 'DD'), array('Y', 'm', 'd'), $dateFormat);
 ?>
 <h1><?= $h1 ?></h1>
 
@@ -10,11 +12,11 @@ $selected = '';
 	<div class="col-inner-2" style="width: 100%;max-width: 600px;margin: 0 auto">
 		<div class="form-group">
 			<label for="cartinput1">От</label>
-			<input id="cartinput1" type="text" class="field-date" name="cart_start_date" value="<?= $filterDateStart ?>" data-date-format="DD.MM.YYYY"/>
+			<input id="cartinput1" type="text" class="field-date" name="cart_start_date" value="<?= $filterDateStart ?>" data-date-format="<?= $dateFormat ?>"/>
 		</div>
 		<div class="form-group">
 			<label for="cartinput2">До</label>
-			<input id="cartinput2" type="text" class="field-date" name="cart_stop_date" value="<?= $filterDateStop ?>" data-date-format="DD.MM.YYYY"/>
+			<input id="cartinput2" type="text" class="field-date" name="cart_stop_date" value="<?= $filterDateStop ?>" data-date-format="<?= $dateFormat ?>"/>
 		</div>
 		<div class="form-group">
 			<label for="select1">Статус заказа</label>
@@ -46,7 +48,24 @@ $selected = '';
 		   echo form_dropdown($args, $tmp, $filterCartCashStatus);
 			 ?>
 		</div>
-		<div class="form-group" style="flex-basis: 100%;text-align: center;">
+
+		<div class="form-group">
+			<label for="select3">Тип корзины</label>
+			<?
+			$args = array(
+				'class' => 'form-control',
+				'id' => 'select3',
+				'name' => 'cart_type',
+				);
+				$tmp = array(0 => 'Не учитывать');
+				foreach($allCartTypes as $key => $value) {
+					$tmp[$key] = $value['ecarttypes_name'];
+				}
+		   echo form_dropdown($args, $tmp, $filterCartTypeCart);
+			 ?>
+		</div>
+		<div class="form-group">
+			<label>Выполнить поиск</label>
 			<button type="submit" class="btn btn-success" style="width: 100%">Поиск</button>
 		</div>
 	</div>
@@ -58,6 +77,7 @@ $selected = '';
 	<tr>
 				<th>№ п/п</th>
 				<th>Номер заказа</th>
+				<th>Тип корзины</th>
 				<th>Дата заказа</th>
 				<th>Изменение</th>
 				<th>Стоимость</th>
@@ -73,8 +93,9 @@ $selected = '';
 		<tr class="cash-status<?= $order['ecart_cash_status'] ?>">
 			<td><?= $i ?></td>
 			<td><?= $order['ecart_num'] ?></td>
+			<td><?= $allCartTypes[$order['ecart_type']]['ecarttypes_name'] ?></td>
 			<td><?= date_convert('d.m.Y в H:i:s', $order['ecart_date_order']) ?></td>
-			<td><?= $order['ecart_last_mod'] ?></td>
+			<td><?= date($dateFormatPHP . ' в H:i:s', $order['ecart_last_mod']) ?></td>
 			<td><?= $order['ecart_summ'] ?></td>
 			<td><?= $order['products_count'] ?></td>
 			<td>

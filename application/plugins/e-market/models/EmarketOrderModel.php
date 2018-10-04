@@ -319,6 +319,14 @@ class EmarketOrderModel extends CI_Model
 			}
 		}
 
+		if(isset($params['type']) && $params['type']) {
+			if(is_array($params['type'])) {
+				$this->db->where_in('ecart_type', $params['type']);
+			} else {
+				$this->db->where('ecart_type', $params['type']);
+			}
+		}
+
 		if(isset($params['cash_status']) && $params['cash_status']) {
 			$this->db->where('ecart_cash_status', $params['cash_status']);
 		}

@@ -240,16 +240,19 @@ class IndexEMarketLib {
 		$data['filterDateStop'] = $CI->input->get('cart_stop_date') ? $CI->input->get('cart_stop_date') : date('Y-m-d');
 		$data['filterCartStatus'] = $CI->input->get('cart_status') ? $CI->input->get('cart_status') : 0;
 		$data['filterCartCashStatus'] = $CI->input->get('cart_cash_status') ? $CI->input->get('cart_cash_status') : 0;
+		$data['filterCartTypeCart'] = $CI->input->get('cart_type') ? $CI->input->get('cart_type') : 0;
 
 		$paramsOrderSelect = array(
 			'date_start' => $data['filterDateStart'],
 			'date_stop' => $data['filterDateStop'],
 			'status' => $data['filterCartStatus'],
 			'cash_status' => $data['filterCartCashStatus'],
+			'type' => $data['filterCartTypeCart'],
 		);
 
 		$data['allStatus'] = $CI->EmarketModel->EmarketOptionsModel->getSatusCart(false);
 		$data['allCashStatus'] = $CI->EmarketModel->EmarketOptionsModel->getCashSatusCart();
+		$data['allCartTypes'] = $CI->EmarketModel->EmarketOptionsModel->getCarts();
 
 		$data['orders'] = $CI->EmarketModel->EmarketOrderModel->allOrders('', $paramsOrderSelect);
 
@@ -463,6 +466,16 @@ class IndexEMarketLib {
 		}
 		unset($value);
 
+		# дополнительные поля
+		$data['otherFields'] = array(
+			'obj_h1' => $CI->ExpCsvModel->activeFieldsExport['obj_h1']['name'],
+			'obj_title' => $CI->ExpCsvModel->activeFieldsExport['obj_title']['name'],
+			'obj_description' => $CI->ExpCsvModel->activeFieldsExport['obj_description']['name'],
+			'obj_keywords' => $CI->ExpCsvModel->activeFieldsExport['obj_keywords']['name'],
+			'obj_anons' => $CI->ExpCsvModel->activeFieldsExport['obj_anons']['name'],
+			'obj_content' => $CI->ExpCsvModel->activeFieldsExport['obj_content']['name'],
+		);
+
 		$data['infoDelimiterField'] = $CI->ExpCsvModel->csvDelimiterField;
 		$data['infoEnclosure'] = $CI->ExpCsvModel->csvEnclosure;
 		$data['exportLimit'] = $CI->ExpCsvModel->limitExport;
@@ -571,12 +584,39 @@ class IndexEMarketLib {
 			throw new Exception('Не указаны типы данных');
 		}
 
+		$otherFields = array();
+		if(isset($formValues['other_fields'])) {
+			foreach($formValues['other_fields'] as $value) {
+				if(isset($CI->ExpCsvModel->activeFieldsExport[$value])) {
+					$otherFields[$value] = $CI->ExpCsvModel->activeFieldsExport[$value]['name'];
+				}
+
+			}
+		}
+
+		$exportHeaders = array(
+			'obj_id' => 'ID товара',
+			'obj_name' => 'Название товара'
+		);
+
+		if($otherFields) {
+			foreach($otherFields as $key => $value) {
+				$exportHeaders[$key] = $value;
+			}
+		}
+
+		$exportHeaders['link'] = 'Ссылка';
+		$exportHeaders['category'] = 'Категория';
+		$exportHeaders['site_currency'] = 'Валюта сайта';
+		$exportHeaders['product_currency'] = 'Валюта товара';
+
+
 		$limitExport = $CI->ExpCsvModel->limitExport;
 		$sqlOffset = $CI->input->post('sql_offset');
 
 		$OBJS = array();
 		$CI->db->limit($limitExport, $sqlOffset);
-		$OBJS = $CI->EmarketModel->getProductsExport($formValues['active_types']);
+		$OBJS = $CI->EmarketModel->getProductsExport($formValues['active_types'], array(), $otherFields);
 
 		// файл CSV
 		$pathCsvLib = APP_PLUGINS_DIR_PATH . 'exp-csv/libraries/CsvFileLib.php';
@@ -622,14 +662,7 @@ class IndexEMarketLib {
 		// Название валюты сайта
 		$currSite = $currArray[$CI->EmarketModel->EmarketPriceModel->currSiteID]['ecartcur_code'];
 
-		$exportHeaders = array(
-			'obj_id' => 'ID товара',
-			'obj_name' => 'Название товара',
-			'link' => 'Ссылка',
-			'category' => 'Категория',
-			'site_currency' => 'Валюта сайта',
-			'product_currency' => 'Валюта товара',
-		);
+
 
 		// код товара
 		if($sku = app_get_option('product_code_field', 'e-market', 0)) {
