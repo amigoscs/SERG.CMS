@@ -1,4 +1,10 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
+
+if(!$formFields) {
+	echo 'Empty form';
+	return;
+}
+
 # шаблон формы заказа
 $elemValue = '';
 # формируем форму

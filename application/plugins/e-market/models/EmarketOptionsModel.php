@@ -183,9 +183,9 @@ class EmarketOptionsModel extends CI_Model
 			} else {
 				$out[$key]['ecartfield_name'] = $value['ecartf_name'];
 				$out[$key]['ecartfield_label'] = $value['ecartf_label'];
-				$out[$key]['ecartfield_value'] = 'Empty';
+				$out[$key]['ecartfield_value'] = '';
 				$out[$key]['ecartfield_type'] = $value['ecartf_type'];
-				$out[$key]['ecartfield_save_value'] = 'Empty';
+				$out[$key]['ecartfield_save_value'] = '';
 			}
 
 			$tmp = array();

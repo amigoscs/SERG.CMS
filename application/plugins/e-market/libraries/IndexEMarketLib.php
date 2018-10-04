@@ -276,6 +276,7 @@ class IndexEMarketLib {
 		}
 
 		$data['order'] = $CI->EmarketModel->cartInfo($cartID);
+		//pr($data['order']);
 		if(!$data['order']) {
 			return $CI->_render_not_found();
 		}

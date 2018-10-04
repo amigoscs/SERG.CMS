@@ -3,10 +3,13 @@
 /*
 	*  библиотека EmarketViewsLib
 	* Содержит методы для отображения корзины, формы и прочего
-
+	*
 	* UPD 2018-05-15
 	* version 0.1
-
+	*
+	* UPD 2018-10-04
+	* version 0.2
+	* renderCartForm дополнился параемтром - можно передавать значения в форму
 */
 
 class EmarketViewsLib {
@@ -43,7 +46,7 @@ class EmarketViewsLib {
 	/*
 	* генерация формы заказа
 	*/
-	public function renderCartForm($render = true)
+	public function renderCartForm($render = true, $formValues = array())
 	{
 		$CI = &get_instance();
 
@@ -54,8 +57,14 @@ class EmarketViewsLib {
 		$data = array(
 			'formAction' => '',
 			'formFields' => $CI->EmarketModel->EmarketOptionsModel->getFieldsFormCart(),
-			'cartfield' => $CI->input->post('cartfield'),
+			'cartfield' => array(),
 		);
+
+		if($cf = $CI->input->post('cartfield')) {
+			$data['cartfield'] = $cf;
+		} else if($formValues) {
+			$data['cartfield'] = $formValues;
+		}
 
 		# фозможно в шаблоне есть кастомный файла
 		$templateFile = APP_SITE_TEMPLATES_PATH . APP_SITE_TEMPLATE . '/plugins/e-market/cart-user-form.php';

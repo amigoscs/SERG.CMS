@@ -138,9 +138,9 @@ class EmarketOrderModel extends CI_Model
 				} else {
 					$cart['user_fields_values'][$key]['ecartfield_name'] = $value['ecartf_name'];
 					$cart['user_fields_values'][$key]['ecartfield_label'] = $value['ecartf_label'];
-					$cart['user_fields_values'][$key]['ecartfield_value'] = 'Empty';
+					$cart['user_fields_values'][$key]['ecartfield_value'] = '';
 					$cart['user_fields_values'][$key]['ecartfield_type'] = $value['ecartf_type'];
-					$cart['user_fields_values'][$key]['ecartfield_save_value'] = 'Empty';
+					$cart['user_fields_values'][$key]['ecartfield_save_value'] = '';
 				}
 
 				// для выпадающего списка или радио дополнительная обработка
