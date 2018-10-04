@@ -72,7 +72,7 @@ function plugin_plugin_install($args = array())
 		ecartp_cart_id BIGINT(20),
 		ecartp_object_id BIGINT(20),
 		ecartp_object_sku VARCHAR(50),
-		ecartp_obj_name VARCHAR(255),
+		ecartp_object_name VARCHAR(255),
 		ecartp_price VARCHAR(20),
 		ecartp_count INT(4),
 		ecartp_descr TEXT,
