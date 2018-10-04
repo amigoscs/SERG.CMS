@@ -5,7 +5,11 @@
 	*
 	* UPD 2018-04-17
 	* Version 1.0
-
+	*
+	* UPD 2018-10-04
+	* Version 1.1
+	* Ошибка формирования цены по правилам в cartInfo. (#308)
+	*
 */
 
 class EmarketModel extends CI_Model
@@ -28,21 +32,6 @@ class EmarketModel extends CI_Model
         parent::__construct();
 		$this->init();
     }
-
-	/*
-	* сброс параметров
-
-	public function reset()
-	{
-		$this->userKey = $this->session->userdata('user_key');
-		//$this->userGroupID = $this->session->userdata('group');
-
-		$this->userCarts = array();
-
-
-		$this->init();
-	}*/
-
 
 	public function init()
 	{
@@ -75,15 +64,6 @@ class EmarketModel extends CI_Model
 			require_once($pathFile);
 			$this->EmarketViewsLib = new EmarketViewsLib();
 		}
-
-
-		/*if(isset($this->EmarketOptionsModel->pricesFields[$userGroup]) && $this->EmarketOptionsModel->pricesFields[$userGroup]) {
-			$this->userGroupID = $userGroup;
-		} else {
-			$this->userGroupID = 'ALL';
-		}*/
-		//pr($pathFile);
-		//$this->priceModel
 	}
 
 	/*
@@ -99,6 +79,7 @@ class EmarketModel extends CI_Model
 		// изображение товара app_get_option('product_image_field', 'e-market', 0);
 		$image = isset($product['data_fields'][app_get_option('product_image_field', 'e-market', 0)])
 			? $product['data_fields'][app_get_option('product_image_field', 'e-market', 0)]['objects_data_value'] : '';
+			
 		// очистим от elfinder
 		$image = str_replace(array('##', '_ELF_'), '__EXPLODE__', $image);
 		if(strpos($image, '__EXPLODE__')) {
@@ -301,7 +282,7 @@ class EmarketModel extends CI_Model
 
 					# если корзина наполняется, то пишем текущие цены товара
 					if($cartIsNew) {
-						$priceInfo = $this->EmarketPriceModel->initProduct($objects[$objectID]);
+						$priceInfo = $this->initProduct($objects[$objectID]);
 						$priceProduct = $priceInfo['price'];
 					}
 

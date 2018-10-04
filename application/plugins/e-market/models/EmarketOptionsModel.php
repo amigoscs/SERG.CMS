@@ -5,7 +5,11 @@
 	*
 	* UPD 2018-04-17
 	* Version 1.0
-
+	*
+	* UPD 2018-10-04
+	* Version 1.1
+	* Исправлена при пустом $this->TEMP_ARRAY (#159)
+	*
 */
 
 class EmarketOptionsModel extends CI_Model
@@ -154,11 +158,14 @@ class EmarketOptionsModel extends CI_Model
 	*/
 	public function parseUserFields($fieldsArray = array())
 	{
+		$out = array();
+
 		if(!$this->TEMP_ARRAY) {
-			$this->TEMP_ARRAY = $this->getFieldsFormCart();
+			if(!$this->TEMP_ARRAY = $this->getFieldsFormCart()) {
+				return $out;
+			}
 		}
 
-		$out = array();
 		foreach($this->TEMP_ARRAY[0] as $key => $value) {
 
 			if(isset($fieldsArray[$key])) {

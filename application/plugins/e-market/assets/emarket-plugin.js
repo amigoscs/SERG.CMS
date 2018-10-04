@@ -1,15 +1,21 @@
 var emarketAjaxRequest;
 emarketAjaxRequest = function(method, params, callBack) {
   $.ajax({
-		url: '/ajax/plugin/e-market/' + method,
-		type: 'POST',
-		data: params,
-		success: function(data){
-			if(callBack) {
-				callBack(data);
-			}
+	url: '/ajax/plugin/e-market/' + method,
+	type: 'POST',
+	data: params,
+    dataType: 'json',
+	success: function(data) {
+		if(callBack) {
+			callBack(data);
 		}
-	});
+	},
+    error: function(a, b, c) {
+      if(callBack) {
+  			callBack({status: 'ERROR'});
+  		}
+    }
+  });
 }
 
 /*
