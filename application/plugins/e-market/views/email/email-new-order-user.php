@@ -72,7 +72,7 @@
 		</tr>
 	<? endforeach ?>
 	<tr>
-		<td colspan="3" style="text-align: right">Итого</td>
+		<td colspan="4" style="text-align: right">Итого</td>
 		<td style="text-align: center; font-weight: 700"><?= $userCart['ecart_summ'] ?> <?= $userCart['ecart_currency_info']['ecartcur_code'] ?></td>
 	</tbody>
 </table>
