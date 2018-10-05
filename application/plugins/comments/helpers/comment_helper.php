@@ -67,6 +67,7 @@ function comment_form_html($objID = 0, $submitUrl = '', $userID = 0)
 		$data['submitUrl'] = $submitUrl ? $submitUrl : $CI->currentBaseUrl;
 		$data['userName'] = $userName;
 		$data['objID'] = $objID;
+		$data['captcha'] = app_get_option("comment_captcha", "comments", "");
 		$CI->load->view('comment_forms/form-main', $data, FALSE);
 	}
 

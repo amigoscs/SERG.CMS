@@ -3,11 +3,12 @@ $(document).ready(function(e) {
     var actionUrl = $(this).attr('action');
     var formValues = $(this).serialize();
     $.ajax({
-      url: '/ajax/plugin/comments?action=newcomment',
+      url: '/ajax/plugin/comments/newcomment',
       type: 'POST',
       data: formValues,
-      success: function(data){
-          var DATA = JSON.parse(data);
+      dataType: 'json',
+      success: function(DATA){
+        if(DATA.status == 'OK'){
           // закроем форму
           $('form.comments-form').slideUp(300, function(){
             $('form.comments-form').remove();
@@ -16,12 +17,10 @@ $(document).ready(function(e) {
               $('.comments-not-found').remove();
             }
           });
-          if(DATA.status == 'OK'){
-            $('#comment_response').addClass('response-true complite').text(DATA.info);
-          }else{
-            $('#comment_response').addClass('response-true error').text(DATA.info);
-          }
-          //console.log(DATA);
+          $('#comment_response').addClass('response-true complite').text(DATA.info);
+        } else {
+          $('#comment_response').addClass('response-true error').text(DATA.info);
+        }
   	}
     });
     return false;

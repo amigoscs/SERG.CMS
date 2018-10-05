@@ -3,19 +3,24 @@
 /*
 	ссылка на папку плагинов - info('plugins_url')
 
-	UPD 2018-03-12
-	v 2.2
-	исправлена проблема текущего URl для формы комментариев (comments_helper)
-
-	PD 2018-03-16
-	v 2.3
-	добавлены опции для метода отправки комментариев. Настроена отправка письма. Мелкие правки
+	* UPD 2018-03-12
+	* v 2.2
+	* исправлена проблема текущего URl для формы комментариев (comments_helper)
+	*
+	* UPD 2018-03-16
+	* v 2.3
+	* добавлены опции для метода отправки комментариев. Настроена отправка письма. Мелкие правки
+	*
+	* UPD 2018-09-25
+	* v 2.4
+	* Введена рекапча
+	*
 */
 
 $info = array(
 		'name' => 'Комментарии',
 		'descr' => 'Плагин позволяет организовать комментарии на сайте',
-		'version' => '2.3',
+		'version' => '2.4',
 		'author' => 'Сергей Будников',
 		'url' => '//sergcms.ru',
 	);
@@ -52,7 +57,9 @@ $load_site = array(
 );
 
 # файлы скриптов и стилей сайта в секцию HEAD
-$load_site['assets']['top'] = array();
+$load_site['assets']['top'] = array(
+	0 => '<script src="https://www.google.com/recaptcha/api.js"></script>'
+);
 
 # файлы скриптов и стилей сайта в секцию BODY
 $load_site['assets']['bottom'] = array(
@@ -126,3 +133,15 @@ $options['comment_method']['values'] = array(
 	'post' => 'Отправлять по POST'
 );
 $options['comment_method']['description'] = 'Выберите способ отправки комментариев';
+
+$options['comment_captcha']['name'] = 'Ключ reCAPTCHA';
+$options['comment_captcha']['type'] = 'text';
+$options['comment_captcha']['default'] = '';
+$options['comment_captcha']['values'] = array();
+$options['comment_captcha']['description'] = 'Вставьте здесь свой ключ reCAPTCHA от google. Подробнее <a href="https://www.google.com/recaptcha/admin" target="_blank" title="">на сайте »</a>';
+
+$options['comment_captcha_skey']['name'] = 'Секретный ключ проверки';
+$options['comment_captcha_skey']['type'] = 'text';
+$options['comment_captcha_skey']['default'] = '';
+$options['comment_captcha_skey']['values'] = array();
+$options['comment_captcha_skey']['description'] = 'Вставьте здесь свой ключ проверки запроса reCAPTCHA от google. Подробнее <a href="https://www.google.com/recaptcha/admin" target="_blank" title="">на сайте »</a>';

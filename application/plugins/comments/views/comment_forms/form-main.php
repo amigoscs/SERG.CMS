@@ -22,6 +22,9 @@
 			<button type="buttn" class="text-center btn btn-default stop-answer">Отмена</button>
 		</div>
 	</fieldset>
+	<? if($captcha): ?>
+		<div class="g-recaptcha" data-sitekey="<?= $captcha ?>"></div>
+	<? endif ?>
 </form>
 </div>
 <div id="comment_response"></div>
