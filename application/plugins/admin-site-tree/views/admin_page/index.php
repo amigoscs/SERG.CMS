@@ -46,6 +46,13 @@
 		</ul>
 	</li>
 
+	<li class="export-nodes tree-context-menu-item tree-context-menu-submenu"><i class="fa fa-sort" aria-hidden="true"></i> <a href="#"><?= app_lang('ADST_MENU_SORTED') ?></a>
+		<ul class="tree-context-menu-list">
+			<li><i class="fa fa-sort-alpha-asc" aria-hidden="true"></i> <a href="#sort_name_asc"><?= app_lang('ADST_MENU_SORTED_NAME_ASC') ?></a></li>
+			<li><i class="fa fa-sort-alpha-desc" aria-hidden="true"></i> <a href="#sort_name_desc"><?= app_lang('ADST_MENU_SORTED_NAME_DESC') ?></a></li>
+		</ul>
+	</li>
+
 	<li class="group-nodes tree-context-menu-item"><i class="fa fa-paper-plane-o" aria-hidden="true"></i> <a href="#group-nodes"><?= app_lang('ADST_MENU_CR_GROUP') ?></a></li>
 	<li class="group-nodes tree-context-menu-item"><i class="fa fa-diamond" aria-hidden="true"></i> <a href="#orig-nodes"><?= app_lang('ADST_MENU_CR_ORIG') ?></a></li>
 	<li class="divider tree-context-menu-item"><?= app_lang('ADST_MENU_OTHER') ?></li>

@@ -26,11 +26,14 @@ function SaveOrderNodes(node, NewParentID, CallBack)
 		url: '/admin/admin-site-tree/ajax?method=save-order',
 		type: 'POST',
 		data: { row_id: NodeID, new_parent: NewParentID, nodes_array: ChildrenNodesIdArr },
-		success: function(data){
-			console.log(data);
+		dataType: 'json',
+		success: function(DATA){
 			if(CallBack) {
-				CallBack(data);
+				CallBack(DATA);
 			}
+		},
+		error: function(a, b, c) {
+			admin_dialog('Response error', 'Error', 350);
 		}
 	});
 }
@@ -64,11 +67,14 @@ function treeChangeStatus(Node, CallBack)
 		url: '/admin/admin-site-tree/ajax?method=change-status',
 		type: 'POST',
 		data: { objects_id: SnodesID },
-		success: function(data){
-
+		dataType: 'json',
+		success: function(DATA){
 			if(CallBack) {
-				CallBack(data, AllSelectedNodes);
+				CallBack(DATA, AllSelectedNodes);
 			}
+		},
+		error: function(a, b, c) {
+			admin_dialog('Response error', 'Error', 350);
 		}
 	});
 }
@@ -84,6 +90,9 @@ function treeChangeStatusCopy(Node, Status, CallBack)
 			if(CallBack) {
 				CallBack(data);
 			}
+		},
+		error: function(a, b, c) {
+			admin_dialog('Response error', 'Error', 350);
 		}
 	});
 }
@@ -96,14 +105,17 @@ function treeCopyObject(node, typeCopy, CallBack)
 		url: '/admin/admin-site-tree/ajax?method=copy-object',
 		type: 'POST',
 		data: { type_copy: typeCopy, row_id: node.id },
-		success: function(data){
-			DATA = JSON.parse(data);
+		dataType: 'json',
+		success: function(DATA) {
 			$.each(DATA.node, function(index, elem){
 				$TREE.tree('addNodeAfter', elem, node);
 			});
 			if(CallBack) {
 				CallBack(DATA);
 			}
+		},
+		error: function(a, b, c) {
+			admin_dialog('Response error', 'Error', 350);
 		}
 	});
 }
@@ -141,13 +153,16 @@ function treeDeleteNode(node, CallBack)
 			url: '/admin/admin-site-tree/ajax?method=delete-node',
 			type: 'POST',
 			data: { row_id: node.id, row_type: node.copyType },
-			success: function(data){
-				DATA = JSON.parse(data);
+			dataType: 'json',
+			success: function(DATA){
 				$.each(NodeRemove, function(idx, elemNode){
 					$TREE.tree('removeNode', elemNode);
 				});
 				remove_loader();
 				noty_info('information', DATA.info);
+			},
+			error: function(a, b, c) {
+				admin_dialog('Response error', 'Error', 350);
 			}
 		});
 	});
@@ -161,8 +176,8 @@ function treeUpdateNode(node, CallBack)
 		url: TreeDataUrl + '?single_load=1&node=' + node.id,
 		type: 'POST',
 		data: { value: 'empty'},
-		success: function(data){
-			DATA = JSON.parse(data);
+		dataType: 'json',
+		success: function(DATA){
 			$TREE.tree('updateNode', node, DATA[0]);
 			// обновим название всех копий ноды
 			$TREE.tree('getNodeByCallback', function(otherNode){
@@ -170,7 +185,10 @@ function treeUpdateNode(node, CallBack)
 					$TREE.tree('updateNode', otherNode, {name: DATA[0].name});
 			});
 			remove_loader();
-  		}
+		},
+		error: function(a, b, c) {
+			admin_dialog('Response error', 'Error', 350);
+		}
 	});
 }
 
@@ -192,12 +210,15 @@ function treeChangeParentNodes(NodesIdArray, NewPArentID, CallBack)
 		url: '/admin/admin-site-tree/ajax?method=change-parent',
 		type: 'POST',
 		data: { nodes_id: NodesIdArray, parent_id: NewPArentID},
-		success: function(data){
-			DATA = JSON.parse(data);
+		dataType: 'json',
+		success: function(DATA) {
 			if(CallBack) {
 				CallBack(DATA);
 			}
-  		}
+		},
+		error: function(a, b, c) {
+			admin_dialog('Response error', 'Error', 350);
+		}
 	});
 }
 
@@ -208,12 +229,15 @@ function treeCopyCreateCopy(NodesIDArray, ParentID, CallBack)
 		url: '/admin/admin-site-tree/ajax?method=create-copy',
 		type: 'POST',
 		data: { nodes_id: NodesIDArray, parent_id: ParentID},
-		success: function(data){
-			DATA = JSON.parse(data);
+		dataType: 'json',
+		success: function(DATA){
 			if(CallBack) {
 				CallBack(DATA);
 			}
-  		}
+		},
+		error: function(a, b, c) {
+			admin_dialog('Response error', 'Error', 350);
+		}
 	});
 }
 
@@ -230,11 +254,14 @@ function treeMakeOriginal(Nodes, CallBack)
 			url: '/admin/admin-site-tree/ajax?method=make-original',
 			type: 'POST',
 			data: { nodes_id: NodesID},
-			success: function(data){
-				DATA = JSON.parse(data);
+			dataType: 'json',
+			success: function(DATA){
 				if(CallBack) {
 					CallBack(DATA);
 				}
+			},
+			error: function(a, b, c) {
+				admin_dialog('Response error', 'Error', 350);
 			}
 		});
 	}
@@ -249,7 +276,7 @@ function treeCheckContext(Node)
 	return true;
 }
 
-// возвращает информацию о достапах к объекту
+// возвращает информацию о доступах к объекту
 var treeGetAccessObject
 treeGetAccessObject = function(objectID = 0, CallBack) {
 	if(objectID) {
@@ -262,9 +289,30 @@ treeGetAccessObject = function(objectID = 0, CallBack) {
 				if(CallBack) {
 					CallBack(DATA);
 				}
+			},
+			error: function(a, b, c) {
+				admin_dialog('Response error', 'Error', 350);
 			}
 		});
 	}
+}
+
+// сортировка вложенных нод
+var treeSortNodes = function(nodeID, sortKey, sortASC, CallBack) {
+	$.ajax({
+		url: '/admin/admin-site-tree/ajax?method=sort-nodes',
+		type: 'POST',
+		data: { node_id: nodeID, 'sort_key': sortKey, 'sort_asc': sortASC},
+		dataType: 'json',
+		success: function(DATA) {
+			if(CallBack) {
+				CallBack(DATA);
+			}
+		},
+		error: function(a, b, c) {
+			admin_dialog('Response error', 'Error', 350);
+		}
+	});
 }
 /*
 ##########################

@@ -443,4 +443,27 @@ class AdstModel extends CI_Model {
 		$jsonTree = $this->TreeCreateArrayToJson($arr_tree, $parentID, $appendDemand);
 		return $jsonTree;
 	}
+
+	# сортирует дочерние ноды
+	public function treeSortChilds($parentID = 0, $keySort = 'obj_name', $sortAsc = 'ASC')
+	{
+		// сначала получим объекты в запрошенном порядке
+		$this->db->select('tree_id, obj_name');
+		$this->db->join('objects', 'tree.tree_object = objects.obj_id');
+		$this->db->where('tree_parent_id', $parentID);
+		$this->db->order_by($keySort, $sortAsc);
+		$query = $this->db->get('tree');
+		if(!$query->num_rows()) {
+			throw new Exception('Objects not found');
+		}
+
+		foreach($query->result_array() as $key => $value) {
+			$this->db->where('tree_id', $value['tree_id']);
+			if(!$this->db->update('tree', array('tree_order' => $key))) {
+				throw new Exception('Error update');
+			}
+		}
+
+		return true;
+	}
 }

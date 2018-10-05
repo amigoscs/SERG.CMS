@@ -49,28 +49,27 @@ $(document).ready(function(e){
 	#############*/
 	var TREECONTEXTMENU = $TREE.jqTreeContextMenu($('#adstreemenu'), {
 		// изменить статус видимости
-		"status": function (node) {
-					add_loader();
-					treeChangeStatus(node, function(data, nodes){
-						DATA = JSON.parse(data);
-						console.log(DATA.object_status);
-						$.each(DATA.object_status, function(idx, status){
-							Nodes = $TREE.tree('getNodesByProperty', 'objectID', idx);
-							$.each(Nodes, function(idx, node){
-								$(node.element).removeClass('status-publish status-hidden').addClass('status-' + status);
-							});
-						});
-						remove_loader();
+		'status': function (node) {
+			add_loader();
+			treeChangeStatus(node, function(DATA, nodes){
+				//console.log(DATA.object_status);
+				$.each(DATA.object_status, function(idx, status){
+					Nodes = $TREE.tree('getNodesByProperty', 'objectID', idx);
+					$.each(Nodes, function(idx, node){
+						$(node.element).removeClass('status-publish status-hidden').addClass('status-' + status);
 					});
-				},
+				});
+				remove_loader();
+			});
+		},
 		// редактировать
-		"edit": function (node) {
+		'edit': function (node) {
 					//Показывать редактирование в новой вкладке
 					window.open('/admin/admin-page/edit?node_id=' + node.id, '_blank');
 				},
 		"delete": function (node) { return treeDeleteNode(node); },
 		// открыть на сайте в новой вкладке
-		"on-site": function (node) {
+		'on-site': function (node) {
 			// соберем url
 			var NodeUrl = treeGetUrlsTree(node, NodeUrl);
 			// удалим последний слэш
@@ -87,13 +86,13 @@ $(document).ready(function(e){
 
 		},
 		// создать копию ноды
-		"copy_copy": function(node){
+		'copy_copy': function(node){
 			return treeCopyObject(node, 'copy_copy', function(res){
 				noty_info('information', DATA.info, 'topRight');
 			});
 		 },
 		// создать копию ноды с подразделами
-		"copy_copy_childs": function(node){
+		'copy_copy_childs': function(node){
 			noty_comfirm(cmsGetLang('astCopyGoupQ'), cmsGetLang('astBtnContinue'), cmsGetLang('astBtnCancel'), function(r){
 				if(r){
 					return treeCopyObject(node, 'copy_copy_childs', function(res){
@@ -103,13 +102,13 @@ $(document).ready(function(e){
 			});
 		},
 		// создать копию ноды и объекта
-		"copy_obj": function(node){
+		'copy_obj': function(node){
 			return treeCopyObject(node, 'copy_obj', function(res){
 				noty_info('information', DATA.info, 'topRight');
 			});
 		 },
 		// создать копию ноды и объекта со всеми потомками
-		"copy_obj_childs": function(node){
+		'copy_obj_childs': function(node){
 			noty_comfirm(cmsGetLang('astCopyGoupQ'), cmsGetLang('astBtnContinue'), cmsGetLang('astBtnCancel'), function(r){
 				if(r){
 					return treeCopyObject(node, 'copy_obj_childs', function(res){
@@ -119,7 +118,7 @@ $(document).ready(function(e){
 			});
 		},
 		// экспорт всех выделенных нод
-		"export_selected": function(node){
+		'export_selected': function(node){
 			AllNodes = $TREE.tree('getSelectedNodes');
 			var UrlNodes = [];
 			$.each(AllNodes, function(idx, elem){
@@ -129,11 +128,17 @@ $(document).ready(function(e){
 			window.open(TreeExportUrl + '?node_id=' + UrlNodes.join('-'), '_blank');
 		},
 		// экспорт всех вложенных нод
-		"export_childs": function(node){
+		'export_childs': function(node){
 			window.open(TreeExportUrl + '?parent_node_id=' + node.id, '_blank');
 		},
 		// техническая информация о ноде
-		"get-info": function (node){
+		'get-info': function (node){
+			//$TREE.tree('closeNode', node);
+			$TREE.tree('loadDataFromUrl', node);
+			/*$TREE.loadDataFromUrl(TreeDataUrl, node, function() {
+				 console.log('finished');
+			 });*/
+			return;
 			var HtmlData = '';
 			HtmlData += '<div><span>' + cmsGetLang('astNodeID') + ':</span> <span>' + node.id + '</span></div>';
 			HtmlData += '<div><span>' + cmsGetLang('astObjID') + ':</span> <span>' + node.objectID + '</span></div>';
@@ -150,7 +155,7 @@ $(document).ready(function(e){
 			});
 		},
 		// Группировка нод для отправки
-		"group-nodes": function (node){
+		'group-nodes': function (node){
 			// группировать можно в пределах одного родителя
 			AllNodes = $TREE.tree('getSelectedNodes');
 			var NewGroupNode = {
@@ -177,7 +182,7 @@ $(document).ready(function(e){
 
 		},
 		// сделать выделенные ноды оригиналами
-		"orig-nodes": function (node){
+		'orig-nodes': function (node){
 			// все выделенные ноды
 			TextConfirm = '<p>' + cmsGetLang('astInfoCrOrigNodeInfo1') + '.</p> <p><strong>' + cmsGetLang('astInfoCrOrigNodeInfo2') + '!</strong></p>';
 			noty_comfirm(TextConfirm, cmsGetLang('astBtnContinue'), cmsGetLang('astBtnCancel'), function(r){
@@ -196,10 +201,34 @@ $(document).ready(function(e){
 				}
 			});
 		},
+		'sort_name_asc' : function(node) {
+			add_loader();
+			treeSortNodes(node.id, 'obj_name', 'ASC', function(DATA) {
+				remove_loader();
+				if(DATA.status == 200) {
+					noty_info('success', DATA.info, 'topRight');
+					$TREE.tree('loadDataFromUrl', node);
+				} else {
+					noty_info('error', DATA.info, 'center');
+				}
+			});
+		},
+		'sort_name_desc' : function(node) {
+			add_loader();
+			treeSortNodes(node.id, 'obj_name', 'DESC', function(DATA) {
+				remove_loader();
+				if(DATA.status == 200) {
+					noty_info('success', DATA.info, 'topRight');
+					$TREE.tree('loadDataFromUrl', node);
+				} else {
+					noty_info('error', DATA.info, 'center');
+				}
+			});
+		},
 
 	});
 
-	TREECONTEXTMENU.disable('GROUP NODES', ['status','edit','delete','on-site','copy_copy','copy_copy_childs','copy_obj','copy_obj_childs','export-nodes','group-nodes','orig-nodes']);
+	TREECONTEXTMENU.disable('GROUP NODES', ['status','edit','delete','on-site','copy_copy','copy_copy_childs','copy_obj','copy_obj_childs','export-nodes','group-nodes','orig-nodes', 'sort_name_asc', 'sort_name_desc']);
 	/*#############
 	--//-- context menu
 	#############*/
@@ -440,8 +469,7 @@ $(document).ready(function(e){
 				if(r) {
 					add_loader();
 					event.move_info.do_move();
-					SaveOrderNodes(event.move_info.moved_node, ParentNode, function(data){
-						DATA = JSON.parse(data);
+					SaveOrderNodes(event.move_info.moved_node, ParentNode, function(DATA){
 						if(DATA.status == '200'){
 							noty_info('information', DATA.info, 'topRight');
 						}else{
