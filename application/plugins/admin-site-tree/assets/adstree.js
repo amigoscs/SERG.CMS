@@ -40,6 +40,10 @@ $(document).ready(function(e){
 			if(node.objectAccess !== 'ALL') {
 				$ElemLiTitle.before('<i class="fa fa-lock" aria-hidden="true"></i>');
 			}
+
+			if(node.isPublish) {
+				$ElemLiTitle.before('<i class="fa fa-clock-o" aria-hidden="true" title="' + node.isPublish + '"></i>');
+			}
 		}
 
     });
@@ -313,15 +317,17 @@ $(document).ready(function(e){
 			if($(event.click_event.originalEvent.target).hasClass('fa-lock')) {
 				treeGetAccessObject(CurentNode.objectID, function(DATA) {
 					if(DATA.status == '200') {
-						var text = 'Доступ: ';
-						$.each(DATA.info, function(indx, elem) {
-							text += elem + ', ';
-						});
-						noty_info('alert', text, 'center');
+						noty_info('alert', DATA.info, 'center');
 					} else {
 						noty_info('error', DATA.info, 'center');
 					}
 				});
+			}
+
+			// если клик по иконке часов
+			if($(event.click_event.originalEvent.target).hasClass('fa-clock-o')) {
+				var text = $(event.click_event.originalEvent.target).attr('title');
+				noty_info('alert', text, 'center');
 			}
 		}
 

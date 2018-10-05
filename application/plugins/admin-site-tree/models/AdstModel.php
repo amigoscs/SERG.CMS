@@ -22,10 +22,12 @@
 
 class AdstModel extends CI_Model {
 
+	private $currentDate;
 
 	function __construct()
     {
         parent::__construct();
+		$this->currentDate = new DateTime(date('Y-m-d H:i:s'));
 
     }
 
@@ -48,8 +50,9 @@ class AdstModel extends CI_Model {
 	public function changeParent($rowID = 0, $newParentID = 0, $order = array())
 	{
 		# ЕСли парент равен 999999999, то это самый верхний уровень, т.е. ноль. Сделано из-за особенностей jqTree
-		if($newParentID == '999999999')
+		if($newParentID == '999999999') {
 			$newParentID = 0;
+		}
 
 		// получим id объекта
 		$this->db->select('tree_url, tree_parent_id');
@@ -373,6 +376,15 @@ class AdstModel extends CI_Model {
 			$i=0;
 			foreach($tree[$parent] as $value)
 			{
+				$isPublish = 0;
+				$datePublish = new DateTime($value['obj_date_publish']);
+				//
+				if($this->currentDate < $datePublish) {
+					$diff = $this->currentDate->diff($datePublish);
+					$isPublish = $diff->format("Через %d дней %h:%i часов"); ;
+				}
+
+
 				$out[$i]['name'] = $value['obj_name'];
 				$out[$i]['id'] = $value['tree_id'];
 				$out[$i]['copyType'] = $value['tree_type'];
@@ -381,6 +393,7 @@ class AdstModel extends CI_Model {
 				$out[$i]['objURL'] = $value['tree_url'];
 				$out[$i]['objectID'] = $value['obj_id'];
 				$out[$i]['objectAccess'] = $value['obj_ugroups_access'];
+				$out[$i]['isPublish'] = $isPublish;
 				$out[$i]['dataFields'] = array();
 
 				if($dataFields) {

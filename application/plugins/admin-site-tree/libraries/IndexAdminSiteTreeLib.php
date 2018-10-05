@@ -324,7 +324,7 @@ class indexAdminSiteTreeLib {
 
 		if($out) {
 			$this->ajaxResponse['status'] = '200';
-			$this->ajaxResponse['info'] = $out;
+			$this->ajaxResponse['info'] = 'Доступ для групп: ' . implode(', ', $out);
 		} else {
 			throw new Exception( app_lang('ADST_INFO_ERROR'));
 		}
