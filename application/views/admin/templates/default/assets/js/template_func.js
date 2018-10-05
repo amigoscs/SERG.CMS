@@ -194,7 +194,10 @@ function admin_dialog(Html, Title, WidthDialog)
 	$('#'+DialogBlockID).html(Html);
 	$('#'+DialogBlockID).dialog({
 		minWidth: WidthDialog,
-		title: Title
+		title: Title,
+		close: function(event, ui) {
+			remove_loader();
+		}
 	});
 }
 

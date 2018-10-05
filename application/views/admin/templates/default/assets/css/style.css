@@ -1809,7 +1809,7 @@ ul.list-draggable .s-handle > .sort-handle {font-style: normal;margin-right: 8px
 .system-info p {margin: 2px 0}
 
 /*loader*/
-#admin_loader { background:url('../img/loader-bgr.gif') no-repeat 50% 50% rgba(255,255,255,0.7); position:fixed; top:0; left:0; width:100%; height:100%;z-index: 99999}
+#admin_loader { background:url('../img/loader-bgr.gif') no-repeat 50% 50% rgba(255,255,255,0.7); position:fixed; top:0; left:0; width:100%; height:100%;z-index: 90}
 
 /*топ меню в контенте*/
 .cd-added-menu {position: absolute; top: 45px;left:0;width: 100%;background:#585c64;display: flex;flex-direction: column;align-items: flex-start;justify-content: center;transition:left ease-out 0.2s;z-index: 3;}
