@@ -220,7 +220,7 @@ jQuery(document).ready(function() {
 	START
 	*/
 	var $InputElem, InputText;
-	$('body').on('focus.SELECTEDFIELDS', 'input.form-control', function(){
+	$('body').on('focus.SELECTEDFIELDS', 'input.form-control', function() {
 		if($(this).hasClass('date-input')) {
 			return false;
 		}
@@ -238,16 +238,23 @@ jQuery(document).ready(function() {
 		}
 	});
 
-	$('body').on('click.SELECTEDFIELDS', '.selected-field-sel', function(){
+	$('body').on('click.SELECTEDFIELDS', '.selected-field-sel', function() {
 		if($(this).parent('.input-button-block').next('.selected-field-selblock').length){
 			$(this).parent('.input-button-block').next('.selected-field-selblock').remove();
 			return false;
-		}else{
+		} else {
 			$('.selected-field-selblock').remove();
 		}
 
-		$(this).parent('.input-button-block').after('<div class="selected-field-selblock">Неверное значение</div>');
-		InputText = $(this).parent('.input-button-block').prev('input').val();
+		// ширину поля установим равную input, но не более 500px
+		var $InputElem = $(this).parent('.input-button-block').prev('input');
+		InputText = $InputElem.val();
+		var sfsWidth = $InputElem.innerWidth();
+		if(sfsWidth > 500) {
+			sfsWidth = 500;
+		}
+
+		$(this).parent('.input-button-block').after('<div class="selected-field-selblock" style="width:'+sfsWidth+'px">Неверное значение</div>');
 
 		var FormText = '';
 		FormText += '<div class="sfise-close"><span></span></div>';
@@ -257,7 +264,7 @@ jQuery(document).ready(function() {
 		if(InputText.indexOf("||") === -1)
 		{
 			FormText += '<li>';
-			FormText += '<input type="text" value=""> - ';
+			FormText += '<input type="text" value=""> <i class="sep">-</i> ';
 			FormText += '<input type="text" value="">';
 			FormText += '<span class="sf-line-remove"><i class="fa fa-trash-o" aria-hidden="true"></i></span>';
 			FormText += '</li>';
@@ -273,7 +280,7 @@ jQuery(document).ready(function() {
 			for(i=0; i < InputTextArr.length; i++){
 				FormText += '<li>';
 				InputTextArrNext = InputTextArr[i].split("||");
-				FormText += '<input type="text" value="'+ InputTextArrNext[0].trim() + '" class="sel-key"> - ';
+				FormText += '<input type="text" value="'+ InputTextArrNext[0].trim() + '" class="sel-key"> <i class="sep">-</i> ';
 				FormText += '<input type="text" value="'+ InputTextArrNext[1].trim() + '" class="sel-value">';
 				FormText += '<span class="sf-line-remove"><i class="fa fa-trash-o" aria-hidden="true"></i></span>';
 				FormText += '</li>';
@@ -285,7 +292,7 @@ jQuery(document).ready(function() {
 		FormText += '<p class="selected-field-selblock-submit-line"><span class="btn btn-primary new-line">'+cmsGetLang('append')+'</span> <span class="btn btn-default sort-list">'+cmsGetLang('sort')+'</span> <span class="btn btn-success submit-sf">'+cmsGetLang('apply')+'</span></p>';
 
 		$('.selected-field-selblock').html(FormText);
-		$('.selected-field-selblock ul').sortable();
+		$('.selected-field-selblock ul').sortable({handle: '.sep'});
 
 	});
 
@@ -297,7 +304,7 @@ jQuery(document).ready(function() {
 	});
 
 	$('body').on('click.SELECTEDFIELDS', '.selected-field-selblock .new-line', function(){
-		$(this).parent('p').prev('ul').append('<li><input type="text" value="" class="sel-key"> - <input type="text" value="" class="sel-value"><span class="sf-line-remove"><i class="fa fa-trash-o" aria-hidden="true"></i></span></li>');
+		$(this).parent('p').prev('ul').append('<li><input type="text" value="" class="sel-key"> <i class="sep">-</i> <input type="text" value="" class="sel-value"><span class="sf-line-remove"><i class="fa fa-trash-o" aria-hidden="true"></i></span></li>');
 	});
 	$('body').on('click.SELECTEDFIELDS', '.selected-field-selblock .sort-list', function(){
 		var $target = $(this).parent('p').prev('ul');
@@ -312,10 +319,6 @@ jQuery(document).ready(function() {
 			return 0;
 		});
 		$elements.detach().appendTo($target);
-
-
-
-		//$(this).parent('p').prev('ul').append('<li><input type="text" value="" class="sel-key"> - <input type="text" value="" class="sel-value"><span class="sf-line-remove"><i class="fa fa-trash-o" aria-hidden="true"></i></span></li>');
 	});
 
 	$('body').on('click.SELECTEDFIELDS', '.selected-field-selblock .sfise-close span', function(){
@@ -349,8 +352,15 @@ jQuery(document).ready(function() {
 		$(this).parent('li').remove();
 	});
 
-	$('body').on('click.SELECTEDFIELDS', '.selected-field-delete-value', function(){
-		$(this).parent('.input-button-block').prev('input').val('');
+	$('body').on('click.SELECTEDFIELDS', '.selected-field-delete-value', function() {
+		var $elInput = $(this).parent('.input-button-block').prev('input');
+		if($elInput.hasClass('field-number')) {
+			$elInput.val('0');
+		} else if($elInput.hasClass('field-numberfloat')) {
+			$elInput.val('0');
+		} else {
+			$elInput.val('');
+		}
 	});
 
 
