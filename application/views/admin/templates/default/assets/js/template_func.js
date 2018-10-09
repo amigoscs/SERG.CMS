@@ -315,3 +315,37 @@ var appShSwitch = function() {
 		$(Elements).addClass('hide');
 	}
 }
+
+/*
+* функция для индексации сайта
+*/
+var appIndexSite = function(step) {
+	$.ajax({
+		url: '/admin/index_site',
+		type: 'POST',
+		data: { step: step },
+		dataType: 'json',
+		success: function(DATA){
+			console.log(DATA);
+			if(DATA.status == 'OK') {
+				if(DATA.flag == 'CONTINUE') {
+					$('#ui-dialog').append('<p>' + DATA.info + '</p>');
+					setTimeout(function() {
+						appIndexSite(DATA.step);
+					}, 2000);
+				} else {
+					$('#ui-dialog p.upd-loader').remove();
+					$('#ui-dialog').append('<p>' + DATA.info + '</p>');
+				}
+
+			} else {
+				admin_dialog('<p>' + DATA.info + '</p>', 'Error!', 350);
+			}
+			remove_loader();
+		},
+		error: function(a, b, c) {
+			admin_dialog('<p>Error response</p>', 'Error!', 350);
+			remove_loader();
+		}
+	});
+}

@@ -93,6 +93,10 @@
 	* version 16.62
 	* Правки
 	*
+	* UPD 2018-10-09
+	* version 16.7
+	* Индексация сайта сделана через AJAX (page_index_site())
+	*
 */
 
 class Admin extends CI_Controller {
@@ -436,27 +440,19 @@ class Admin extends CI_Controller {
 
 		$data['update_panel'] = '';
 
+		# POST на удаление кэша
 		if($post = $this->input->post('delete_cache')) {
 			app_delete_cash();
 			$this->pageCompliteMessage = app_lang('INFO_DEL_CACHE_DELETE_COMPLITE');
 			app_add_option('update_cash_time', time(), 'general');
 		}
 
+		# POST на создание sitemap
 		if($post = $this->input->post('create_sitemap')) {
 			//app_delete_cash();
 			$this->load->model('SitemapAdmModel');
 			$this->SitemapAdmModel->createSitemapFile();
 			$this->pageCompliteMessage = app_lang('INFO_SITEMAP_CREATE_COMPLITE');
-		}
-
-		if($post = $this->input->post('index_site')) {
-			//app_delete_cash();
-			if($this->CommonModel->runIndexesSite()) {
-				$this->pageCompliteMessage = app_lang('INFO_INDEX_SITE_COMPLITE');
-			} else {
-				$this->pageErrorMessage = app_lang('INFO_INDEX_SITE_ERROR');
-			}
-
 		}
 
 		if($this->systemUpdate) {
@@ -590,9 +586,9 @@ class Admin extends CI_Controller {
 		{
 			$ins = $this->CommonModel->createDataType($new_type_data);
 			if($ins)
-				$this->data['infocomplite'] = 'Новый тип данных создан успешно';
+				$this->data['infocomplite'] = $this->lang->line('INFO_DT_TYPE_NEW_COMPLITE');
 			else
-				$this->data['infoerror'] = 'Тип данных уже существует';
+				$this->data['infoerror'] = $this->lang->line('INFO_DT_TYPE_IS_EXISTS');
 		}
 		# POST для редактирования типов данных
 		if($edit_type = $this->input->post('edit_type') and !$this->input->post('delete_type'))
@@ -603,9 +599,9 @@ class Admin extends CI_Controller {
 			}
 
 			if($upd) {
-				$this->pageCompliteMessage = 'Типы данных успешно обновлены';
+				$this->pageCompliteMessage = $this->lang->line('INFO_DT_TYPE_UPDATE_COMPLITE');
 			} else {
-				$this->pageErrorMessage = 'Ошибка обновления типов данных';
+				$this->pageErrorMessage = $this->lang->line('INFO_DT_TYPE_UPDATE_ERROR');
 			}
 		}
 
@@ -622,9 +618,9 @@ class Admin extends CI_Controller {
 			}
 
 			if($del) {
-				$this->pageCompliteMessage = 'Тип данных успешно удален';
+				$this->pageCompliteMessage = $this->lang->line('INFO_DT_TYPE_DELETE_COMPLITE');
 			} else {
-				$this->pageErrorMessage = 'Тип данных не удален';
+				$this->pageErrorMessage = $this->lang->line('INFO_DT_TYPE_DELETE_ERROR');
 			}
 		}
 
@@ -637,15 +633,14 @@ class Admin extends CI_Controller {
 			}
 
 			if($field_id) {
-				$this->pageCompliteMessage = 'Поле создано успешно';
+				$this->pageCompliteMessage = $this->lang->line('INFO_DTF_CREATE_COMPLITE');
 			} else {
-				$this->pageErrorMessage = 'Поле не создано или уже существует';
+				$this->pageErrorMessage = $this->lang->line('INFO_DTF_CREATE_ERROR');
 			}
 		}
 
 		# POST удаление полей типов данных
-		if($delete_fields = $this->input->post('delete_fields'))
-		{
+		if($delete_fields = $this->input->post('delete_fields')) {
 			/*$data['message'] = 'будет удален тип';
 			//$res = false;
 			foreach($del_type as $type_id)
@@ -655,27 +650,26 @@ class Admin extends CI_Controller {
 		}
 
 		# POST на обновление полей
-		if($update_data_field =$this->input->post('edit_fields'))
-		{
-			foreach($update_data_field as $key_field => $val_field)
-			{
+		if($update_data_field =$this->input->post('edit_fields')) {
+			foreach($update_data_field as $key_field => $val_field) {
 				$upd_field = $this->CommonModel->updateDataTypeField($val_field, $key_field);
 			}
-			$this->pageCompliteMessage = 'Изменения сохранены';
+
+			$this->pageCompliteMessage = $this->lang->line('INFO_DTF_UPDATE_COMPLITE');
 		}
 
 		# POST на подключение полей
-		if($connect_field = $this->input->post('connect_to'))
-		{
-			foreach($connect_field as $key => $value)
+		if($connect_field = $this->input->post('connect_to')) {
+			foreach($connect_field as $key => $value) {
 				$this->CommonModel->createData2Data($key, $value);
+			}
 		}
 
 		# POST на отключение полей
-		if($disconnect_field = $this->input->post('disconnect_to'))
-		{
-			foreach($disconnect_field as $key => $value)
+		if($disconnect_field = $this->input->post('disconnect_to')) {
+			foreach($disconnect_field as $key => $value) {
 				$this->CommonModel->deleteData2Data($key, $value);
+			}
 		}
 
 
@@ -685,12 +679,12 @@ class Admin extends CI_Controller {
 		if($args)
 		{
 			$data['type_fields'] = $args[0];
-			if(!isset($data['types_array'][$data['type_fields']]))
-			{
+			if(!isset($data['types_array'][$data['type_fields']])) {
 				$this->pageContent = '';
-				$this->pageErrorMessage = 'Тип данных не найден';
+				$this->pageErrorMessage = $this->lang->line('INFO_DT_TYPE_NOT_FOUND');
 				return $this->_render_content();
 			}
+
 			$data['type_info'] = $data['types_array'][$data['type_fields']];
 			$data['fields_array'] = $this->CommonModel->getAllDataTypesFields();
 
@@ -722,7 +716,7 @@ class Admin extends CI_Controller {
 			foreach($types_objects as $key => $value)
 				$this->CommonModel->updateObjType($key, $value);
 
-			$this->pageCompliteMessage = app_lang('UPDATE_SETTING_COMPLITE');
+			$this->pageCompliteMessage = $this->lang->line('UPDATE_SETTING_COMPLITE');
 		}
 
 		# add data type
@@ -731,7 +725,7 @@ class Admin extends CI_Controller {
 			foreach($types_objects_new as $key => $value)
 				$this->CommonModel->createObjType($key, $value);
 
-			$this->pageCompliteMessage = 'Новый тип объекта успешно создан';
+			$this->pageCompliteMessage = $this->lang->line('INFO_TO_CREATE_COMPLITE');
 		}
 
 		$data['all_types'] = $this->CommonModel->getAllObjTypes();
@@ -1076,6 +1070,54 @@ class Admin extends CI_Controller {
 			} else {
 				$response = array('status' => 'ERROR', 'info' => 'Fields is not found');
 			}
+		}
+		echo json_encode($response);
+	}
+
+	# AJAX: индексация сайта
+	public function page_index_site()
+	{
+		$response = array('status' => 'ERROR', 'flag' => 'STOP', 'step' => 'stop', 'info' => 'Ajax error');
+		try {
+			if($step = $this->input->post('step')) {
+				$response['status'] = 'OK';
+				switch($step) {
+					case 'start':
+						// прописываем ссылки
+						if($this->CommonModel->runIndexesSite()) {
+							$response['flag'] = 'CONTINUE';
+							$response['info'] = app_lang('INFO_INDEX_SITE_LINKS_COMPLITE');
+							$response['step'] = 'second';
+						} else {
+							throw new Exception(app_lang('INFO_INDEX_SITE_LINKS_ERROR'));
+						}
+						break;
+					case 'second':
+					//case 'start':
+						if($this->CommonModel->runIndexesDates()) {
+							$response['flag'] = 'CONTINUE';
+							$response['info'] = app_lang('INFO_INDEX_SITE_DATE_COMPLITE');
+							$response['step'] = 'third';
+						} else {
+							throw new Exception(app_lang('INFO_INDEX_SITE_DATE_ERROR'));
+						}
+						break;
+					/*case 'third':
+						$response['flag'] = 'CONTINUE';
+						$response['info'] = 'Update step 3';
+						$response['step'] = 'fourth';
+						break;*/
+					default:
+						$response['flag'] = 'STOP';
+						$response['info'] = app_lang('INFO_INDEX_SITE_COMPLITE');
+				}
+
+			} else {
+				throw new Exception(app_lang('INFO_INDEX_SITE_PARAMS_ERROR'));
+			}
+		} catch (Exception $e) {
+			$response['status']  = 'ERROR';
+			$response['info'] = $e->getMessage();
 		}
 		echo json_encode($response);
 	}

@@ -36,6 +36,11 @@
 	* UPD 2018-09-24
 	* Version 6.5
 	* Ошибка вычисления axis при индексации сайта
+	*
+	* UPD 2018-10-09
+	* Version 6.6
+	* Добавлен метод runIndexesDates() - проверка корректных дат у объектов и исправление
+	*
 */
 
 class CommonModel extends CI_Model {
@@ -601,5 +606,38 @@ class CommonModel extends CI_Model {
 			$tmpParent = $allObjects[$tmpParent]['parent_id'];
 			$this->_indexesSitePrep($nodeID, $tmpParent, $allObjects, $tmpUrls);
 		}
+	}
+
+	# перепись дат публикации и последнего изменения
+	public function runIndexesDates()
+	{
+		$lastMod = time();
+		$dateCreate = date('Y-m-d H:i:s');
+		$this->db->select('obj_id, obj_date_create, obj_date_publish, obj_lastmod');
+		$query = $this->db->get('objects');
+		foreach($query->result_array() as $row) {
+			$dataUpd = array();
+			if(!$row['obj_lastmod']) {
+				$dataUpd['obj_lastmod'] = $lastMod;
+			}
+
+			if($row['obj_date_create'] == '0000-00-00 00:00:00') {
+				$dataUpd['obj_date_create'] = $dateCreate;
+			}
+
+			if($row['obj_date_publish'] == '0000-00-00 00:00:00') {
+				if(isset($dataUpd['obj_date_create'])) {
+					$dataUpd['obj_date_publish'] = $dataUpd['obj_date_create'];
+				} else {
+					$dataUpd['obj_date_publish'] = $dateCreate;
+				}
+			}
+
+			if($dataUpd) {
+				$this->db->where('obj_id', $row['obj_id']);
+				$this->db->update('objects', $dataUpd);
+			}
+		}
+		return true;
 	}
 }

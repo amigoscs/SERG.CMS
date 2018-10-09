@@ -4,12 +4,12 @@
 ?>
 <h1><?=$this->lang->line('H1_ADMIN_PANEL')?></h1>
 
-<form action="" method="post">
-<button type="submit" name="delete_cache" class="btn btn-info" value="dd">Очистить кеш</button>
-<button type="submit" name="create_sitemap" class="btn btn-info" value="dd">Создать SiteMap</button>
-<button type="submit" name="index_site" class="btn btn-info" value="dd">Проиндексировать сайт</button>
-
+<form action="" method="post" id="cms_index_form">
+	<button type="submit" name="delete_cache" class="btn btn-info" value="dd">Очистить кеш</button>
+	<button type="submit" name="create_sitemap" class="btn btn-info" value="dd">Создать SiteMap</button>
+	<button type="button" name="index_site" class="btn btn-info" value="dd">Проиндексировать сайт</button>
 </form>
+
 <div class="system-info">
 	<p><strong>Версия SERG.CMS:</strong> <span><?= $CMSVERSION ?></span></p>
 	<p><strong>Версия PHP:</strong> <span><?= $confPhpVersion ?></span></p>

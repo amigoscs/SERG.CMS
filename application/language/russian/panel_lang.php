@@ -74,7 +74,25 @@ $lang['INFO_DEL_CACHE_DELETE_COMPLITE'] = 'Кеш успешно удален';
 $lang['INFO_SITEMAP_CREATE_COMPLITE'] = 'Файл Sitemap успешно создан';
 $lang['INFO_INDEX_SITE_COMPLITE'] = 'Сайт проиндексирован';
 $lang['INFO_INDEX_SITE_ERROR'] = 'Ошибка индексации сайта';
-$lang['INFO_SITE_TEMPLATE_NOT_ERROR'] = 'Шаблоны сайта не найдены. Загрузите шаблон в папку, чтобы продолжить';
+$lang['INFO_INDEX_SITE_DATE_ERROR'] = 'Ошибка индексации дат';
+$lang['INFO_INDEX_SITE_DATE_COMPLITE'] = 'Даты проиндексированы';
+$lang['INFO_INDEX_SITE_LINKS_ERROR'] = 'Ошибка индексации ссылок';
+$lang['INFO_INDEX_SITE_LINKS_COMPLITE'] = 'Ссылки проиндексированы';
+$lang['INFO_INDEX_SITE_PARAMS_ERROR'] = 'Ошибка в параметрах';
+
+$lang['INFO_DT_TYPE_NEW_COMPLITE'] = 'Новый тип данных создан успешно';
+$lang['INFO_DT_TYPE_IS_EXISTS'] = 'Тип данных уже существует';
+$lang['INFO_DT_TYPE_UPDATE_COMPLITE'] = 'Типы данных успешно обновлены';
+$lang['INFO_DT_TYPE_UPDATE_ERROR'] = 'Ошибка обновления типов данных';
+$lang['INFO_DT_TYPE_DELETE_COMPLITE'] = 'Тип данных успешно удален';
+$lang['INFO_DT_TYPE_DELETE_ERROR'] = 'Ошибка удаления типа данных';
+$lang['INFO_DT_TYPE_NOT_FOUND'] = 'Тип данных не найден';
+
+$lang['INFO_DTF_CREATE_COMPLITE'] = 'Поле создано успешно';
+$lang['INFO_DTF_CREATE_ERROR'] = 'Поле не создано или уже существует';
+$lang['INFO_DTF_UPDATE_COMPLITE'] = 'Поля успешно обновлены';
+
+$lang['INFO_TO_CREATE_COMPLITE'] = 'Новый тип объекта успешно создан';
 
 /*
 * Admin - users

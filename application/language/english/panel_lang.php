@@ -74,7 +74,25 @@ $lang['INFO_DEL_CACHE_DELETE_COMPLITE'] = 'Cache deleted successfully';
 $lang['INFO_SITEMAP_CREATE_COMPLITE'] = 'Sitemap successfully created';
 $lang['INFO_INDEX_SITE_COMPLITE'] = 'The site is indexed';
 $lang['INFO_INDEX_SITE_ERROR'] = 'Error indexing the site';
-$lang['INFO_SITE_TEMPLATE_NOT_ERROR'] = 'No site templates found. Download the template to the folder to continue';
+$lang['INFO_INDEX_SITE_DATE_ERROR'] = 'Date indexing error';
+$lang['INFO_INDEX_SITE_DATE_COMPLITE'] = 'Dates indexed';
+$lang['INFO_INDEX_SITE_LINKS_ERROR'] = 'Link Indexing Error';
+$lang['INFO_INDEX_SITE_LINKS_COMPLITE'] = 'Links are indexed';
+$lang['INFO_INDEX_SITE_PARAMS_ERROR'] = 'Error in parameters';
+
+$lang['INFO_DT_TYPE_NEW_COMPLITE'] = 'New data type created successfully';
+$lang['INFO_DT_TYPE_IS_EXISTS'] = 'Data type already exists';
+$lang['INFO_DT_TYPE_UPDATE_COMPLITE'] = 'Data types updated successfully';
+$lang['INFO_DT_TYPE_UPDATE_ERROR'] = 'Data Type Update Error';
+$lang['INFO_DT_TYPE_DELETE_COMPLITE'] = 'Data type successfully deleted';
+$lang['INFO_DT_TYPE_DELETE_ERROR'] = 'Error deleting data type';
+$lang['INFO_DT_TYPE_NOT_FOUND'] = 'Data type not found';
+
+$lang['INFO_DTF_CREATE_COMPLITE'] = 'Field created successfully';
+$lang['INFO_DTF_CREATE_ERROR'] = 'The field is not created or already exists';
+$lang['INFO_DTF_UPDATE_COMPLITE'] = 'Fields successfully updated';
+
+$lang['INFO_TO_CREATE_COMPLITE'] = 'New object type created successfully';
 
 /*
 * Admin - users

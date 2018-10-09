@@ -500,6 +500,14 @@ jQuery(document).ready(function() {
 		return false;
 	});
 
+	// кнопка создания sitemap
+	$('#cms_index_form button[name="index_site"]').on('click.CMS', function() {
+		admin_dialog('<p class="upd-loader"><img src="/application/plugins/exp-csv/assets/exloader.gif"/></p>', 'Progress...', 350);
+		$(this).remove();
+		appIndexSite('start');
+		return false;
+	});
+
 	/* поля типа DATE*/
 	admin_InitFieldsDate();
 
