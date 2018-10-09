@@ -51,6 +51,7 @@ var expfunc_import = function(FilePath, updOffset, getCountRows) {
     data: {file: FilePath, upd_offset: updOffset, get_count_rows: getCountRows},
     dataType: 'json',
     success: function(DATA) {
+      console.log(DATA);
       // если запрашиваются строки, добавим в диалог информацию
       if(getCountRows) {
         $('#ui-dialog').append('<p>' + DATA.info + '</p>');

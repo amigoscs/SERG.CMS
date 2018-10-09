@@ -23,12 +23,16 @@
 	* Version 10.0
 	* Переписана логика работы экспорта. Экспорт теперь лимитируется
 	*
+	* UPD 2018-10-09
+	* Version 10.1
+	* Добавлена функция парсера CSV-файла, с помощью которого можно удалить переносы строк в ячейках
+	*
 */
 
 $info = array(
 		'name' => app_lang('EXPCSV_AUTOLOAD_PLUGIN_NAME'),
 		'descr' => app_lang('EXPCSV_AUTOLOAD_PLUGIN_DESCRIPTION'),
-		'version' => '10.0',
+		'version' => '10.1',
 		'author' => app_lang('EXPCSV_AUTOLOAD_AUTHOR'),
 		'url' => '//sergcms.ru',
 	);

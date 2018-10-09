@@ -3,4 +3,5 @@
 	<li><a href="/admin/exp-csv/export_node_id"><span>Экспорт</span></a></li>
 	<li><a href="/admin/exp-csv/export_object_types"><span>Экспорт по типам объектов</span></a></li>
     <li><a href="/admin/exp-csv/import_objects"><span>Импорт</span></a></li>
+    <li><a href="/admin/exp-csv/parse_file"><span>Парсер</span></a></li>
 </ul>

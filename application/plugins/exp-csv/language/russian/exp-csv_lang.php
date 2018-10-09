@@ -22,6 +22,7 @@ $lang['EXPCSV_TITLE_IMPORT'] = 'Импорт объектов CSV';
 $lang['EXPCSV_TITLE_EXPORT_DATA_TYPES'] = 'Выгрузить объекты по типам данных';
 $lang['EXPCSV_TITLE_EXPORT_TYPE_OBJECTS'] = 'Выгрузить объекты по типам объектов';
 $lang['EXPCSV_TITLE_EXPORT_CHILDS_OBJECTS'] = 'Выгрузить вложенные объекты';
+$lang['EXPCSV_TITLE_PARSER'] = 'Парсер файла';
 
 $lang['EXPCSV_INFO_ERROR'] = 'Ошибка';
 $lang['EXPCSV_INFO_ERROR_NO_ID'] = 'Не указан ID';
@@ -35,6 +36,7 @@ $lang['EXPCSV_INFO_FILE_ENCODING'] = 'Кодировка файла';
 $lang['EXPCSV_INFO_ROWS_SHOWN'] = 'Записей показано';
 $lang['EXPCSV_INFO_CREATE_NEW_OBJECT'] = 'Для объектов будут созданы новые позиции или обновление идет по DATA-полю';
 $lang['EXPCSV_INFO_UPDATE_OBJECT'] = 'Для объектов будет выполнено обновление';
+$lang['EXPCSV_INFO_FILE_PARSE_COMPLITE'] = 'Файл успешно обработан';
 
 $lang['EXPCSV_BUTTON_LOAD_FILE'] = 'Загрузить файл';
 $lang['EXPCSV_BUTTON_RUN_IMPORT'] = 'Начать импорт';
@@ -42,6 +44,7 @@ $lang['EXPCSV_BUTTON_RUN_EXPORT'] = 'Выгрузить объекты';
 $lang['EXPCSV_BUTTON_SELECT_NODE'] = 'Выбрать ноду';
 
 $lang['EXPCSV_FORM_LABEL_FILE_IMPORT'] = 'Файл для импорта';
+$lang['EXPCSV_FORM_LABEL_FILE_PARSE'] = 'Файл для обработки';
 $lang['EXPCSV_FORM_LABEL_TYPE_OBJECT'] = 'Тип объекта';
 $lang['EXPCSV_FORM_LABEL_TYPE_FIELDS'] = 'Выберите поля типов данных';
 $lang['EXPCSV_FORM_LABEL_ID_FIELD'] = 'Поле-идентификатор';

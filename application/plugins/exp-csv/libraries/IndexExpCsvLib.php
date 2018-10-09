@@ -15,6 +15,10 @@
 	* UPD 2018-10-03
 	* добавлен параметр limitExport для выгрузки порциями
 	*
+	* version 2.1
+	* UPD 2018-10-09
+	* Добавлен парсер файла
+	*
 */
 
 class IndexExpCsvLib {
@@ -420,10 +424,11 @@ class IndexExpCsvLib {
 			$this->ajaxResponse['offset'] = $offset + $limit;
 			$this->ajaxResponse['info'] = 'Обновление завершено';
 		} else {
+			$totalUpd = $offset + $updRes - 2;
 			$this->ajaxResponse['status'] = 'OK';
 			$this->ajaxResponse['flag_update'] = 'CONTINUE';
 			$this->ajaxResponse['offset'] = $offset + $limit;
-			$this->ajaxResponse['info'] = 'Обновлено позиций: ' . $updRes;
+			$this->ajaxResponse['info'] = 'Обновлено позиций: ' . $totalUpd;
 		}
 
 
@@ -579,11 +584,21 @@ class IndexExpCsvLib {
 			$data['tableHeaders'] = $this->CSVLIB->getHeadersCSV();
 			$data['readResult'] = $this->CSVLIB->Read($this->limitPreview);
 			$tmp = array();
+			$headersCount = count($data['tableHeaders']);
+			$arrEgtCsv = array();
 			foreach($data['readResult'] as $value) {
 				if(!$value) {
 					continue;
 				}
-				$tmp[] = str_getcsv($value, $CI->ExpCsvModel->csvDelimiterField, $CI->ExpCsvModel->csvEnclosure);
+
+				$arrEgtCsv = str_getcsv($value, $CI->ExpCsvModel->csvDelimiterField, $CI->ExpCsvModel->csvEnclosure);
+
+				if($headersCount != count($arrEgtCsv)) {
+					throw new Exception('В файле направильно расставлены переносы строк!');
+				}
+
+				$tmp[] = $arrEgtCsv;
+
 			}
 
 			if(!$tmp) {
@@ -642,6 +657,52 @@ class IndexExpCsvLib {
 		$data['exportLimit'] = $CI->ExpCsvModel->limitExport;
 
 		$CI->pageContent = $CI->load->view('admin_page/export_type_object', $data, true);
+	}
+
+	/*
+	* Парсер файла csv
+	*/
+	public function parse_file()
+	{
+		$CI = &get_instance();
+		$CI->pageContentTitle = app_lang('EXPCSV_TITLE_PARSER');
+		$CI->pageContentDescription = $CI->pageContentTitle;
+		$data = array('h1' => $CI->pageContentTitle);
+		$data['viewUploader'] = true;
+		$data['infoCharset'] = $this->csvCharset;
+		$data['infoDelimiterField'] = $CI->ExpCsvModel->csvDelimiterField;
+		$data['infoEnclosure'] = $CI->ExpCsvModel->csvEnclosure;
+		$data['fileDownload'] = '';
+
+		$config['upload_path'] = $CI->ExpCsvModel->exportFilePath;
+		$config['allowed_types'] = 'csv';
+		$config['max_size']	= '8000';
+
+		$CI->load->library('upload', $config);
+		$pathFile = '';
+		if($CI->upload->do_upload('file_import')) {
+			$data['viewUploader'] = false;
+			$uploadData = $CI->upload->data();
+			$pathFile = $uploadData['full_path'];
+			$fileContent = file_get_contents($pathFile);
+			// уберем экранирование пока, потом вернем
+			$fileContent = str_replace('""', '__ECR__', $fileContent);
+
+			$pattern = '/("[^"]*")|[^"]*/i';
+			$res = preg_replace_callback($pattern, "expcsv_delete_rn", $fileContent);
+
+			// вернем экранирование
+			$res = str_replace('__ECR__', '""', $res);
+
+			if($res) {
+				$data['fileDownload'] = $fileOut = $CI->ExpCsvModel->exportFilePath . 'parse_out.csv';
+				file_put_contents($fileOut, $res);
+				$data['fileDownload'] = str_replace(APP_BASE_PATH, APP_BASE_URL, $data['fileDownload']);
+				$CI->pageCompliteMessage = app_lang('EXPCSV_INFO_FILE_PARSE_COMPLITE');
+			}
+		}
+
+		$CI->pageContent = $CI->load->view('admin_page/parse_file', $data, true);
 	}
 
 	/*

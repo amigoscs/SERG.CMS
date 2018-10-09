@@ -36,6 +36,11 @@
 	* version 4.1
 	* UPD 2018-10-03
 	* добавлен параметр limitExport для выгрузки порциями
+	*
+	* version 4.2
+	* UPD 2018-10-08
+	* исправлена ошибка last_mod при добавлении позиции
+	*
 */
 
 class ExpCsvModel extends CI_Model {
@@ -224,6 +229,8 @@ class ExpCsvModel extends CI_Model {
 				continue;
 			}
 
+			++$i;
+
 			$arrayValues = str_getcsv($value, $this->csvDelimiterField);
 
 			##
@@ -241,7 +248,7 @@ class ExpCsvModel extends CI_Model {
 				}
 				if($data) {
 					$this->db->where('obj_id', $objID);
-					$this->db->update('objects', $data);
+					$upd = $this->db->update('objects', $data);
 				}
 			}
 
@@ -261,7 +268,7 @@ class ExpCsvModel extends CI_Model {
 
 				if($data) {
 					$this->db->where('tree_id', $objID);
-					$this->db->update('tree', $data);
+					$upd =  $this->db->update('tree', $data);
 				}
 			}
 
@@ -276,26 +283,31 @@ class ExpCsvModel extends CI_Model {
 					if($insVal == $this->noValue) {
 						continue;
 					}
-
-					# проверим существование строки
-					$this->db->where('objects_data_obj', $objID);
-					$this->db->where('objects_data_field', $dv);
-					$q = $this->db->get('objects_data');
-					if($q->num_rows()) {
+					# проверим существование объекта в базе
+					$this->db->where('obj_id', $objID);
+					$q = $this->db->get('objects');
+					if($q->num_rows())
+					{
+						# проверим существование строки
 						$this->db->where('objects_data_obj', $objID);
 						$this->db->where('objects_data_field', $dv);
-						$this->db->update('objects_data', array('objects_data_value' => $insVal));
-					} else {
-						$data = array(
-							'objects_data_obj' => $objID,
-							'objects_data_field' => $dv,
-							'objects_data_value' => $insVal
-						);
-						$this->db->insert('objects_data', $data);
+						$q = $this->db->get('objects_data');
+						if($q->num_rows()) {
+							$this->db->where('objects_data_obj', $objID);
+							$this->db->where('objects_data_field', $dv);
+							$this->db->update('objects_data', array('objects_data_value' => $insVal));
+						} else {
+							$data = array(
+								'objects_data_obj' => $objID,
+								'objects_data_field' => $dv,
+								'objects_data_value' => $insVal
+							);
+							$this->db->insert('objects_data', $data);
+						}
 					}
 				}
 			}
-			++$i;
+
 		}
 
 		return $i;
@@ -307,6 +319,7 @@ class ExpCsvModel extends CI_Model {
 	public function _csvReadFileInsert($keysUpdate = array(), $keysValues = array(), $fieldsAllows = array())
 	{
 		$dateCreate = date('Y-m-d H:i:s');
+		$lastMod = time();
 
 		// ключи значений для таблицы объектов
 		$dataFieldObjID = array();
@@ -357,6 +370,7 @@ class ExpCsvModel extends CI_Model {
 			if($data) {
 				$objName = $data['obj_name'];
 				$data['obj_date_create'] = $dateCreate;
+				$data['obj_lastmod'] = $lastMod;
 
 				!isset($data['obj_date_publish']) ? $data['obj_date_publish'] = $data['obj_date_create'] : 0;
 				!isset($data['obj_ugroups_access']) ? $data['obj_ugroups_access'] = 'ALL' : 0;
