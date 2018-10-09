@@ -170,6 +170,7 @@ function confirm_delete()
 		<? endif; ?>
 
         <button type="submit" class="btn btn-success ng-scope"><?=$this->lang->line('button_save')?></button>
+        <button type="button" class="btn btn-success ng-scope check-object" data-field-id="<?= $key ?>">Найти у объектов</button>
      </div>
 
      <div class="form-group info-line info-items" style="flex-basis: 100%">

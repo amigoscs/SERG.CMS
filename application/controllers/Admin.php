@@ -1056,7 +1056,7 @@ class Admin extends CI_Controller {
 		$response['status'] = 'OK';
 		$response['count'] = $query->num_rows();
 		$response['info'] = 'Complite';
-		$response['button'] = '<div style="padding: 12px;background: #cbf9cb;margin: 8px 0;">Найдено сохраненных: ' . $response['count'] . '.';
+		$response['button'] = '<div class="df-found" style="padding: 12px;background: #cbf9cb;margin: 8px 0;">Найдено сохраненных: ' . $response['count'] . '.';
 		if($response['count']) {
 			$response['button'] .= ' <a href="#" class="delete-all-fields" data-field-id="'.$fieldID.'">Удалить сохраненные</a>';
 		}

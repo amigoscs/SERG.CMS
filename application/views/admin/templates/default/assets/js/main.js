@@ -451,9 +451,11 @@ jQuery(document).ready(function() {
 			type: 'POST',
 			data: { field_id: fieldID},
 			dataType: 'json',
-			success: function(DATA){
-				console.log(DATA);
+			success: function(DATA) {
 				if(DATA.status == 'OK') {
+					if($Btn.next('.df-found').length) {
+						$Btn.next('.df-found').remove();
+					}
 					$Btn.after(DATA.button);
 				} else {
 					noty_info('error', DATA.info, 'center');
