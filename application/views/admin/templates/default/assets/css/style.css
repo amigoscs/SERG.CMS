@@ -54,6 +54,8 @@ Main Page Content
   padding: 3em 0;
   font-size: 2rem;
 }
+
+.cd-main-content .content-wrapper h2 {padding: 1em 0;font-size: 1.8rem;font-weight: 600;}
 .cd-main-content::before {
   /* never visible - used to check MQ in jQuery */
   display: none;
