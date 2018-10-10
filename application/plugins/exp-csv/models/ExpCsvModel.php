@@ -194,11 +194,17 @@ class ExpCsvModel extends CI_Model {
 		// ключ, где хранится в строке CSV tree_id объекта
 		$keyTreeID = false;
 
+		// ключ, где хранится информация о родителях
+		$keyParentsID = false;
+
 		// ключи значений для таблицы tree
 		$dataFieldTreeID = array();
 
 		// Ключи для data-полей
 		$dataFieldsID = array();
+
+		// дата создания
+		$dateCreate = date('Y-m-d H:i:s');
 
 		foreach($keysUpdate as $key => $value) {
 			if($value == 'obj_id') {
@@ -215,6 +221,10 @@ class ExpCsvModel extends CI_Model {
 
 			if(in_array($value, $fieldsAllows['tree'])) {
 				$dataFieldTreeID[$key] = $value;
+			}
+
+			if($value == 'tree_parent_id') {
+				$keyParentsID = $key;
 			}
 
 			if(strpos($value, $this->prefixDataFields) === 0) {
@@ -237,7 +247,10 @@ class ExpCsvModel extends CI_Model {
 			# если есть ID объекта и поля для objects, то обновляем
 			##
 			if($keyObjID !== false && $dataFieldObjID) {
-				$objID = $arrayValues[$keyObjID];
+				// массив родителей, если их обновление
+				$treeParents = array();
+
+				$objID = trim($arrayValues[$keyObjID]);
 				$data = array();
 				foreach($dataFieldObjID as $dk => $dv) {
 					$insVal = trim($arrayValues[$dk]);
@@ -256,11 +269,15 @@ class ExpCsvModel extends CI_Model {
 			# если есть TREE_ID объекта и поля для tree, то обновляем
 			##
 			if($keyTreeID !== false && $dataFieldTreeID) {
-				$objID = $arrayValues[$keyTreeID];
+				$objID = trim($arrayValues[$keyTreeID]);
 				$data = array();
 				foreach($dataFieldTreeID as $dk => $dv) {
 					$insVal = trim($arrayValues[$dk]);
 					if($insVal == $this->noValue) {
+						continue;
+					}
+					// если в полях есть изменение родителя
+					if($dv == 'tree_parent_id') {
 						continue;
 					}
 					$data[$dv] = $arrayValues[$dk];
@@ -277,7 +294,7 @@ class ExpCsvModel extends CI_Model {
 			##
 			if($keyObjID !== false && $dataFieldsID) {
 				//pr($arrayValues);
-				$objID = $arrayValues[$keyObjID];
+				$objID = trim($arrayValues[$keyObjID]);
 				foreach($dataFieldsID as $dk => $dv) {
 					$insVal = trim($arrayValues[$dk]);
 					if($insVal == $this->noValue) {
@@ -308,6 +325,43 @@ class ExpCsvModel extends CI_Model {
 				}
 			}
 
+			// если в ключах есть obj_id и tree_parent_id, то требуется перепись местоположения в дереве
+			if($keyParentsID !== false && $keyObjID !== false)
+			{
+				$objID = trim($arrayValues[$keyObjID]);
+				$parentsArray = explode('|', $arrayValues[$keyParentsID]);
+				$parentsArray = array_map("trim", $parentsArray);
+
+				// получим оригинальную позицию
+				$this->db->where('tree_object', $objID);
+				$this->db->where('tree_type', 'orig');
+				$query = $this->db->get('tree');
+				$origPos = $query->row_array();
+
+				// если нет оригинального объекта, то ничего не делаем
+				if(!$origPos) {
+					throw new Exception('Не найдена нода для объекта ID: ' . $objID);
+				}
+
+				// удалим ID
+				unset($origPos['tree_id']);
+
+				# будем добавлять позиции
+				foreach($parentsArray as $parentID) {
+					// проверим существование ноды
+					$this->db->where('tree_object', $objID);
+					$this->db->where('tree_parent_id', $parentID);
+					$query = $this->db->get('tree');
+					if(!$query->num_rows()) {
+						$origPos['tree_parent_id'] = $parentID;
+						$origPos['tree_date_create'] = $dateCreate;
+						$origPos['tree_type'] = 'copy';
+						$origPos['tree_short'] = '';
+						$origPos['tree_axis'] = '';
+						$this->db->insert('tree', $origPos);
+					}
+				}
+			}
 		}
 
 		return $i;

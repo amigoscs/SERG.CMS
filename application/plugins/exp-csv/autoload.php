@@ -27,12 +27,16 @@
 	* Version 10.1
 	* Добавлена функция парсера CSV-файла, с помощью которого можно удалить переносы строк в ячейках
 	*
+	* UPD 2018-10-10
+	* Version 10.2
+	* Теперь через CSV можно менять родительские ноды
+	*
 */
 
 $info = array(
 		'name' => app_lang('EXPCSV_AUTOLOAD_PLUGIN_NAME'),
 		'descr' => app_lang('EXPCSV_AUTOLOAD_PLUGIN_DESCRIPTION'),
-		'version' => '10.1',
+		'version' => '10.2',
 		'author' => app_lang('EXPCSV_AUTOLOAD_AUTHOR'),
 		'url' => '//sergcms.ru',
 	);
