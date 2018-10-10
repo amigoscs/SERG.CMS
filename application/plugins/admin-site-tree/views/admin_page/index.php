@@ -58,4 +58,5 @@
 	<li class="divider tree-context-menu-item"><?= app_lang('ADST_MENU_OTHER') ?></li>
 	<li class="delete tree-context-menu-item"><i class="fa fa-trash-o" aria-hidden="true"></i> <a href="#delete"><?= app_lang('ADST_MENU_DEL') ?></a></li>
 	<li class="get-info tree-context-menu-item"><i class="fa fa-info" aria-hidden="true"></i> <a href="#get-info"><?= app_lang('ADST_MENU_INFO') ?></a></li>
+	<li class="get-info tree-context-menu-item"><i class="fa fa-refresh" aria-hidden="true"></i> <a href="#update"><?= app_lang('ADST_MENU_UPDATE_NODE') ?></a></li>
  </ul>

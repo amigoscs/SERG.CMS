@@ -137,12 +137,6 @@ $(document).ready(function(e){
 		},
 		// техническая информация о ноде
 		'get-info': function (node){
-			//$TREE.tree('closeNode', node);
-			$TREE.tree('loadDataFromUrl', node);
-			/*$TREE.loadDataFromUrl(TreeDataUrl, node, function() {
-				 console.log('finished');
-			 });*/
-			return;
 			var HtmlData = '';
 			HtmlData += '<div><span>' + cmsGetLang('astNodeID') + ':</span> <span>' + node.id + '</span></div>';
 			HtmlData += '<div><span>' + cmsGetLang('astObjID') + ':</span> <span>' + node.objectID + '</span></div>';
@@ -157,6 +151,9 @@ $(document).ready(function(e){
 				title: cmsGetLang('astInfoTitle'),
 				height: 300,
 			});
+		},
+		'update': function(node) {
+			$TREE.tree('loadDataFromUrl', node);
 		},
 		// Группировка нод для отправки
 		'group-nodes': function (node){
