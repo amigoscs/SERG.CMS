@@ -36,3 +36,4 @@ $lang['ADST_MENU_OTHER'] = 'Other';
 $lang['ADST_MENU_SORTED'] = 'Sort child';
 $lang['ADST_MENU_SORTED_NAME_ASC'] = 'By name: A - Z';
 $lang['ADST_MENU_SORTED_NAME_DESC'] = 'By name: Z - A';
+$lang['ADST_MENU_UPDATE_NODE'] = 'Update node';

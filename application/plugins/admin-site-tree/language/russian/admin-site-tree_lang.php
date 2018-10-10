@@ -36,3 +36,4 @@ $lang['ADST_MENU_OTHER'] = 'Прочее';
 $lang['ADST_MENU_SORTED'] = 'Сортировать дочерние';
 $lang['ADST_MENU_SORTED_NAME_ASC'] = 'По названию: А - Я';
 $lang['ADST_MENU_SORTED_NAME_DESC'] = 'По названию: Я - А';
+$lang['ADST_MENU_UPDATE_NODE'] = 'Обновить ноду';
