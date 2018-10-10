@@ -19,6 +19,10 @@
 	* UPD 2018-10-09
 	* Добавлен парсер файла
 	*
+	* version 2.2
+	* UPD 2018-10-10
+	* добавлена информация о файле и проверка на заголовки
+	*
 */
 
 class IndexExpCsvLib {
@@ -541,8 +545,9 @@ class IndexExpCsvLib {
 		$data['infoCharset'] = $this->csvCharset;
 		$data['infoDelimiterField'] = $CI->ExpCsvModel->csvDelimiterField;
 		$data['infoEnclosure'] = $CI->ExpCsvModel->csvEnclosure;
-
 		$data['viewUploader'] = false;
+		$data['import_info'] = '';
+
 		$config['upload_path'] = $CI->ExpCsvModel->exportFilePath;
 		$config['allowed_types'] = 'csv';
 		$config['max_size']	= '8000';
@@ -582,6 +587,12 @@ class IndexExpCsvLib {
 
 			$this->CSVLIB->SetOffset(0);
 			$data['tableHeaders'] = $this->CSVLIB->getHeadersCSV();
+
+			// если количество заголовков меньше 2-х, то файл некорректный
+			if(count($data['tableHeaders']) < 2) {
+				throw new Exception('Ошибка! Некорректный файл. Проверьте разделители полей');
+			}
+
 			$data['readResult'] = $this->CSVLIB->Read($this->limitPreview);
 			$tmp = array();
 			$headersCount = count($data['tableHeaders']);
@@ -611,6 +622,12 @@ class IndexExpCsvLib {
 
 			$data['pathFile'] = base64_encode($pathFile);
 			$data['limitPreview'] = $this->limitPreview;
+
+			if(isset($data['tableHeaders']['obj_id']) || isset($data['tableHeaders']['tree_id'])) {
+				$data['import_info'] = 'Для объектов будет выполнено обновление';
+			} else {
+				$data['import_info'] = 'Внимание! Будут созданы новые объекты';
+			}
 
 			$CI->pageContent = $CI->load->view('admin_page/import', $data, true);
 		}

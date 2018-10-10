@@ -23,6 +23,9 @@
 <? return ?>
 <? endif ?>
 
+<? if($import_info): ?>
+<div class="adm-error"><?= $import_info ?></div>
+<? endif ?>
 
 <table class="simple-table">
 	<tr>

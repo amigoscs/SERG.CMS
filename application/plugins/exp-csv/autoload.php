@@ -31,12 +31,16 @@
 	* Version 10.2
 	* Теперь через CSV можно менять родительские ноды
 	*
+	* UPD 2018-10-10
+	* Version 10.21
+	* Информация по загружаемым позициям и проверка заголовков
+	*
 */
 
 $info = array(
 		'name' => app_lang('EXPCSV_AUTOLOAD_PLUGIN_NAME'),
 		'descr' => app_lang('EXPCSV_AUTOLOAD_PLUGIN_DESCRIPTION'),
-		'version' => '10.2',
+		'version' => '10.21',
 		'author' => app_lang('EXPCSV_AUTOLOAD_AUTHOR'),
 		'url' => '//sergcms.ru',
 	);
