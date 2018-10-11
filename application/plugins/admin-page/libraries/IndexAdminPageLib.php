@@ -16,6 +16,10 @@
 	* UPD 2018-09-19
 	* Подключены языковые файлы. Подключение нескольких типов данных к объекту
 	*
+	* version 2.0
+	* UPD 2018-10-11
+	* Переработана логика. Добавлены методы для работы с формой по ajax
+	*
 */
 
 class IndexAdminPageLib {
@@ -74,84 +78,58 @@ class IndexAdminPageLib {
 
 		$message = '';
 		$ins = false;
-		$row_id = 0;
+		$nodeID = 0;
 		$obj_name = '';
-		$updateCanonical = false;
 
-		$row_id = $CI->input->get('row_id');
+		$nodeID = $CI->input->get('row_id');
 
-		if(!$row_id)
-			$row_id = $CI->input->get('node_id');
-
-		if(!$row_id) {
-			return $CI->_render_not_found();
+		if(!$nodeID) {
+			$nodeID = $CI->input->get('node_id');
 		}
 
+		if(!$nodeID) {
+			return $CI->_render_not_found();
+		}
 
 		if($CI->input->get('new')) {
 			$CI->pageCompliteMessage = app_lang('ADMP_INFO_CREATE_COMPLITE');
 		}
 
+		$updateParams = array();
+
 		# update data fields
 		if($data_fields = $CI->input->post('data_field')) {
-			foreach($data_fields as $key => $value)
-			{
-				$ins = $CI->ObjectAdmModel->updateDataFieldsArray($value, $key);
+			foreach($data_fields as $key => $value){
+				$updateParams['data_field'][$key] = $value;
 			}
 		}
 
 		# update object
 		if($data_obj = $CI->input->post('obj')) {
-			foreach($data_obj as $key => $value)
-			{
-				if(isset($value['obj_status'])) {
-					$value['status'] = 'publish';
-				} else {
-					$value['status'] = 'hidden';
-				}
-
-				$obj_name = $value['name'];
-				if(isset($value['data_type']) && $value['data_type']) {
-					$value['data_type'] = '|' . implode('|', $value['data_type']) . '|';
-				} else {
-					$value['data_type'] = '|' . 1 . '|';;
-				}
-
-				$ins = $CI->ObjectAdmModel->updateObject($value, $key);
+			foreach($data_obj as $key => $value) {
+				$updateParams['obj'][$key] = $value;
 			}
 		}
 
 		# update tree
 		if($data_obj2obj = $CI->input->post('tree')) {
-			foreach($data_obj2obj as $key => $value)
-			{
-				# если url пустой, то отправим название объекта
-				if(!trim($value['url'])) {
-					$value['url'] = $obj_name;
-				}
-				# проверим короткую ссылку. Если такая существует в БД, надо менять
-				if($CI->AdminPageModel->checkShortLink($value['short'], $key)) {
-					$value['short'] = $CI->AdminPageModel->createShortLink();
-				}
-
-				$ins = $CI->TreelibAdmModel->updateTree($key, $value);
+			foreach($data_obj2obj as $key => $value) {
+				$updateParams['tree'][$key] = $value;
 			}
-			$updateCanonical = true;
 		}
 
-
-		if($updateCanonical){
-			$CI->TreelibAdmModel->updateCanonicalOblect(0, $row_id);
+		if($updateParams) {
+			if($this->_updateObject($updateParams)) {
+				$CI->pageCompliteMessage = app_lang('ADMP_INFO_UPDATE_COMPLITE');
+			} else {
+				$CI->pageErrorMessage = 'Error update';
+			}
 		}
 
-		$data = $CI->AdminPageModel->loadObjectFromRow($row_id);
-		if(!$data) {
+		if(!$data = $CI->AdminPageModel->loadObjectFromRow($nodeID)) {
 			$CI->pageErrorMessage = app_lang('ADMP_INFO_NOT_FOUND');
+			$CI->pageContent = '';
 			return;
-		}
-
-		if($ins) {
-			$CI->pageCompliteMessage = app_lang('ADMP_INFO_UPDATE_COMPLITE');
 		}
 
 		$data['obj_data_type'] = explode('|', trim($data['obj_data_type'], '|'));
@@ -168,7 +146,7 @@ class IndexAdminPageLib {
 		}
 
 		$data['message'] = $message;
-		$data['form_action'] = info('base_url') . 'admin/admin-page/edit?node_id=' . $row_id;
+		$data['form_action'] = info('base_url') . 'admin/admin-page/edit?node_id=' . $nodeID;
 
 		$tpls = app_get_pages_templates();
 		$data['options_tpl_page'] = $tpls['pages'];
@@ -210,20 +188,181 @@ class IndexAdminPageLib {
 
 		unset($value);
 
-		# если требуется вернуть в JSON
-		if($CI->input->get('jsontrue')) {
-			$out = array();
-			if($ins) {
-				$out['status'] = 'complite';
-				$out['info'] = app_lang('ADMP_INFO_UPDATE_COMPLITE');
-			} else {
-				$out['status'] = 'error';
-				$out['info'] = app_lang('ADMP_INFO_UPDATE_ERROR');
+		$CI->pageContent = $CI->load->view('admin-page/edit', $data, true);
+	}
+
+	/**
+	* ajax_edit_node
+	*
+	* возвращает ноду для редактирования по ajax
+	*
+	* @return json
+	*/
+	public function ajax_edit_node()
+	{
+		$CI = &get_instance();
+		$response = array('status' => 'ERROR', 'info' => '', 'node_info' => array(), 'node_form' => '');
+
+		try {
+			if(!$nodeID = $CI->input->get('node_id')) {
+				throw new Exception(app_lang('ADMP_INFO_PARAMS_NOT_FOUND'));
 			}
-			$out['content'] = $CI->load->view('admin-page/edit', $data, true);
-			echo json_encode($out);
-		} else {
-			$CI->pageContent = $CI->load->view('admin-page/edit', $data, true);
+
+			$OBJ = array();
+			$OBJ = $CI->AdminPageModel->loadObjectFromRow($nodeID);
+			if(!$OBJ) {
+				throw new Exception(app_lang('ADMP_INFO_PAGE_NOT_FOUND'));
+			}
+
+
+			# получим все URLs объекта
+			$OBJ['all_urls'] = array();
+			$OBJ['all_urls'] = $CI->AdminPageModel->getAllTreeObject($OBJ['obj_id']);
+
+			$tpls = app_get_pages_templates();
+			$OBJ['options_tpl_page'] = $tpls['pages'];
+			$OBJ['options_tpl_content'] = $tpls['contents'];
+
+			// все типы данных с полями
+			$OBJ['all_data_types'] = $CI->CommonModel->getAllDataTypesFull();
+			$OBJ['obj_data_type'] = explode('|', trim($OBJ['obj_data_type'], '|'));
+
+			// типы данных объекта с полями
+			$OBJ['objectDataTypes'] = array();
+			foreach($OBJ['obj_data_type'] as $value) {
+				if(isset($OBJ['all_data_types'][$value])) {
+					$OBJ['objectDataTypes'][$value] = $OBJ['all_data_types'][$value];
+				}
+			}
+
+			$OBJ['all_types'] = array();
+			$types = $CI->CommonModel->getAllObjTypes();
+			foreach($types as $key => $value) {
+				$OBJ['all_types'][$key] = $value['obj_types_name'];
+			}
+
+			unset($key, $value, $types);
+
+			# все пользователи. Только админы
+			$value = array();
+			$OBJ['all_users'] = $CI->LoginAdmModel->getAllUsers(2);
+			$OBJ['all_users'][0] = $this->noUserArray[0];
+			$OBJ['all_users_groups'] = $CI->LoginAdmModel->getUsersGroups(true);
+			//pr($data['all_users_groups']);
+			foreach($OBJ['all_users'] as $key => &$value) {
+				$value = $value['users_name'] . ' ('.$value['users_login'].', '.$value['users_email'].')';
+			}
+
+			unset($value);
+
+			// ссылка для перехода по короткой ссылке
+			$OBJ['visibleShortLink'] = true;
+			# если короткая ссылка не создана для объекта
+			if(!$OBJ['tree_short']){
+				$OBJ['tree_short'] =  $CI->AdminPageModel->createShortLink();
+				$OBJ['visibleShortLink'] = false;
+			}
+
+			$response['status'] = 'OK';
+			$response['info'] = app_lang('ADMP_INFO_FORM_CREATE_OK');
+			$response['node_info'] = $OBJ;
+			$response['node_form'] = $CI->pageContent = $CI->load->view('admin-page/edit-form-ajax', $OBJ, true);
+			//echo $response['node_form'];
+			//exit();
+		} catch (Exception $e) {
+			$response['info'] = $e->getMessage();
 		}
+		echo json_encode($response);
+		exit();
+	}
+
+	/**
+	* ajax_edit_node
+	*
+	* возвращает ноду для редактирования по ajax
+	*
+	* @return json
+	*/
+	public function ajax_update_node()
+	{
+		$CI = &get_instance();
+		$response = array('status' => 'ERROR', 'info' => '');
+
+		try {
+
+			if(!$nodeID = $CI->input->post('node_id')) {
+				throw new Exception(app_lang('ADMP_INFO_PAGE_NOT_FOUND'));
+			}
+
+			if(!$CI->input->post('fom_values')) {
+				throw new Exception(app_lang('ADMP_INFO_PARAMS_NOT_FOUND'));
+			}
+			parse_str($CI->input->post('fom_values'), $formValues);
+
+			if($this->_updateObject($formValues)) {
+				$response['status'] = 'OK';
+				$response['info'] = app_lang('ADMP_INFO_FORM_UPDATE_OK');
+			} else {
+				throw new Exception(app_lang('ADMP_INFO_UPDATE_ERROR'));
+			}
+		} catch (Exception $e) {
+			$response['info'] = $e->getMessage();
+		}
+		echo json_encode($response);
+		exit();
+	}
+
+	// обновляет объект
+	private function _updateObject($params)
+	{
+		$CI = &get_instance();
+		# update data fields
+		if(isset($params['data_field'])) {
+			foreach($params['data_field'] as $key => $value){
+				$upd = $CI->ObjectAdmModel->updateDataFieldsArray($value, $key);
+			}
+		}
+
+		# update object
+		if(isset($params['obj'])) {
+			foreach($params['obj'] as $key => $value)
+			{
+				if(isset($value['obj_status'])) {
+					$value['status'] = 'publish';
+				} else {
+					$value['status'] = 'hidden';
+				}
+
+				$obj_name = $value['name'];
+				if(isset($value['data_type']) && $value['data_type']) {
+					$value['data_type'] = '|' . implode('|', $value['data_type']) . '|';
+				} else {
+					$value['data_type'] = '|' . 1 . '|';;
+				}
+
+				$upd = $CI->ObjectAdmModel->updateObject($value, $key);
+			}
+		}
+
+		# update tree
+		if(isset($params['tree'])) {
+			foreach($params['tree'] as $key => $value)
+			{
+				# если url пустой, то отправим название объекта
+				if(!trim($value['url'])) {
+					$value['url'] = $obj_name;
+				}
+				# проверим короткую ссылку. Если такая существует в БД, надо менять
+				if($CI->AdminPageModel->checkShortLink($value['short'], $key)) {
+					$value['short'] = $CI->AdminPageModel->createShortLink();
+				}
+
+				$upd = $CI->TreelibAdmModel->updateTree($key, $value);
+			}
+
+			$CI->TreelibAdmModel->updateCanonicalOblect(0, $key);
+		}
+
+		return true;
 	}
 }

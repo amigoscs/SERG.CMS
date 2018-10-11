@@ -205,7 +205,7 @@ class indexAdminSiteTreeLib {
 	{
 		$CI = &get_instance();
 		$nodeID = $this->POST['row_id'];
-		if($CI->AdstModel->DeleteTreeNode($nodeID)){
+		if($CI->AdstModel->deleteTreeNode($nodeID)){
 			$this->ajaxResponse['status'] = '200';
 			$this->ajaxResponse['info'] = app_lang('ADST_INFO_DE_COMPLITE');
 		}else{

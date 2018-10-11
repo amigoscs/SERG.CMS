@@ -295,25 +295,22 @@ class AdstModel extends CI_Model {
 	*
 	* удалить объект
 	*
-	* @param	id объекта (tree_id)
+	* @param	id ноды (tree_id)
 	* @return	array
 	*/
-	public function DeleteTreeNode($row_id = 0)
+	public function deleteTreeNode($row_id = 0)
 	{
-		$this->load->model('TreelibAdmModel');
 		$childs = array();
 
 		$this->db->where('tree_id', $row_id);
 		$query = $this->db->get('tree');
-		if(!$query->num_rows())
-		{
+		if(!$query->num_rows()){
 			return false;
 		}
 
 		$rows = $query->row_array();
 		# объект оригинальный. Полная зачистка
-		if($rows['tree_type'] == 'orig')
-		{
+		if($rows['tree_type'] == 'orig') {
 			// таблица objects
 			$this->db->where('obj_id', $rows['tree_object']);
 			$this->db->delete('objects');
@@ -325,27 +322,22 @@ class AdstModel extends CI_Model {
 
 
 		$childs = $this->TreelibAdmModel->loadAllChildsTree($row_id);
-		if($childs and isset($childs[$row_id]))
-		{
-			foreach($childs[$row_id] as $key => $value)
-			{
-				$this->DeleteTreeNode($key);
+		if($childs and isset($childs[$row_id])) {
+			foreach($childs[$row_id] as $key => $value) {
+				$this->deleteTreeNode($key);
 			}
 		}
 
-		if($rows['tree_type'] == 'orig')
-		{
+		if($rows['tree_type'] == 'orig') {
 			// таблица tree
 			$this->db->where('tree_object', $rows['tree_object']);
 			$this->db->delete('tree');
-		}
-		else
-		{
+		} else {
 			# удаляем строку tree
 			$this->db->where('tree_id', $row_id);
 			$this->db->delete('tree');
 		}
-		return TRUE;
+		return true;
 	}
 
 

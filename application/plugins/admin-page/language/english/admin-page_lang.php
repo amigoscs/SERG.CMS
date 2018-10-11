@@ -5,11 +5,14 @@
 $lang['ADMP_TITLE_INDEX'] = 'Editing page';
 $lang['ADMP_TITLE_EDIT'] = 'Edit page';
 
-$lang['ADMP_INFO_CREATE_COMPLITE'] = 'Page successfully created';
 $lang['ADMP_INFO_UPDATE_COMPLITE'] = 'Page successfully updated';
 $lang['ADMP_INFO_UPDATE_ERROR'] = 'Upgrade failed';
 $lang['ADMP_INFO_NOT_FOUND'] = 'Object not found';
 $lang['ADMP_INFO_DN_DEL_FOUND'] = 'Removed unused nodes: ';
+$lang['ADMP_INFO_PAGE_NOT_FOUND'] = 'Error! Object not found';
+$lang['ADMP_INFO_PARAMS_NOT_FOUND'] = 'Error! No parameters';
+$lang['ADMP_INFO_FORM_CREATE_OK'] = 'Form successfully created';
+$lang['ADMP_INFO_FORM_UPDATE_OK'] = 'Form successfully updated';
 
 $lang['ADMP_FORM_TITLE_MAIN'] = 'Main';
 $lang['ADMP_FORM_TITLE_ADDITION'] = 'Additionally';

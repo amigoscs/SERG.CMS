@@ -195,6 +195,12 @@ li.jqtree-loading > div {background: url('img/tree-loader.gif') no-repeat 2px 50
 /*###########################
 # доалоговое окно на странице плагина
 ##############*/
+.adst-top-info {padding: 8px;font-size: 11px;background: #e0eff9;margin-bottom: 12px;}
+.adst-top-info p {font-size: 11px}
+.ui-dialog.edit-page.ui-front {z-index: 80}
+.ui-dialog .ui-btn-save-change {background: #5cb85c;border: 1px solid #4cae4c;color:#fff;font-weight: 400;font-size: 14px;padding: 8px 32px;}
+.ui-dialog .ui-btn-save-change:hover {background: #449d44;border-color: #398439;}
+
 #ui-dialog form * {font-size: 12px}
 #ui-dialog form .mce-toolbar * {font-size: 16px}
 #ui-dialog h1 {margin: 15px 0 25px 0}

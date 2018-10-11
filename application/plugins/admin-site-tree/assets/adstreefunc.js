@@ -171,7 +171,6 @@ function treeDeleteNode(node, CallBack)
 // обновление ноды (обновление)
 function treeUpdateNode(node, CallBack)
 {
-	add_loader();
 	$.ajax({
 		url: TreeDataUrl + '?single_load=1&node=' + node.id,
 		type: 'POST',
@@ -184,10 +183,16 @@ function treeUpdateNode(node, CallBack)
 				if(otherNode.objectID == node.objectID && otherNode.id != node.id)
 					$TREE.tree('updateNode', otherNode, {name: DATA[0].name});
 			});
-			remove_loader();
+
+			if(CallBack) {
+				CallBack(DATA);
+			}
 		},
 		error: function(a, b, c) {
 			admin_dialog('Response error', 'Error', 350);
+			if(CallBack) {
+				CallBack(a);
+			}
 		}
 	});
 }
@@ -313,6 +318,114 @@ var treeSortNodes = function(nodeID, sortKey, sortASC, CallBack) {
 			admin_dialog('Response error', 'Error', 350);
 		}
 	});
+}
+
+// возвращает форму редактирования для ноды
+// retur JSON - DATA.node_info, DATA.node_form
+var adstEditNodeDialog = function(node, callBack) {
+	$.ajax({
+		url: '/admin/admin-page/ajax_edit_node?node_id=' + node.id, // url до страницы редактирования
+		type: 'POST',
+		data: { args: 'empty' },
+		dataType: 'json',
+		success: function(DATA) {
+			remove_loader();
+			if(DATA.status == 'OK') {
+				adstEditNodeDialogOpen(DATA.node_info.obj_name, DATA.node_form, node);
+			} else {
+				noty_info('error', DATA.info, 'center');
+			}
+		},
+		error: function(a, b, c) {
+			remove_loader();
+			console.warn(a);
+			console.warn(b);
+			console.warn(c);
+			admin_dialog('<p>Error response', 'Error', 350);
+		}
+	});
+}
+
+// Открытие диалога для редактирования страницы
+// node - нода, по которую надо отобразить в диалоге
+var adstEditNodeDialogOpen = function(dTitle, dContent, node) {
+
+	$('#' + DialogBlockID).html(dContent);
+	$('#' + DialogBlockID).dialog({
+		minWidth: 1000,
+		title: dTitle,
+		height: 600,
+		classes: {
+			"ui-dialog": "edit-page"
+		},
+		buttons: [
+			{
+				text: "Сохранить",
+				//icon: "ui-icon-check",
+				class: "ui-btn-save-change",
+				click: function() {
+					add_loader();
+					var $submitForm = $('#' + DialogBlockID + ' form');
+					var attrAction = $submitForm.attr('action');
+					var formValues = $submitForm.serialize();
+					$.ajax({
+						url: attrAction,
+						type: 'POST',
+						data: {node_id: node.id, fom_values: formValues},
+						dataType: 'json',
+						success: function(DATA) {
+							if(DATA.status == 'OK') {
+								// уничтожим диалог
+								$('#ui-dialog').dialog("destroy").empty();
+
+								// откроем диалог
+								adstEditNodeDialog(node);
+								noty_info('success', DATA.info, 'topRight');
+
+								// обновим ноду в дереве
+								setTimeout(function(){
+									treeUpdateNode(node);
+								}, 400);
+							} else {
+								remove_loader();
+								noty_info('error', DATA.info, 'center');
+							}
+						},
+						error: function(a, b, c) {
+							remove_loader();
+							console.warn(a);
+							console.warn(b);
+							console.warn(c);
+						}
+					});
+				}
+			}
+		],
+		close: function(event, ui) {
+			// уничтожим диалог
+			$('#ui-dialog').dialog("destroy").empty();
+
+			// удалим диалого от datepicker
+			$('.date-picker-wrapper').remove();
+
+			// обновим ноду после закрытия окна
+			add_loader();
+				treeUpdateNode(node, function(){
+				remove_loader();
+			});
+		},
+		modal: false,
+		open: function( event, ui ) {
+			setTimeout(function(){
+				ElfinderViewImgInit();
+				tinymceRun();
+				admin_InitFieldsDate();
+				appShSwitch();
+			},200);
+		}
+	});
+
+	//adstEditFormNode(node);
 }
 /*
 ##########################

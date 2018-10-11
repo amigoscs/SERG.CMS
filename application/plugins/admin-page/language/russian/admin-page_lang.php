@@ -5,11 +5,14 @@
 $lang['ADMP_TITLE_INDEX'] = 'Редактирование страниц';
 $lang['ADMP_TITLE_EDIT'] = 'Редактирование страницы';
 
-$lang['ADMP_INFO_CREATE_COMPLITE'] = 'Страница успешно создана';
 $lang['ADMP_INFO_UPDATE_COMPLITE'] = 'Страница успешно обновлена';
 $lang['ADMP_INFO_UPDATE_ERROR'] = 'Ошибка обновления';
 $lang['ADMP_INFO_NOT_FOUND'] = 'Объект не найден';
 $lang['ADMP_INFO_DN_DEL_FOUND'] = 'Удалены неиспользуемые ноды: ';
+$lang['ADMP_INFO_PAGE_NOT_FOUND'] = 'Ошибка! Объект не найден';
+$lang['ADMP_INFO_PARAMS_NOT_FOUND'] = 'Ошибка! Параметры отсутствуют';
+$lang['ADMP_INFO_FORM_CREATE_OK'] = 'Форма успешно создана';
+$lang['ADMP_INFO_FORM_UPDATE_OK'] = 'Форма успешно обновлена';
 
 $lang['ADMP_FORM_TITLE_MAIN'] = 'Основное';
 $lang['ADMP_FORM_TITLE_ADDITION'] = 'Дополнительно';

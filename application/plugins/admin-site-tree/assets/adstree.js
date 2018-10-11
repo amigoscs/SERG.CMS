@@ -16,13 +16,10 @@ $(document).ready(function(e){
 			CurrentObjType = node.objType;
 			// Add 'icon' before title
 			var $ElemLiTitle = $li.find('.jqtree-title');
-			if(TreeDataTypesIcons['icon_' + CurrentObjType])
-			{
+			if(TreeDataTypesIcons['icon_' + CurrentObjType]) {
 				$li.addClass('status-' + node.objStatus);
 				$ElemLiTitle.attr('data-type-obj', CurrentObjType).before('<img class="img-icon" src="' + TreeDataTypesIcons.icons_path + TreeDataTypesIcons['icon_' + CurrentObjType] + '"/>');
 			}
-
-
 
 			if(node.dataFields.length) {
 				var tText = '';
@@ -34,7 +31,6 @@ $(document).ready(function(e){
 
 			if(node.copyType == 'copy') {
 				$ElemLiTitle.addClass('e-copy');
-				//$li.addClass('object-' + node.copyType);
 			}
 
 			if(node.objectAccess !== 'ALL') {
@@ -334,71 +330,10 @@ $(document).ready(function(e){
 
 	/*двойной клик по ноде*/
 	$TREE.on('tree.dblclick', function(event) {
+		// event.node is the clicked node
 		var node = event.node;
-        // event.node is the clicked node
 		add_loader();
-		$.ajax({
-			url: '/admin/admin-page/edit?row_id=' + node.id, // url до страницы редактирования
-			type: 'POST',
-			data: { args: 'empty' },
-			success: function(data){
-				$('#'+DialogBlockID).html(data);
-				$('#'+DialogBlockID).dialog({
-					minWidth: 1000,
-					title: 'Window',
-					height: 600,
-					close: function(event, ui) {
-						$('.ui-dialog').off('submit.UIDIALOG');
-						// обновим ноду после закрытия окна
-						treeUpdateNode(node);
-					},
-					modal: false,
-					open: function( event, ui ) {
-						var TTT;
-						if(TTT = $('.ui-dialog').find('h1')){
-							$('.ui-dialog-title').text(TTT.text());
-						}
-						// событие на submit формы в диалоговом окне
-						$('.ui-dialog').on('submit.UIDIALOG', 'form', function(){
-							add_loader();
-							var SubmitUrl = $(this).attr('action') + '&jsontrue=1';
-							var Values = $(this).serialize();
-							$.ajax({
-								url: SubmitUrl,
-								type: 'POST',
-								data: Values,
-								dataType: 'json',
-								success: function(DATA){
-									$('#'+DialogBlockID).html(DATA.content);
-									remove_loader();
-									if(DATA.status == 'complite'){
-										noty_info('success', DATA.info, 'topRight');
-									}else{
-										noty_info('error', DATA.info, 'topRight');
-									}
-
-									setTimeout(function(){
-										ElfinderViewImgInit();
-										tinymceRun();
-										admin_InitFieldsDate();
-										appShSwitch();
-									},500);
-								}
-							});
-							return false;
-						});
-					}
-				});
-				remove_loader();
-				setTimeout(function(){
-					ElfinderViewImgInit();
-					tinymceRun();
-					admin_InitFieldsDate();
-					appShSwitch();
-				},500);
-
-			  }
-		});
+		adstEditNodeDialog(node);
     });
 
 
