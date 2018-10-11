@@ -9,7 +9,9 @@ $tablesArray[$tablePrefix . 'data2data']['create'] = "CREATE TABLE __TABLE__ (
 		data2data_id INT(8) NOT NULL AUTO_INCREMENT COMMENT 'main id',
 		data2data_type_id INT(3),
 		data2data_field_id INT(3),
-		PRIMARY KEY  (data2data_id)
+		PRIMARY KEY  (data2data_id),
+		INDEX (data2data_type_id),
+		INDEX (data2data_field_id)
 	) ENGINE = MyISAM CHARACTER SET utf8 COLLATE utf8_general_ci;";
 $tablesArray[$tablePrefix . 'data2data']['insert'] = "";
 
@@ -38,7 +40,11 @@ $tablesArray[$tablePrefix . 'data_types_fields']['create'] = "CREATE TABLE __TAB
 		types_fields_flag4 TINYINT(1) NOT NULL,
 		types_fields_order INT(5),
 		types_fields_status ENUM('publish', 'hidden') NOT NULL DEFAULT 'publish',
-		PRIMARY KEY  (types_fields_id)
+		PRIMARY KEY  (types_fields_id),
+		INDEX (types_fields_flag1),
+		INDEX (types_fields_flag2),
+		INDEX (types_fields_flag3),
+		INDEX (types_fields_flag4)
 	) ENGINE = MyISAM CHARACTER SET utf8 COLLATE utf8_general_ci;";
 $tablesArray[$tablePrefix . 'data2data']['insert'] = "";
 
@@ -55,7 +61,14 @@ $tablesArray[$tablePrefix . 'tree']['create'] = "CREATE TABLE __TABLE__ (
 		tree_folow TINYINT(1) NOT NULL,
 		tree_short VARCHAR(50),
 		tree_axis VARCHAR(100),
-		PRIMARY KEY  (tree_id)
+		PRIMARY KEY  (tree_id),
+		INDEX (tree_parent_id),
+		INDEX (tree_object),
+		INDEX (tree_url),
+		INDEX (tree_type),
+		INDEX (tree_folow),
+		INDEX (tree_short),
+		INDEX (tree_axis)
 	) ENGINE = MyISAM CHARACTER SET utf8 COLLATE utf8_general_ci;";
 $tablesArray[$tablePrefix . 'tree']['insert'] = "INSERT INTO __TABLE__
 		(`tree_id`, `tree_parent_id`, `tree_object`, `tree_url`, `tree_date_create`, `tree_order`, `tree_type`, `tree_type_object`, `tree_folow`, `tree_short`, `tree_axis`)
@@ -101,7 +114,9 @@ $tablesArray[$tablePrefix . 'objects_data']['create'] = "CREATE TABLE __TABLE__ 
 		objects_data_obj BIGINT(20) NOT NULL,
 		objects_data_field INT(8) NOT NULL,
 		objects_data_value LONGTEXT,
-		PRIMARY KEY  (objects_data_id)
+		PRIMARY KEY  (objects_data_id),
+		INDEX (objects_data_obj),
+		INDEX (objects_data_field)
 	) ENGINE = MyISAM CHARACTER SET utf8 COLLATE utf8_general_ci;";
 $tablesArray[$tablePrefix . 'objects_data']['insert'] = "";
 
@@ -137,7 +152,9 @@ $tablesArray[$tablePrefix . 'options']['create'] = "CREATE TABLE __TABLE__ (
 		options_group VARCHAR(100),
 		options_last_mod VARCHAR(100),
 		options_descr VARCHAR(255),
-		PRIMARY KEY  (options_id)
+		PRIMARY KEY  (options_id),
+		INDEX (options_key),
+		INDEX (options_group)
 	) ENGINE = MyISAM CHARACTER SET utf8 COLLATE utf8_general_ci;";
 $tablesArray[$tablePrefix . 'options']['insert'] = "INSERT INTO __TABLE__
 		(`options_id`, `options_key`, `options_value`, `options_group`, `options_last_mod`, `options_descr`)
@@ -155,7 +172,8 @@ $tablesArray[$tablePrefix . 'plugins']['create'] = "CREATE TABLE __TABLE__ (
 		plugins_version VARCHAR(10) NOT NULL,
 		plugins_author VARCHAR(255) NOT NULL,
 		plugins_group VARCHAR(10),
-		PRIMARY KEY  (plugins_id)
+		PRIMARY KEY  (plugins_id),
+		INDEX (plugins_folder)
 	) ENGINE = MyISAM CHARACTER SET utf8 COLLATE utf8_general_ci;";
 $tablesArray[$tablePrefix . 'plugins']['insert'] = "INSERT INTO __TABLE__
 		(`plugins_id`, `plugins_name`, `plugins_folder`, `plugins_version`, `plugins_author`, `plugins_group`)
@@ -200,7 +218,8 @@ $tablesArray[$tablePrefix . 'users']['create'] = "CREATE TABLE __TABLE__ (
 		users_activate TINYINT NOT NULL,
 		users_lang VARCHAR(20),
 		users_status ENUM('publish', 'hidden') NOT NULL DEFAULT 'hidden',
-		PRIMARY KEY  (users_id)
+		PRIMARY KEY  (users_id),
+		INDEX (users_group)
 	) ENGINE = MyISAM CHARACTER SET utf8 COLLATE utf8_general_ci;";
 $tablesArray[$tablePrefix . 'users']['insert'] = "INSERT INTO __TABLE__
 		(`users_id`, `users_group`, `users_login`, `users_password`, `users_name`, `users_image`, `users_email`, `users_phone`, `users_phone_active`, `users_date_registr`, `users_date_birth`, `users_last_visit`, `users_ip_register`, `users_activate_key`, `users_site_key`, `users_activate`, `users_lang`, `users_status`)
