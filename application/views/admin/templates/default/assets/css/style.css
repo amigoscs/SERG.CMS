@@ -1777,7 +1777,7 @@ input[type="button"].btn-block {
 .plugin-rows-container {flex-direction:column}
 .plugin-row {border-bottom: 1px solid #3e454c;position: relative;display: flex;flex-direction: row;flex-wrap: wrap;align-items: flex-start;justify-content: flex-start;padding:8px;}
 .plugin-row:hover {background: #f3f3f3}
-.plugin-row h2 {font-size:16px; line-height:36px; font-weight:600;flex-basis: 100%}
+.cd-main-content .plugin-row h2 {font-size:16px; line-height:36px; font-weight:600;flex-basis: 100%;padding: 0}
 .plugin-row h2 i {font-style:normal;border: 1px solid #ccc;padding: 0 8px;display: inline-block;vertical-align: baseline;}
 .plugin-row .plugin-buttons {flex-basis: 100%;position: relative}
 .plugin-row .plugin-buttons > * {margin-left: 8px}
@@ -1787,7 +1787,7 @@ input[type="button"].btn-block {
 .plugin-buttons .pl-setting:hover {background: #2c3136}
 .plugin-buttons .pl-setting i {font-style: normal}
 @media only screen and (min-width: 768px) {
-	.plugin-row h2 {flex-basis: calc(100% - 400px)}
+	.cd-main-content .plugin-row h2 {flex-basis: calc(100% - 400px)}
 	.plugin-row .plugin-buttons {flex-basis: 400px}
 	.plugin-row p {flex-basis: 100%}
 }

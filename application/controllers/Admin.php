@@ -97,12 +97,19 @@
 	* version 16.7
 	* Индексация сайта сделана через AJAX (page_index_site())
 	*
+	* UPD 2018-10-11
+	* version 16.8
+	* Добавлены системные плагины
+	*
 */
 
 class Admin extends CI_Controller {
 
 	// установленные плагины
 	private $installPlugins;
+
+	// необходимы плагины
+	private $requiredPlugins;
 
 	// Скрипты и стили у плагинов
 	private $pluginsAssetsTop, $pluginsAssetsBottom, $pluginAssetsLang;
@@ -172,6 +179,7 @@ class Admin extends CI_Controller {
 		$this->WIDJETS = array();
 		$this->pluginsAssetsTop = array();
 		$this->pluginsAssetsBottom = array();
+		$this->requiredPlugins = array('admin-page', 'admin-site-tree', 'exp-csv', 'elfinder');
 		$this->pluginAssetsLang = array(APP_BASE_URL . 'application/views/admin/templates/' . APP_CMS_TEMPLATE . '/assets/lang/' . $this->userInfo['lang'] . '/panel_lang_script.js');
 
 		$this->pageContent =
@@ -316,6 +324,7 @@ class Admin extends CI_Controller {
 
 		// меню для плагинов
 		$this->data['left_nav_menu'] = array();
+		$this->data['left_system_plugins_menu'] = array();
 		$menuSegment = $this->uri->segment(2);
 		if($plugins = $this->installPlugins)
 		{
@@ -355,12 +364,17 @@ class Admin extends CI_Controller {
 				$this->installPlugins[$dir]['options'] = array();
 
 				# создадим меню с учетом разрешений
-				$activeMenu = FALSE;
+				$activeMenu = false;
 				if($admin_menu) {
 					if(in_array($this->userInfo['group_type'], $this->accesses[$dir]['access'])) {
-						$menuSegment == $dir ? $activeMenu = TRUE : $activeMenu = FALSE;
-						$this->data['left_nav_menu'][$this->installPlugins[$dir]['plugins_name']]['link'] = $dir;
-						$this->data['left_nav_menu'][$this->installPlugins[$dir]['plugins_name']]['active'] = $activeMenu;
+						$menuSegment == $dir ? $activeMenu = true : $activeMenu = false;
+						if(in_array($dir, $this->requiredPlugins)) {
+							$this->data['left_system_plugins_menu'][$this->installPlugins[$dir]['plugins_name']]['link'] = $dir;
+							$this->data['left_system_plugins_menu'][$this->installPlugins[$dir]['plugins_name']]['active'] = $activeMenu;
+						} else {
+							$this->data['left_nav_menu'][$this->installPlugins[$dir]['plugins_name']]['link'] = $dir;
+							$this->data['left_nav_menu'][$this->installPlugins[$dir]['plugins_name']]['active'] = $activeMenu;
+						}
 					}
 				}
 
@@ -563,6 +577,7 @@ class Admin extends CI_Controller {
 
 		$data['plugins_array'] = $dir_map;
 		$data['plugins_install'] = $this->installPlugins;
+		$data['notUninstall'] = $this->requiredPlugins;
 
 		$this->pageContent = $this->load->view('admin/plugins-install', $data, true);
 		return $this->_render_content();
@@ -1247,9 +1262,6 @@ class Admin extends CI_Controller {
 		} else {
 			$this->data['infoerror'] = '';
 		}
-
-		# меню плагинов
-		isset($this->data['left_nav_menu']) ?: $this->data['left_nav_menu'] = '';
 
 		# системное меню
 		$this->data['system_nav_menu'] = array();

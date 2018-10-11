@@ -156,6 +156,7 @@ $lang['MENU_SETTING_OBJECTS'] = 'Объекты';
 $lang['MENU_SETTING_USERS'] = 'Пользователи';
 $lang['MENU_TITLE_ACTION'] = 'Действия';
 $lang['MENU_TITLE_SYSTEM'] = 'Система';
+$lang['MENU_TITLE_SYSTEM_PLUGINS'] = 'Системные плагины';
 $lang['MENU_TITLE_PLUGINS'] = 'Активные плагины';
 
 $lang['SECOND_MENU_USERS_USERS_LIST'] = 'Список пользователей';

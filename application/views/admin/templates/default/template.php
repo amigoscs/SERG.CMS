@@ -127,7 +127,21 @@ $CI = &get_instance();
 
 				endforeach;
 			?>
+			<li class="cd-label"><?= app_lang('MENU_TITLE_SYSTEM_PLUGINS') ?></li>
+			<?
+				// меню системных плагинов
+				foreach($left_system_plugins_menu as $key => $value):
+					$liClass = 'cl-' . $value['link'];
+					$li = $value['active'] ? '<li class="active ' . $liClass . '">' : '<li class="' . $liClass . '">';
+						echo $li;
+						echo '<a href="' . APP_ADMIN_URL . '/' . $value['link'] . '">' . $key . '</a>';
+						echo '</li>';
 
+				endforeach;
+			?>
+
+
+			<? if($left_nav_menu): ?>
 			<li class="cd-label"><?= app_lang('MENU_TITLE_PLUGINS') ?></li>
             <?
 				// меню плагинов
@@ -138,9 +152,10 @@ $CI = &get_instance();
 		   			echo $li;
 		   			echo '<a href="' . APP_ADMIN_URL . '/' . $value['link'] . '">' . $key . '</a>';
 		   			echo '</li>';
-
 				endforeach;
+			endif;
 			?>
+
 
 			</ul>
 		</nav>

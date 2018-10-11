@@ -156,6 +156,7 @@ $lang['MENU_SETTING_OBJECTS'] = 'Objects';
 $lang['MENU_SETTING_USERS'] = 'Users';
 $lang['MENU_TITLE_ACTION'] = 'Actions';
 $lang['MENU_TITLE_SYSTEM'] = 'System';
+$lang['MENU_TITLE_SYSTEM_PLUGINS'] = 'System plugins';
 $lang['MENU_TITLE_PLUGINS'] = 'Plugins';
 
 $lang['SECOND_MENU_USERS_USERS_LIST'] = 'List of users';
