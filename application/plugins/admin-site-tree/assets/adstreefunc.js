@@ -365,6 +365,8 @@ var adstEditNodeDialogOpen = function(dTitle, dContent, node) {
 				class: "ui-btn-save-change",
 				click: function() {
 					add_loader();
+					// сохраним контенты текстовых редакторов
+					tinyMCE.triggerSave();
 					var $submitForm = $('#' + DialogBlockID + ' form');
 					var attrAction = $submitForm.attr('action');
 					var formValues = $submitForm.serialize();
@@ -402,10 +404,11 @@ var adstEditNodeDialogOpen = function(dTitle, dContent, node) {
 			}
 		],
 		close: function(event, ui) {
+			window.onbeforeunload = null;
 			// уничтожим диалог
 			$('#ui-dialog').dialog("destroy").empty();
 
-			// удалим диалого от datepicker
+			// удалим диалог от datepicker
 			$('.date-picker-wrapper').remove();
 
 			// обновим ноду после закрытия окна
