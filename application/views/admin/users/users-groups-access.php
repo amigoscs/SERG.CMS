@@ -24,14 +24,14 @@
 			echo '<td>';
 			if($key == 1) {
 				echo '<input type="hidden" name="accesses[' . $keyAcc . '][]" value="' . $key . '"/>';
-				echo '<input type="checkbox" name="accessesjoker[]" value="' . $key . '" checked onclick="return false;" disabled/>';
+				echo '<input type="checkbox" id="sulb' . $keyAcc . $key . '" name="accessesjoker[]" value="' . $key . '" checked onclick="return false;" disabled/><label for="sulb' . $keyAcc . $key . '"></label>';
 			} elseif($key == 2) {
-				echo '<input type="checkbox" name="accessesjoker[]" value="' . $key . '" onclick="return false;" disabled/>';
+				echo '<input type="checkbox" id="sulb' . $keyAcc . $key . '" name="accessesjoker[]" value="' . $key . '" onclick="return false;" disabled/><label for="sulb' . $keyAcc . $key . '"></label>';
 			} else {
 				if(in_array($key, $valueAcc['access'])) {
-					echo '<input type="checkbox" name="accesses[' . $keyAcc . '][]" value="' . $key . '" checked />';
+					echo '<input type="checkbox" id="sulb' . $keyAcc . $key . '" name="accesses[' . $keyAcc . '][]" value="' . $key . '" checked /><label for="sulb' . $keyAcc . $key . '"></label>';
 				} else {
-					echo '<input type="checkbox" name="accesses[' . $keyAcc . '][]" value="' . $key . '"/>';
+					echo '<input type="checkbox" id="sulb' . $keyAcc . $key . '" name="accesses[' . $keyAcc . '][]" value="' . $key . '"/><label for="sulb' . $keyAcc . $key . '"></label>';
 				}
 			}
 			echo '</td>';
