@@ -210,3 +210,6 @@ li.jqtree-loading > div {background: url('img/tree-loader.gif') no-repeat 2px 50
 .jqtree-element i.fa-lock {color: #b20;margin-left: 0;vertical-align: bottom;opacity: 1;font-size: 12px;}
 .jqtree-element i.fa-lock + i {margin-left: 0;}
 .jqtree-element i.fa-clock-o {color: #00a024;opacity: 1;margin-top: 2px}
+#ui-dialog .chosen-container-multi .chosen-choices li.search-choice {padding: 6px 20px 6px 5px}
+#ui-dialog .chosen-container-single .chosen-single span {line-height: 2.8em}
+#ui-dialog .chosen-container-multi .chosen-choices {border-radius: 4px}

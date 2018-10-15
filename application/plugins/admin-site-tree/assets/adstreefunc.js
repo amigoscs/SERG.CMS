@@ -424,6 +424,7 @@ var adstEditNodeDialogOpen = function(dTitle, dContent, node) {
 				tinymceRun();
 				admin_InitFieldsDate();
 				appShSwitch();
+				appChosenInit();
 			},200);
 		}
 	});
