@@ -244,7 +244,6 @@ function admin_InitFieldsDate()
 				}
 			})
 		})
-
 	}
 }
 
@@ -348,4 +347,11 @@ var appIndexSite = function(step) {
 			remove_loader();
 		}
 	});
+}
+
+/*
+* инициализация chosen
+*/
+var appChosenInit = function() {
+	$('select').chosen({});
 }

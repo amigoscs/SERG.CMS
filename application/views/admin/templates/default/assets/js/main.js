@@ -510,6 +510,9 @@ jQuery(document).ready(function() {
 		return false;
 	});
 
+	// Chosen
+	appChosenInit();
+
 	/* поля типа DATE*/
 	admin_InitFieldsDate();
 

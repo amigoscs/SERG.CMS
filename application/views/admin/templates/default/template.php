@@ -33,6 +33,7 @@ $CI = &get_instance();
     <link rel="stylesheet" href="<?= $ADMIN_CSS_URL ?>unit.css"> <!-- CSS units -->
     <link rel="stylesheet" href="<?= $ADMIN_CSS_URL ?>jquery.contextMenu.css"> <!-- CSS context menu -->
     <link rel="stylesheet" href="<?= $ADMIN_CSS_URL ?>daterangepicker.min.css"> <!-- CSS datepicker -->
+    <link rel="stylesheet" href="<?= $ADMIN_ASSETS_URL ?>chosen/chosen.min.css"> <!-- CSS chosen -->
 
     <style>
 		.content-wrapper i.mce-ico {font-style:normal;}
@@ -64,7 +65,8 @@ $CI = &get_instance();
     <script src="<?= $ADMIN_JS_URL ?>jquery.menu-aim.js"></script>
     <script src="<?= $ADMIN_JS_URL ?>moment-with-locales.min.js"></script>
     <script src="<?= $ADMIN_JS_URL ?>jquery.daterangepicker.min.js"></script>
-	<script src="<?= $ADMIN_ASSETS_URL ?>/tinymce/tinymce.min.js"></script>
+	<script src="<?= $ADMIN_ASSETS_URL ?>tinymce/tinymce.min.js"></script>
+	<script src="<?= $ADMIN_ASSETS_URL ?>chosen/chosen.jquery.min.js"></script>
 
     <script src="<?= $ADMIN_JS_URL ?>inputmask.js"></script>
     <script src="<?= $ADMIN_JS_URL ?>template_func.js"></script>
@@ -167,6 +169,7 @@ $CI = &get_instance();
         </div> <!-- .content-wrapper -->
 	</main> <!-- .cd-main-content -->
     <!-- <footer>Page rendered in <strong>{elapsed_time}</strong> seconds. <?php echo  (ENVIRONMENT === 'development') ?  'CodeIgniter Version <strong>' . CI_VERSION . '</strong>' : '' ?> SQL - <?=$CI->db->query_count?></footer>-->
+
 	<!--assets bottom-->
     <?= $ASSETS_BOTTOM ?>
 
