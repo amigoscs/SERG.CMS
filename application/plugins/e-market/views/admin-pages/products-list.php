@@ -48,12 +48,18 @@
 	</div>
 </form>
 
+
 <? if($products): ?>
 <table class="product-list cart-info-table">
 <thead>
 	<tr>
-		<th>Наименование</th>
-		<th>Артикул</th>
+		<?
+		foreach($tableHeaders as $keyHead => $valueHead) {
+			echo '<th>';
+			echo $valueHead;
+			echo '</th>';
+		}
+		?>
 		<th></th>
 	</tr>
 </thead>
@@ -61,17 +67,22 @@
 <? $imageFieldID = app_get_option('product_image_field', 'to-cart', '0'); ?>
 <? foreach($products as $key => $value):
 	$PAGE = PAGEINIT($value);
-	/*if($ElfinderModel){
-		$ElfinderModel->load($PAGE->data($imageFieldID));
-	}*/
 
 	?>
 	<tr class="status-<?= $PAGE->obj_status ?>">
-		<td>
-			<input id="inn<?= $PAGE->id ?>" type="checkbox" data-id="<?= $PAGE->id ?>"/>
-			<label for="inn<?= $PAGE->id ?>"><?= $PAGE->name ?></label>
-		</td>
-		<td><?= $PAGE->data($fieldSKU) ?></td>
+		<?
+		foreach($tableHeaders as $keyHead => $valueHead) {
+			echo '<td>';
+			if($keyHead == 'name') {
+				echo '<input id="inn' . $PAGE->id . '" type="checkbox" data-id="' . $PAGE->id . '"/>';
+				echo '<label for="inn' . $PAGE->id . '">' . $PAGE->name . '</label>';
+			} else {
+				echo $PAGE->data($keyHead);
+			}
+			echo '</td>';
+		}
+		?>
+
 		<td>
 			<a href="/admin/admin-page/edit?node_id=<?= $PAGE->nodeID ?>" target="_blank" class="btn btn-default" title="Редактировать объект в отдельном окне">Edit</a>
 			<a href="<?= $PAGE->link ?>" target="_blank" class="btn btn-default" target="_blank" title="Посмотреть страницу на сайте">Open</a>

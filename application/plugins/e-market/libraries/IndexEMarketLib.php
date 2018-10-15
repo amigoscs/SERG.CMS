@@ -5,6 +5,10 @@
 
 	* UPD 2018-04-17
 	* version 0.1
+	*
+	* UPD 2018-04-17
+	* version 0.2
+	* product_list - добалена возможность вывода дополнительных полей
 
 */
 
@@ -359,11 +363,27 @@ class IndexEMarketLib {
 		$data['filterViewImage'] = 0;
 		$data['filterTypeObject'] = 8;
 		$data['allTypeObject'] = array(8 => 'Товарная позиция', 11 => 'Группа товаров');
-		$data['fieldSKU'] = app_get_option('product_code_field', 'e-market', 0);
+		$data['fieldSKU'] = 0;
 
-		//$data['activeDataTypes'] = app_get_option('product_view_fields', 'e-market', 8);
-		//$data['imageFieldID'] = app_get_option('product_image_field', 'e-market', 0);
-		//$data['ElfinderModel'] = FALSE;
+		# заголовки таблицы
+		$data['tableHeaders'] = array(
+			'name' => 'Наименование',
+		);
+
+		if($fSku = app_get_option('product_code_field', 'e-market', 0)) {
+			$data['tableHeaders'][$fSku] = 'Артикул';
+			$data['fieldSKU'] = $fSku;
+		}
+
+		if($tmp = app_get_option('e_market_products_table_headers', 'e-market', '')) {
+			$tmp = explode(',', $tmp);
+			$CI->CommonModel->getOnlyPublish = true;
+			$dataFields = $CI->CommonModel->getAllDataTypesFields();
+			foreach($tmp as $fKey) {
+				$data['tableHeaders'][$fKey] = $dataFields[$fKey]['types_fields_name'];
+			}
+			unset($tmp);
+		}
 
 		$data['getTextValue'] = $data['getFieldValue'] = '';
 
@@ -474,6 +494,7 @@ class IndexEMarketLib {
 			'obj_keywords' => $CI->ExpCsvModel->activeFieldsExport['obj_keywords']['name'],
 			'obj_anons' => $CI->ExpCsvModel->activeFieldsExport['obj_anons']['name'],
 			'obj_content' => $CI->ExpCsvModel->activeFieldsExport['obj_content']['name'],
+			'obj_ugroups_access' => $CI->ExpCsvModel->activeFieldsExport['obj_ugroups_access']['name'],
 		);
 
 		$data['infoDelimiterField'] = $CI->ExpCsvModel->csvDelimiterField;
