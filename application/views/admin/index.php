@@ -31,8 +31,8 @@
 <? if($widjets): ?>
 <h2 class="admin-widjets-title">Активные виджеты</h2>
 <ul class="widjets-list">
-<? foreach($widjets as $widjetContent): ?>
-	<li id="<?= $key ?>">
+<? foreach($widjets as $key => $widjetContent): ?>
+	<li id="wdj<?= $key ?>">
 		<?= $widjetContent ?>
 	</li>
 <? endforeach; ?>
