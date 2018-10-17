@@ -9,6 +9,10 @@
 	* UPD 2018-09-07
 	* version 2.0
 	* правки и переработка логики
+	*
+	* UPD 2018-10-17
+	* version 2.1
+	* переделана логика. Добавлен метод _ajaxChangeDescriptionProduct() для изменения описания товара
 */
 
 class Ajax extends CI_Model {
@@ -18,17 +22,39 @@ class Ajax extends CI_Model {
 	private $response;
 
 	function __construct($post, $get)
-    {
-        parent::__construct();
+	{
+		parent::__construct();
 		$this->post = $post;
 		$this->get = $get;
 		$this->response = array('status' => 'ERROR', 'info' => '');
-    }
+
+	}
+
+	/*Принимает AJAX*/
+	public function emarket()
+	{
+		try {
+			if(!isset($this->get['action'])) {
+				throw new Exception('Error response');
+			}
+			$method = str_replace('_', '-', $this->get['action']);
+			$method = ucwords($method, '-');
+			$method = '_ajax' . str_replace('-', '', $method);
+			if(method_exists($this, $method)) {
+				$this->$method();
+			} else {
+				throw new Exception('Emarket: method is not exists');
+			}
+			$this->renderResponse();
+		} catch (Exception $e) {
+			$this->renderResponse($e->getMessage());
+		}
+	}
 
 	/*
 	* метод возвращает корзину по Ajax
 	*/
-	public function carInfo()
+	private function _ajaxCarInfo()
 	{
 		$CI = &get_instance();
 		$this->response['status'] = 'OK';
@@ -41,7 +67,7 @@ class Ajax extends CI_Model {
 	/*
 	* метод добавления нового товара в корзину
 	*/
-	public function addToCart()
+	private function _ajaxAddToCart()
 	{
 		$CI = &get_instance();
 		// корзина - число.
@@ -58,13 +84,13 @@ class Ajax extends CI_Model {
 			$this->response['info'] = 'Error';
 			$this->response['cartInfo'] = array();
 		}
-		$this->renderResponse();
+		//$this->renderResponse();
 	}
 
 	/*
 	* метод изменения количесва товара в корзине
 	*/
-	public function changeCountProduct()
+	private function _ajaxChangeCountProduct()
 	{
 		$CI = &get_instance();
 
@@ -93,9 +119,60 @@ class Ajax extends CI_Model {
 	}
 
 	/*
+	* метод изменения примечания в товара в корзине
+	*/
+	private function _ajaxChangeDescriptionProduct()
+	{
+		$CI = &get_instance();
+		$cartID = 0;
+		$cartType = 1;
+		$productID = 0;
+
+		// если не пришел товар
+		if(!isset($this->post['productID'])) {
+			throw new Exception('Product no id');
+		}
+
+		$productID = $this->post['productID'];
+
+		// если есть запрос на корзину
+		if(isset($this->post['cartID'])) {
+			$cartID = $this->post['cartID'];
+		}
+
+		// если пришел тип корзины
+		if(isset($this->post['cartType'])) {
+			$cartType = $this->post['cartType'];
+		}
+
+		// загрузим корзину
+		$cartInfo = $CI->EmarketModel->cartInfo($cartID, $cartType);
+
+		if(!$cartInfo) {
+			throw new Exception('Cart is not exists');
+		}
+
+		// если товара нет, прерываем
+		if(!isset($cartInfo['products'][$productID])) {
+			throw new Exception('Product is not exists');
+		}
+
+		$cartID = $cartInfo['ecart_id'];
+
+		if($res = $CI->EmarketModel->editProduct($productID, array('descr' => strip_tags($this->post['description'])), $cartID, $cartType)) {
+			$this->response['status'] = 'OK';
+			$this->response['info'] = 'Описание сохранено';
+			$this->response['product_id'] = $res;
+			$this->response['cartInfo'] = $CI->EmarketModel->cartInfo($cartID);
+		} else {
+			$this->response['info'] = 'Ошибка изменения параметров';
+		}
+	}
+
+	/*
 	* метод удаления товара из корзины
 	*/
-	public function deleteProduct()
+	private function _ajaxDeleteProduct()
 	{
 		$CI = &get_instance();
 		if(!$this->post['cartID'] * 1) {
@@ -115,8 +192,11 @@ class Ajax extends CI_Model {
 	}
 
 
-	private function renderResponse()
+	private function renderResponse($info = '')
 	{
+		if($info) {
+			$this->response['info'] = $info;
+		}
 		echo json_encode($this->response);
 		//pr($this->response);
 	}

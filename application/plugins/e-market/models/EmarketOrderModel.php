@@ -9,6 +9,10 @@
 	* UPD 2018-08-02
 	* Version 0.2
 	* Добавлена запись SKU в массив при оформлении заказа. Тема письма вынесена в настройки
+	*
+	* UPD 2018-10-17
+	* Version 0.3
+	* Исправлена ошибка сохранения описания для товара. Удаление тегов в пользовательских полях
 
 */
 
@@ -97,9 +101,14 @@ class EmarketOrderModel extends CI_Model
 			$sku = isset($value['object']['data_fields'][$this->EmarketModel->SKUkeyField]) ? $value['object']['data_fields'][$this->EmarketModel->SKUkeyField]['objects_data_value'] : 0;
 			$dataUpdateTable = array(
 				'ecartp_object_sku' => $sku,
-				'ecartp_price' => $value['ecartp_price'],
-				'ecartp_descr' => isset($productDescription[$key]) ? $productDescription[$key] : '',
+				'ecartp_price' => $value['ecartp_price']
 			);
+
+			// если есть в post описание для товара
+			if(isset($productDescription[$key])) {
+				$dataUpdateTable['ecartp_descr'] = strip_tags($productDescription[$key]);
+			}
+
 			$this->db->where('ecartp_cart_id', $cartID);
 			$this->db->where('ecartp_object_id', $key);
 			if(!$this->db->update('ecart_products', $dataUpdateTable)) {
@@ -208,24 +217,12 @@ class EmarketOrderModel extends CI_Model
 			$dataUpdateTable = array(
 				'ecartfval_cart_id' => $cartID,
 				'ecartfval_field_id' => $key,
-				'ecartfval_value' => $value,
+				'ecartfval_value' => trim(strip_tags($value)),
 			);
 			$upd = $this->db->insert('ecart_fields_values', $dataUpdateTable);
 		}
 		return $upd;
 	}
-
-	/*
-	* создание писем для админа и покупателя
-
-	public function createMail($cart = array(), $admin = false)
-	{
-		if($admin) {
-			return $this->EmarketModel->EmarketViewsLib->renderOrderMailAdmin();
-		}
-
-		pr($cart);
-	}*/
 
 	/*
 	* отправка писем на адреса

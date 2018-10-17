@@ -1,19 +1,21 @@
-var emarketAjaxRequest;
-emarketAjaxRequest = function(method, params, callBack) {
+var emarketAjaxRequest = function(method, params, callBack) {
   $.ajax({
-	url: '/ajax/plugin/e-market/' + method,
+	url: '/ajax/plugin/e-market/emarket?action=' + method,
 	type: 'POST',
 	data: params,
     dataType: 'json',
-	success: function(data) {
+    success: function(DATA) {
 		if(callBack) {
-			callBack(data);
+			callBack(DATA);
 		}
 	},
     error: function(a, b, c) {
+      console.warn(a);
+      console.warn(b);
+      console.warn(c);
       if(callBack) {
-  			callBack({status: 'ERROR'});
-  		}
+  		callBack({status: 'ERROR'});
+  	}
     }
   });
 }
@@ -26,10 +28,9 @@ cartType - тип корзины (корзина (1), лист желаний (2
 cartID - id корзины. Если есть, то cartType не учитывается
 callBack - функция callback
 */
-var emarketAddToCart;
-emarketAddToCart = function(productID, productCount, cartType, cartID, callBack) {
+var emarketAddToCart = function(productID, productCount, cartType, cartID, callBack) {
   var params = {'productId': productID, 'productCount': productCount, 'cartType': cartType, 'cartID': cartID};
-  emarketAjaxRequest('addToCart', params, callBack);
+  emarketAjaxRequest('add-to-cart', params, callBack);
 }
 
 /*
@@ -40,10 +41,9 @@ cartType - тип корзины (корзина (1), лист желаний (2
 cartID - id корзины. Если есть, то cartType не учитывается
 callBack - функция callback
 */
-var emarketChangeCountProduct;
-emarketChangeCountProduct = function(productID, productCount, cartType, cartID, callBack) {
+var emarketChangeCountProduct = function(productID, productCount, cartType, cartID, callBack) {
   var params = {'productId': productID, 'productCount': productCount, 'cartType': cartType, 'cartID': cartID};
-  emarketAjaxRequest('changeCountProduct', params, callBack);
+  emarketAjaxRequest('change-count-product', params, callBack);
 }
 
 /*
@@ -53,8 +53,20 @@ cartType - тип корзины (корзина (1), лист желаний (2
 cartID - id корзины. Если есть, то cartType не учитывается
 callBack - функция callback
 */
-var emarketDeleteProduct
-emarketDeleteProduct = function(productID, cartType, cartID, callBack) {
+var emarketDeleteProduct = function(productID, cartType, cartID, callBack) {
   var params = {'productId': productID, 'cartType': cartType, 'cartID': cartID};
-  emarketAjaxRequest('deleteProduct', params, callBack);
+  emarketAjaxRequest('delete-product', params, callBack);
+}
+
+/*
+// изменить описание в товаре
+productID - id товара (объекта)
+cartType - тип корзины (корзина (1), лист желаний (2), список сравнения (3))
+cartID - id корзины. Если есть, то cartType не учитывается иначе берется наполняемая с указанным типом
+descrText - текст, который надо сохранить
+callBack - функция callback
+*/
+var emarketChangeDescriptionProduct = function(productID, cartType, cartID, descrText, callBack) {
+    var params = {'productID': productID, 'cartType': cartType, 'cartID': cartID, 'description': descrText};
+    emarketAjaxRequest('change-description-product', params, callBack);
 }

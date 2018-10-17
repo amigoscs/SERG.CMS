@@ -44,7 +44,8 @@ if(!$editOrder):
         <? foreach($order['products'] as $key => $value): ?>
         <tr>
         	<td>
-				<p><strong>
+				<p>
+					<strong>
 					<?
 					if(isset($value['object']['path_url'])) {
 						echo '<a href="' . $value['object']['path_url'] . '" title="Посмотреть на сайте" target="_blank">' . $value['ecartp_object_name'] . '</a>';
@@ -52,8 +53,9 @@ if(!$editOrder):
 						echo $value['ecartp_object_name'];
 					}
 					?>
-					</strong></p>
-				<p><?= $value['ecartp_descr'] ?></p>
+					</strong>
+				</p>
+				<div class="product-description"><?= $value['ecartp_descr'] ?></div>
 			</td>
             <td><?= $value['ecartp_object_sku'] ?></td>
             <td><?= $value['ecartp_count'] ?></td>

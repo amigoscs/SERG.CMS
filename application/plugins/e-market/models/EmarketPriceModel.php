@@ -2,10 +2,15 @@
 
 /*
 	* EmarketPriceModel - модель Emarket для работы с ценами
-
+	*
 	* Version 1.0
 	* UPD 2018-04-20
 	* первая версия
+	*
+	* Version 1.01
+	* UPD 2018-10-17
+	* добавлены новые правила округления конечных цен
+	*
 */
 
 class EmarketPriceModel extends CI_Model {
@@ -37,39 +42,6 @@ class EmarketPriceModel extends CI_Model {
 	// сохраненное правило округления
 	public $rulesPriceID;
 
-	// очищать массив с ценами при загрузке новой цены
-	//private $clearArray = FALSE;
-
-	// ID последнего загруженного товара
-	//public $lastObjID = 0;
-
-	// массив цен товара array[PRODUCTID][GROUPID] = array(VALUES)
-	//public $productPrices = array();
-
-
-
-	// цена, по которой товар идет в корзину
-	//public $priceToCart = 0;
-
-	// коэффициент на перевод валюты
-	//public $currDiff = 1;
-
-	// массив ID полей с ценами
-	//public $productPricesFields = array();
-
-	// массив ID полей старых цен
-	//public $productOldPricesFields = array();
-
-	// Здесь хранятся курсы валют для групп пользователей
-	//public $priceCurDataField = array();
-
-	// здесь хранятся ID полей с наличием товара
-	//public $productStock;
-
-
-
-
-
 	function __construct()
     {
         parent::__construct();
@@ -78,20 +50,7 @@ class EmarketPriceModel extends CI_Model {
 
 	function reset()
 	{
-		$this->userGroupID = 0;
 		$this->productPrices = array();
-		//$this->priceToCart = 0;
-		//$this->currDiff = 1;
-		//$this->productPricesFields = array();
-		$this->productOldPricesFields = array();
-		$this->priceCurDataField = array();
-		$this->productStock = array();
-		$this->lastObjID = 0;
-		$this->clearArray = FALSE;
-
-
-		// init
-		//$this->init();
 	}
 
 	# init
@@ -139,6 +98,9 @@ class EmarketPriceModel extends CI_Model {
 			2 => 'Оклуглить в большую сторону до целого числа',
 			3 => 'Оклуглить в большую сторону до сотых',
 			4 => 'Оклуглить в большую сторону до десятых',
+			5 => 'Оклуглить до 10-ти',
+			6 => 'Оклуглить до 50-ти',
+			7 => 'Оклуглить до 100',
 		);
 
 		$this->rulesPriceID = app_get_option('price_rules', 'e-market', 1);
@@ -257,22 +219,6 @@ class EmarketPriceModel extends CI_Model {
 		return $out;
 	}
 
-	# получить информацию о наличии
-	/*public function getStock($objID = 0, $groupID = 0)
-	{
-		if(!$objID)
-			$objID = $this->lastObjID;
-
-		if(!$groupID)
-			$groupID = $this->userGroupID;
-
-		if(isset($this->productPrices[$objID][$groupID]['STOCK'])){
-			return $this->productPrices[$objID][$groupID]['STOCK'];
-		}else{
-			return 0;
-		}
-	}*/
-
 	# получить id валюты товара
 	public function getCurrency()
 	{
@@ -327,6 +273,9 @@ class EmarketPriceModel extends CI_Model {
 		// 2 => 'Оклуглить в большую сторону до целого числа',
 		// 3 => 'Оклуглить в большую сторону до сотых',
 		// 4 => 'Оклуглить в большую сторону до десятых',
+		//5 => 'Оклуглить до 10-ти',
+		//6 => 'Оклуглить до 50-ти',
+		//7 => 'Оклуглить до 100',
 
 		if($this->rulesPriceID == 2) {
 			return ceil($price);
@@ -336,60 +285,23 @@ class EmarketPriceModel extends CI_Model {
 		} else if($this->rulesPriceID == 4) {
 			$price = ceil($price * 10);
 			return $price / 10;
+		} else if($this->rulesPriceID == 5 || $this->rulesPriceID == 6 || $this->rulesPriceID == 7){
+			// если число дробное, то округляем его до целого
+			$price = ceil($price);
+			$rate = 10;
+			if($this->rulesPriceID == 6) {
+				$rate = 50;
+			} else if($this->rulesPriceID == 7) {
+				$rate = 100;
+			}
+
+			// разделим число на коэффициент, а результат округлим в большую сторону. Потом умножим число на округленный коэффициент
+			$price = ceil($price / $rate);
+			$price = $rate * $price;
+			return $price;
+
 		} else {
 			return $price;
 		}
 	}
-
-
-
-	###########################
-	###########################
-	###########################
-	###########################
-	###########################
-	###########################
-	###########################
-	###########################
-
-	/*
-	* формирование скидки
-	*/
-	public function createSaleDiff($productID, $dataFields){
-		return 1;
-	}
-
-	/*
-	* формирование информации о курсе валют для товара
-	*/
-	public function productCurrencyInfo($productID, $dataFields){
-		# если заданное значение DATA-поля есть у товара, то ориентируемся на него
-		if(isset($dataFields[$this->EmarketOptionsModel->currencyField])) {
-
-		} else {
-			# поля такого у товара нет, поэтому бурем по-умолчанию
-			//$this->productPrices[$productID][$this->userGroupID]['CURRENCY_INFO'] = $this->productsCurrency
-		}
-
-		return;
-
-		if(isset($this->EmarketOptionsModel->allCurrency[$this->EmarketOptionsModel->currencyField])) {
-			$this->productPrices[$productID][$this->userGroupID]['CURRENCY_INFO'] = $this->EmarketOptionsModel->allCurrency[$this->EmarketOptionsModel->currencyField];
-		}
-
-		pr($this->EmarketOptionsModel->currencyField);
-		pr($this->userGroupID);
-		pr($this->EmarketOptionsModel->allCurrency);
-
-		return 1;
-
-		$this->productPrices;
-	}
-
-	# получить цену товара
-
-
-
-
-
 }
