@@ -166,8 +166,9 @@ class EmarketModel extends CI_Model
 	/*
 	* возвращает информацию о текущей корзине
 	* если нет ID корзины, то поиск ведется по ее типу и userKey. Статус корзины для поиска - НАПОЛНЯЕТСЯ
+	* $userKey - если true, то корзина берется по $userKey пользователя
 	*/
-	public function cartInfo($cartID = 0, $typeID = 0)
+	public function cartInfo($cartID = 0, $typeID = 0, $userKey = false)
 	{
 		// если нет типа - то тип - КОРЗИНА ТОВАРОВ
 		if(!$typeID) {
@@ -189,6 +190,11 @@ class EmarketModel extends CI_Model
 
 		# получим корзину
 		$this->db->where('ecart_id', $cartID);
+
+		if($userKey) {
+			$this->db->where('ecart_user_key', $this->userKey);
+		}
+
 		$query = $this->db->get('ecart');
 		if(!$query->num_rows()) {
 			return array();
