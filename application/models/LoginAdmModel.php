@@ -24,6 +24,10 @@
 	* version 4.1
 	* Переделана проверка доступа пользователя
 	*
+	* UPD 2018-10-23
+	* version 4.2
+	* Правки в коде. strip_tags для метода login
+	*
 */
 
 class LoginAdmModel extends CI_Model {
@@ -147,22 +151,28 @@ class LoginAdmModel extends CI_Model {
 	*/
 	public function login($login, $pass, $expire = 0, $remember = FALSE)
 	{
-		if(!$expire)
+		if(!$expire) {
 			$expire = $this->timeLoginDefault;
+		}
 
 		if($this->allowedNumberAttempts > 0)
 		{
-			if(!$this->session->userdata('attempts_login'))
+			if(!$this->session->userdata('attempts_login')) {
 				$this->numberAttempts = 0;
-			else
+			} else {
 				$this->numberAttempts = $this->session->userdata('attempts_login');
+			}
 
 			# попыток ввода пароля превышает разрешенное количество. Редирект на главную
 			if($this->LoginAdmModel->allowedNumberAttempts <= $this->LoginAdmModel->numberAttempts) {
 				//redirect(info('base_url'), 'refresh');
-				return FALSE;
+				return false;
 			}
 		}
+
+		// чистка
+		$login = strip_tags($login);
+		$pass = strip_tags($pass);
 
 		$result = $this->checkLoginPass($login, $this->encryptPassword($pass));
 		if($result and $result['users_status'] == 'publish')
@@ -196,14 +206,14 @@ class LoginAdmModel extends CI_Model {
 			$this->session->unset_userdata('attempts_login');
 
 			// если надо запомнить пользователя
-			if($remember)
-			{
+			if($remember) {
 				set_cookie('user_login', $user_data['login'], $this->timeLoginRemember, '', '/');
 				set_cookie('user_pass', $user_data['password'], $this->timeLoginRemember, '', '/');
 			}
 
 			return $user_data;
 		}
+
 		$this->session->set_userdata('attempts_login', $this->session->userdata('attempts_login') + 1);
 		return array();
 	}
@@ -236,12 +246,9 @@ class LoginAdmModel extends CI_Model {
 	*/
 	public function checkAdmin()
 	{
-		if($this->session->userdata('id') and $this->session->userdata('group') == '2')
-		{
+		if($this->session->userdata('id') and $this->session->userdata('group') == '2') {
 			return $this->session->userdata();
-		}
-		else
-		{
+		} else {
 			return false;
 		}
 	}
@@ -259,7 +266,7 @@ class LoginAdmModel extends CI_Model {
 		{
 			switch($this->session->userdata('group_type')) {
 				case '2':
-					return FALSE;
+					return false;
 					break;
 				case '1':
 					// no break
@@ -368,11 +375,13 @@ class LoginAdmModel extends CI_Model {
 		isset($args['status']) ? $data['users_status'] = $args['status'] : $data['users_status'] = 'publish';
 		isset($args['lang']) ? $data['users_lang'] = $args['lang'] : $data['users_lang'] = app_get_option('site_lang', 'site', 'english');
 
-		if(!$data['users_login'] OR !$data['users_password'] OR !$data['users_email'])
+		if(!$data['users_login'] OR !$data['users_password'] OR !$data['users_email']) {
 			return false;
+		}
 
-		if($this->checkEmailUser($data['users_email']))
+		if($this->checkEmailUser($data['users_email'])) {
 			return false;
+		}
 
 		$response = $data;
 
@@ -399,7 +408,7 @@ class LoginAdmModel extends CI_Model {
 		}
 		else
 		{
-			return FALSE;
+			return false;
 		}
 	}
 
@@ -482,36 +491,6 @@ class LoginAdmModel extends CI_Model {
 				//return $user_data;
 			}
 		}
-
-		# если нет в куках user_key, то убиваем сессию
-
-		/*$this->session->sess_destroy();
-		delete_cookie('user_login');
-		delete_cookie('user_pass');
-		delete_cookie('user_key');*/
-
-
-		/*
-		if(!$this->session->userdata('user_key'))
-		{
-			if(!$user_key = get_cookie('user_key')) {
-				$user_key = md5($this->session->userdata('__ci_last_regenerate') . time());
-				$to_cook = TRUE;
-			}
-
-			$this->session->set_userdata(array('user_key' => $user_key));
-			if($to_cook) {
-				//$expire = time() + 60 * 60 * 24 * 1; // 1 день
-				$expire = 60 * 60 * 24 * 1;
-				set_cookie('user_key', $user_key, $expire, '', $path = '/');
-			}
-		}
-		// возможно разлогинивание произошло по истечению времени. Тогда этот ключ надо обновить
-		else
-		{
-
-		}*/
-
 	}
 
 	/*
@@ -530,9 +509,10 @@ class LoginAdmModel extends CI_Model {
 	*/
 	public function qualityPassword($pass = '')
 	{
-		$return = TRUE;
-		if(mb_strlen($pass) < 6)
-			$return = FALSE;
+		$return = true;
+		if(mb_strlen($pass) < 6) {
+			$return = false;
+		}
 
 		return $return;
 	}
@@ -545,11 +525,13 @@ class LoginAdmModel extends CI_Model {
 		if($publish){
 			$this->db->where('users_group_status', 'publish');
 		}
+
 		$query = $this->db->get('users_group');
 		$usersGroups = array();
 		foreach($query->result_array() as $row) {
 			$usersGroups[$row['users_group_id']] = $row;
 		}
+
 		return $usersGroups;
 	}
 
@@ -560,7 +542,7 @@ class LoginAdmModel extends CI_Model {
 	{
 		$data = array();
 		if(!$groupID) {
-			return FALSE;
+			return false;
 		}
 
 		isset($args['group_name']) ? $data['users_group_name'] = $args['group_name'] : 0;
@@ -570,14 +552,15 @@ class LoginAdmModel extends CI_Model {
 
 		// группы 1 и 2 можно обновлять только описание
 		if($groupID < 3){
-			if(!isset($data['users_group_descr']))
+			if(!isset($data['users_group_descr'])) {
 				$data = array();
-			else
+			} else {
 				$data = array('users_group_descr' => $data['users_group_descr']);
+			}
 		}
 
 		if(!$data) {
-			return FALSE;
+			return false;
 		}
 
 		$this->db->where('users_group_id', $groupID);
@@ -590,15 +573,17 @@ class LoginAdmModel extends CI_Model {
 	public function createUsersGroup($args = array())
 	{
 		$data = array();
+
 		$data['users_group_name'] = isset($args['group_name']) ? $args['group_name'] : 'NO NAME';
 		$data['users_group_type'] = isset($args['group_type']) ? $args['group_type'] : 1;
 		$data['users_group_descr'] = isset($args['group_descr']) ? $args['group_descr'] : '';
 		$data['users_group_status'] = isset($args['group_status']) ? $args['group_status'] : 'publish';
 
-		if($this->db->insert('users_group', $data))
+		if($this->db->insert('users_group', $data)) {
 			return $this->db->insert_id();
-		else
-			return FALSE;
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -607,8 +592,9 @@ class LoginAdmModel extends CI_Model {
 	public function deleteUsersGroup($groupID = 0)
 	{
 		// группы 1 и 2 удалять нельзя
-		if($groupID < 3)
-			return FALSE;
+		if($groupID < 3) {
+			return false;
+		}
 
 		$this->db->where('users_group_id', $groupID);
 		// надо еще сбросить группу у всех пользователей
@@ -624,11 +610,14 @@ class LoginAdmModel extends CI_Model {
 	public function getAllUsers($userGroup = 0, $userID = 0)
 	{
 		$users = array();
-		if($userID)
-			$this->db->where('users_id', $userID);
 
-		if($userGroup)
+		if($userID) {
+			$this->db->where('users_id', $userID);
+		}
+
+		if($userGroup) {
 			$this->db->where('users_group', $userGroup);
+		}
 
 		$this->db->order_by('users_date_registr', 'DESC');
 		$query = $this->db->get('users');
@@ -666,8 +655,7 @@ class LoginAdmModel extends CI_Model {
 		$this->email->to(trim($adminEmail));
 		$this->email->send();
 
-		if(isset($args['users_email']))
-		{
+		if(isset($args['users_email'])) {
 			$this->email->clear();
 			$this->email->protocol = $emailProtocol;
 			$this->email->from($fromEmail, $fromName);
@@ -678,7 +666,8 @@ class LoginAdmModel extends CI_Model {
 			$this->email->to(trim($args['users_email']));
 			$this->email->send();
 		}
-		return TRUE;
+
+		return true;
 	}
 
 	/*
@@ -709,8 +698,7 @@ class LoginAdmModel extends CI_Model {
 		$this->email->to(trim($adminEmail));
 		$this->email->send();
 
-		if(isset($args['users_email']))
-		{
+		if(isset($args['users_email'])) {
 			$this->email->clear();
 			$this->email->protocol = $emailProtocol;
 			$this->email->from($fromEmail, $fromName);
@@ -721,6 +709,7 @@ class LoginAdmModel extends CI_Model {
 			$this->email->to(trim($args['users_email']));
 			$this->email->send();
 		}
-		return TRUE;
+
+		return true;
 	}
 }

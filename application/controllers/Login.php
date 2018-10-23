@@ -18,6 +18,10 @@
 	* version 0.4
 	* обработка xss. мелкие правки
 	*
+	* UPD 2018-10-23
+	* version 0.5
+	* Мелкие правки
+	*
  */
 
 class Login extends CI_Controller {
@@ -89,7 +93,7 @@ class Login extends CI_Controller {
 
 			if(!$res) {
 				$this->data['error'] = true;
-				if($res === FALSE) {
+				if($res === false) {
 					$this->data['message'] = app_lang('INFO_ERROR_ATTEMPTS_EXC');
 				} else {
 					$this->data['message'] = app_lang('INFO_ERROR_PASS_LOGIN');
@@ -106,9 +110,9 @@ class Login extends CI_Controller {
 					redirect($this->redirectUrl, 'refresh');
 				} else {
 					if($res['group'] == 2){
-						redirect(info('base_url') . 'admin/', 'refresh');
+						redirect(info('baseUrl') . 'admin', 'refresh');
 					}else{
-						redirect(info('base_url'), 'refresh');
+						redirect(info('baseUrlTrim'), 'refresh');
 					}
 				}
 
@@ -127,13 +131,13 @@ class Login extends CI_Controller {
 	*
 	* @return	string
 	*/
-	private function page_logout($redirect = '')
+	private function page_logout()
 	{
 		$this->session->sess_destroy();
 		delete_cookie('user_login');
 		delete_cookie('user_pass');
 		delete_cookie('user_key');
-		redirect($this->redirectUrl, 'refresh');
+		redirect(info('baseUrlTrim'), 'refresh');
 	}
 
 	/**

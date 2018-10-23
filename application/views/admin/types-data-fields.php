@@ -8,6 +8,10 @@
 	* UPD 2018-09-20
 	* Правки в коде - неверные ключи для создания нового поля
 	*
+	* version 2.2
+	* UPD 2018-10-23
+	* Статус поля
+	*
 */
 
 $fieldsTypes = info('typesFields');
@@ -34,7 +38,7 @@ function confirm_delete()
 
 <ul class="list-draggable" data-sort-table="data_types_fields" data-sort-field="types_fields_order">
 <? foreach($fields_array as $key => $val): ?>
-	<li data-id="<?= $key ?>">
+	<li data-id="<?= $key ?>" class="status-<?= $val['types_fields_status'] ?>">
 	<? if(isset($val['data_types'][$type_fields])): ?>
      <div class="col-inner-2 show-hide-switch hide green" data-sh-id="tdf_<?= $key ?>">
     <? else: ?>

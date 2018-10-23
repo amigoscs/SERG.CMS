@@ -41,6 +41,10 @@
 	* Version 6.6
 	* Добавлен метод runIndexesDates() - проверка корректных дат у объектов и исправление
 	*
+	* UPD 2018-10-23
+	* Version 6.7
+	* правки - типы данных получени по статусу
+	*
 */
 
 class CommonModel extends CI_Model {
@@ -56,7 +60,7 @@ class CommonModel extends CI_Model {
 
 	public function reset()
 	{
-		$this->getOnlyPublish = FALSE;
+		$this->getOnlyPublish = false;
 		$this->indexArray = $this->indexOutArray = array();
 	}
 
@@ -212,11 +216,15 @@ class CommonModel extends CI_Model {
 	/**
 	* получить все типы данных
 	*/
-	public function getAllDataTypes($typeID = 0)
+	public function getAllDataTypes($typeID = 0, $publish = true)
 	{
 		$out = array();
 		if($typeID) {
 			$this->db->where('data_types_id', $typeID);
+		}
+
+		if($publish) {
+			$this->db->where('data_types_status', 'publish');
 		}
 
 		$this->db->order_by('data_types_order', 'ASC');
@@ -233,9 +241,9 @@ class CommonModel extends CI_Model {
 	}
 
 	/**
-	* получить все типы данных включая изх поля
+	* получить все типы данных включая их поля
 	*/
-	public function getAllDataTypesFull()
+	public function getAllDataTypesFull($publish = true)
 	{
 		$data_types = $this->getAllDataTypes();
 		$data_types_id = array_keys($data_types);
@@ -243,6 +251,11 @@ class CommonModel extends CI_Model {
 		$fields = array();
 		$this->db->join('data2data', 'data_types_fields.types_fields_id = data2data.data2data_field_id');
 		$this->db->where_in('data2data_type_id', $data_types_id);
+
+		if($publish) {
+			$this->db->where('types_fields_status', 'publish');
+		}
+
 		$this->db->order_by('types_fields_order', 'asc');
 
 		$query = $this->db->get('data_types_fields');

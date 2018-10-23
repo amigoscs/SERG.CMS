@@ -20,6 +20,10 @@
 	* UPD 2018-10-11
 	* Переработана логика. Добавлены методы для работы с формой по ajax
 	*
+	* version 2.1
+	* UPD 2018-10-23
+	* В редактировании типы данных получение только опубликованных
+	*
 */
 
 class IndexAdminPageLib {
@@ -153,7 +157,7 @@ class IndexAdminPageLib {
 		$data['options_tpl_content'] = $tpls['contents'];
 
 		// все типы данных с полями
-		$data['all_data_types'] = $CI->CommonModel->getAllDataTypesFull();
+		$data['all_data_types'] = $CI->CommonModel->getAllDataTypesFull(true);
 
 		// типы данных объекта с полями
 		$data['objectDataTypes'] = array();
