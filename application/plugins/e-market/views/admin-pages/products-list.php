@@ -64,10 +64,13 @@
 	</tr>
 </thead>
 <tbody>
-<? $imageFieldID = app_get_option('product_image_field', 'to-cart', '0'); ?>
+<?
+$imageFieldID = app_get_option('product_image_field', 'to-cart', '0');
+$exportNodes = array();
+?>
 <? foreach($products as $key => $value):
 	$PAGE = PAGEINIT($value);
-
+	$exportNodes[] = $value['tree_id'];
 	?>
 	<tr class="status-<?= $PAGE->obj_status ?>">
 		<?
@@ -93,7 +96,9 @@
 <? endforeach ?>
 </tbody>
 </table>
+<? $exportLink = '/admin/exp-csv/export_node_id?node_id=' . implode('-', $exportNodes); ?>
 <div class="button-row">
+	<a href="<?= $exportLink ?>" class="btn btn-default" title="Export objects" target="_blank">Экспорт списка</a>
 	<button type="button" name="checked_all" class="btn btn-default">Отметить все</button>
 	<button type="button" name="unchecked_all" class="btn btn-default">Снять отметки</button>
 	<button type="button" name="delete_objects" class="btn btn-danger">Удалить отмеченные</button>
