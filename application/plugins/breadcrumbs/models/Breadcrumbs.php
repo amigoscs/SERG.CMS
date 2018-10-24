@@ -9,7 +9,11 @@
 	* UPD 2018-07-10
 	* Version 2.2
 	* Добавлен тег title к ссылке в крошках
-
+	*
+	* UPD 2018-10-24
+	* Version 2.3
+	* Совместимость с версией CMS 7.4
+	*
 */
 
 class Breadcrumbs extends CI_Model {
@@ -66,7 +70,7 @@ class Breadcrumbs extends CI_Model {
 		$CI = &get_instance();
 		$viewHomePage = app_get_option('visible_home', 'breadcrumbs', 'no');
 		# показывать на главной
-		if($CI->data['IsHome'] && $viewHomePage == 'no'){
+		if($CI->Template->IsHome && $viewHomePage == 'no'){
 			return '';
 		}
 

@@ -72,6 +72,11 @@ class Index extends CI_Controller {
 	 * Теперь шаблон сайта в файле info.php может содержать массив стилей и скриптов для подключения на сайта
 	 * Массив assets теперь: $headAssets и $bodyAssets
 	 *
+	 * Version 15.0
+	 * UPD 2018-10-24
+	 * Создан синглетон для перенных шаблона. Теперь перенные в шаблон добавляеются так: Template::getInstance()->VAR_NAME = VAR_VALUE или $CI->Template->VAR_NAME = VAR_VALUE;
+	 * Получить значения можно так: Template::getInstance()->VAR_NAME или $CI->Template->VAR_NAME
+	 *
 	 */
 
 	// Шаблон страницы
@@ -110,8 +115,11 @@ class Index extends CI_Controller {
 	// путь до папки views активного шаблона
 	public $viewsTemplatePath;
 
-	// Массив данных шаблона
+	// Массив данных шаблона (устарело в версии 7.4. Не использовать в шаблонах!)
 	public $dataTemplate;
+
+	// Объект данных шаблона
+	public $Template;
 
 	public function __construct()
 	{
@@ -153,6 +161,12 @@ class Index extends CI_Controller {
 			if(isset($info['assets']['body'])) {
 				$this->bodyAssets = $info['assets']['body'];
 			}
+		}
+
+		# переменные шаблона
+		if(file_exists(APPPATH . 'libraries/Template.php')) {
+			require_once(APPPATH . 'libraries/Template.php');
+			$this->Template = Template::getInstance();
 		}
 
 		// автозагрузка плагинов
@@ -231,13 +245,13 @@ class Index extends CI_Controller {
 		if($start_page == 'ajax')
 			return $this->run_ajax($args);
 
-		$this->dataTemplate['IsHome'] = FALSE;
+		$this->Template->IsHome = false;
 		# вывод главной
 		if($start_page == 'index' and !$this->uri->uri_to_assoc(1))
 		{
 			# для главной только одна страница
 			$this->urls = array('index');
-			$this->dataTemplate['IsHome'] = TRUE;
+			$this->Template->IsHome = true;
 		}
 		else
 		{
@@ -264,7 +278,6 @@ class Index extends CI_Controller {
 
 		if(!$this->BreakRemap)
 		{
-
 			$content = $this->CommonModel->loadPagesFromURL($this->urls);
 			$this->return_active_page($content, 0);
 
@@ -276,31 +289,31 @@ class Index extends CI_Controller {
 			$this->urlobjects->load($this->loading);
 
 			# запись head
-			$this->dataTemplate['PAGE_TITLE'] = $this->urlobjects->title;
-			$this->dataTemplate['PAGE_DESCRIPTION'] = $this->urlobjects->description;
-			$this->dataTemplate['PAGE_KEYWORDS'] = $this->urlobjects->keywords;
+			$this->Template->PAGE_TITLE = $this->urlobjects->title;
+			$this->Template->PAGE_DESCRIPTION = $this->urlobjects->description;
+			$this->Template->PAGE_KEYWORDS = $this->urlobjects->keywords;
 			$this->content_template = $this->urlobjects->curTplContent;
 			$this->page_template = $this->urlobjects->curTplPage;
 
 
 			# настройка canonical. Если он не задан, то ищем автоматически и сразу обновляем его для объекта
 			// если главная, то каноникал главный
-			if($this->dataTemplate['IsHome']) {
-				$this->dataTemplate['PAGE_CANONICAL'] = APP_BASE_URL_NO_SLASH;
+			if($this->Template->IsHome) {
+				$this->Template->PAGE_CANONICAL = APP_BASE_URL_NO_SLASH;
 			} else {
 				$realCanonical = '';
-				$this->dataTemplate['PAGE_CANONICAL'] = $this->urlobjects->canonical;
+				$this->Template->PAGE_CANONICAL = $this->urlobjects->canonical;
 				# если это оригинальный объект и текущая ссылка НЕ короткая, то обновим каноникал если он не совпадает.
 				if($this->urlobjects->object('tree_type') == 'orig' && $this->currentUrl != $this->urlobjects->tree_short) {
 					$realCanonical = $this->currentUrl;
 					// если каноникал не совпадает с записаным, то обновляем
-					if($realCanonical != $this->dataTemplate['PAGE_CANONICAL']) {
+					if($realCanonical != $this->Template->PAGE_CANONICAL) {
 						# обновим canonical
 						$this->TreelibAdmModel->updateCanonicalOblect(0, $this->urlobjects->nodeID);
 					}
-					$this->dataTemplate['PAGE_CANONICAL'] = $realCanonical;
+					$this->Template->PAGE_CANONICAL = $realCanonical;
 				}
-				$this->dataTemplate['PAGE_CANONICAL'] = APP_BASE_URL . $this->dataTemplate['PAGE_CANONICAL'];
+				$this->Template->PAGE_CANONICAL = APP_BASE_URL . $this->Template->PAGE_CANONICAL;
 			}
 
 			# счет количества просмотров
@@ -309,7 +322,6 @@ class Index extends CI_Controller {
 
 		if(!$this->BreakRender){
 			$this->_render_content();
-			$this->_render_template();
 		}
 	}
 
@@ -445,20 +457,19 @@ class Index extends CI_Controller {
 	{
 		# если сжатие не включено, отдаем как есть
 		if(app_get_option('compress_style', 'site', 'no') === 'no') {
-			$this->dataTemplate['TOP_ASSETS_ARRAY'] = $this->headAssets;
-			$this->dataTemplate['BOTTOM_ASSETS_ARRAY'] = $this->bodyAssets;
+			$this->Template->TOP_ASSETS_ARRAY = $this->headAssets;
+			$this->Template->BOTTOM_ASSETS_ARRAY = $this->bodyAssets;
 		} else {
 			$libName = 'CompressStyles';
 			if(file_exists(APPPATH . 'libraries/' . $libName . '.php')) {
 				require_once(APPPATH . 'libraries/' . $libName . '.php');
 				$CompressClass = new $libName;
-				$this->dataTemplate['TOP_ASSETS_ARRAY'] = $CompressClass->compressHeadAssets($this->headAssets);
-				$this->dataTemplate['BOTTOM_ASSETS_ARRAY'] = $CompressClass->compressBodyAssets($this->headAssets);
+				$this->Template->TOP_ASSETS_ARRAY = $CompressClass->compressHeadAssets($this->headAssets);
+				$this->Template->BOTTOM_ASSETS_ARRAY = $CompressClass->compressBodyAssets($this->headAssets);
 			} else {
-				$this->dataTemplate['TOP_ASSETS_ARRAY'] = $this->headAssets;
-				$this->dataTemplate['BOTTOM_ASSETS_ARRAY'] = $this->bodyAssets;
+				$this->Template->TOP_ASSETS_ARRAY = $this->headAssets;
+				$this->Template->BOTTOM_ASSETS_ARRAY = $this->bodyAssets;
 			}
-
 		}
 
 	}
@@ -470,16 +481,13 @@ class Index extends CI_Controller {
 			exit('Unable to load site template!');
 		}
 
-		$this->dataTemplate['CONTENT'] = '';
+		$this->Template->CONTENT = '';
 
 		# загрузка хуков в начале генерации контента
 		$this->loadHooksPlugin('render_content_start');
 
-		// ДЛЯ совеметимости старого шаблона с версией системы 6+
-		$this->data = &$this->dataTemplate;
-
 		if(!APP_SITE_TEMPLATE or !$this->content_template){
-			$this->dataTemplate['CONTENT'] = 'Template error';
+			$this->Template->CONTENT = 'Template error';
 		}
 		else
 		{
@@ -515,66 +523,31 @@ class Index extends CI_Controller {
 				$this->$className = new $className();
 			}
 
-			##########################################
-			# !УСТАРЕЛО в версии 6.0
-			# Преобработка контента в библиотеке контента шаблона
-			$data = array();
-
-			$patchLibFile = APP_SITE_TEMPLATES_PATH . APP_SITE_TEMPLATE . '/Libraries/Contents/AllContents.php';
-			if(file_exists($patchLibFile))
-			{
-				require_once($patchLibFile);
-				if(class_exists('ContentRootLib')) {
-					$LibClass = new ContentRootLib($this->dataTemplate);
-					$data = $LibClass->runLib();
-					unset($LibClass);
-					if($data) {
-						$this->dataTemplate = $data;
-					}
-				}
+			# совместимость с версиями ниже 7.3 - dataTemplate загружаем в $this->Template
+			if($this->dataTemplate) {
+				Template::setVars($this->dataTemplate);
 			}
-
-			# !УСТАРЕЛО в версии 6.0
-			# Преобработка в библиотеке файла вывода контента
-			$patchLibFile = APP_SITE_TEMPLATES_PATH . APP_SITE_TEMPLATE . '/Libraries/Contents/' . ucfirst($this->content_template) . '.php';
-			if(file_exists($patchLibFile))
-			{
-				require_once($patchLibFile);
-				if(class_exists('ContentLib')) {
-					$LibClass = new ContentLib($this->dataTemplate);
-					$data = $LibClass->runLib();
-					unset($LibClass);
-					if($data) {
-						$this->dataTemplate = $data;
-					}
-				}
-			}
-			# END !УСТАРЕЛО в версии 6.0
-			##############################################################################################################################
-
-			# возможно CONTENT уже создан, отдадим его
-			if(!$this->dataTemplate['CONTENT']) {
-				$this->dataTemplate['CONTENT'] = $this->load->view($this->viewsTemplatePath . 'contents/' . $this->content_template, $this->dataTemplate, true);
-			}
-
 		}
+
+		$CONTENT = $this->load->view($this->viewsTemplatePath . 'contents/' . $this->content_template, Template::getVars(), true);
 
 		# загрузка хуков в конце генерации контента
 		$this->loadHooksPlugin('render_content_end');
+		$this->_render_template($CONTENT);
 	}
 
 
-	public function _render_template()
+	public function _render_template($CONTENT = '')
 	{
-		$this->dataTemplate['TEMPLATE_ASSETS_URL'] = APP_BASE_URL . 'application/views/templates/' . APP_SITE_TEMPLATE . '/assets/';
-		$this->dataTemplate['TEMPLATE_JS_URL'] = $this->dataTemplate['TEMPLATE_ASSETS_URL'] . 'js/';
-		$this->dataTemplate['TEMPLATE_CSS_URL'] = $this->dataTemplate['TEMPLATE_ASSETS_URL'] . 'css/';
-		$this->dataTemplate['TEMPLATE_IMG_URL'] = $this->dataTemplate['TEMPLATE_ASSETS_URL'] . 'img/';
+		$this->Template->PAGE_TITLE ?: $this->Template->PAGE_TITLE = app_get_option('site_title_default', 'site', '');
+		$this->Template->PAGE_DESCRIPTION ?: $this->Template->PAGE_DESCRIPTION = app_get_option('site_title_default', 'site', '');
+		$this->Template->PAGE_KEYWORDS ?: $this->Template->PAGE_KEYWORDS = app_get_option('site_title_default', 'site', '');
+		$this->Template->PAGE_CANONICAL ?: $this->Template->PAGE_CANONICAL = app_get_option('site_title_default', 'site', '');
 
-		isset($this->dataTemplate['PAGE_TITLE']) ?: $this->dataTemplate['PAGE_TITLE'] = app_get_option('site_title_default', 'site', '');
-		isset($this->dataTemplate['PAGE_DESCRIPTION']) ?: $this->dataTemplate['PAGE_DESCRIPTION'] = app_get_option('site_description_default', 'site', '');
-		isset($this->dataTemplate['PAGE_KEYWORDS']) ?: $this->dataTemplate['PAGE_KEYWORDS'] = app_get_option('site_keywords_default', 'site', '');
-		isset($this->dataTemplate['PAGE_CANONICAL']) ?: $this->dataTemplate['PAGE_CANONICAL'] = '';
+		$this->Template->TEMPLATE_ASSETS_URL = APP_BASE_URL . 'application/views/templates/' . APP_SITE_TEMPLATE . '/assets/';
+		$this->Template->TEMPLATE_JS_URL = $this->Template->TEMPLATE_ASSETS_URL . 'js/';
+		$this->Template->TEMPLATE_CSS_URL = $this->Template->TEMPLATE_ASSETS_URL . 'css/';
+		$this->Template->TEMPLATE_IMG_URL = $this->Template->TEMPLATE_ASSETS_URL . 'img/';
 
 		# загрузка хуков в начале генерации страницы
 		$this->loadHooksPlugin('render_page_start');
@@ -617,72 +590,36 @@ class Index extends CI_Controller {
 			$this->$className = new $className();
 		}
 
-
-
-		###########################################
-		# !УСТАРЕЛО в версии 6.0
-		# Преобработка шаблона в библиотеке контента шаблона
-		$data = array();
-
-		$patchLibFile = APP_SITE_TEMPLATES_PATH . APP_SITE_TEMPLATE . '/Libraries/Templates/AllTemplates.php';
-		if(file_exists($patchLibFile))
-		{
-			require_once($patchLibFile);
-			if(class_exists('TemplateRootLib')) {
-				$LibClass = new TemplateRootLib($this->dataTemplate);
-				$data = $LibClass->runLib();
-				unset($LibClass);
-				if($data) {
-					$this->dataTemplate = $data;
-				}
-			}
-		}
-
-		# !УСТАРЕЛО в версии 6.0
-		# Преобработка в библиотеке файла вывода
-		$patchLibFile = APP_SITE_TEMPLATES_PATH . APP_SITE_TEMPLATE . '/Libraries/Templates/' . ucfirst($this->page_template) . '.php';
-		if(file_exists($patchLibFile))
-		{
-			require_once($patchLibFile);
-			if(class_exists('TemplateLib')) {
-				$LibClass = new TemplateLib($this->dataTemplate);
-				$data = $LibClass->runLib();
-				unset($LibClass);
-				if($data) {
-					$this->dataTemplate = $data;
-				}
-			}
-		}
-		# !УСТАРЕЛО в версии 6.0
-		###########################################
-
 		$this->_compressStyles();
-		$this->dataTemplate['COMPLITECONTENT'] = $this->load->view('templates/' . APP_SITE_TEMPLATE . '/' . $this->page_template, $this->dataTemplate, TRUE);
-		# парсер контента
-		if(isset($this->ParserContentModel)) {
-			$this->dataTemplate['COMPLITECONTENT'] = $this->ParserContentModel->parseContent($this->dataTemplate['COMPLITECONTENT']);
+
+		# совместимость с версиями ниже 7.3 - dataTemplate загружаем в $this->Template
+		if($this->dataTemplate) {
+			Template::setVars($this->dataTemplate);
+			$this->dataTemplate = array();
 		}
+
+		$this->Template->CONTENT = $CONTENT;
+		$CONTENT = $this->load->view('templates/' . APP_SITE_TEMPLATE . '/' . $this->page_template, Template::getVars(), TRUE);
+		$this->Template->CONTENT = $CONTENT;
+		unset($CONTENT);
 
 		# загрузка хуков в конце генерации страницы
 		$this->loadHooksPlugin('render_page_end');
 
-		$this->load->view('application', array('CONTENT' => $this->dataTemplate['COMPLITECONTENT']));
+		$this->load->view('application', array('CONTENT' => $this->Template->CONTENT));
 	}
 
 	public function _render_not_found()
 	{
-		// ДЛЯ совеметимости старого шаблона с версией системы 6+
-		$this->data = &$this->dataTemplate;
+		$this->Template->PAGE_TITLE ?: $this->Template->PAGE_TITLE = '404 - page not found';
+		$this->Template->PAGE_DESCRIPTION ?: $this->Template->PAGE_DESCRIPTION = '404 - page not found';
+		$this->Template->PAGE_KEYWORDS ?: $this->Template->PAGE_KEYWORDS = '404 - page not found';
+		$this->Template->PAGE_CANONICAL ?: $this->Template->PAGE_CANONICAL = '';
 
-		$this->dataTemplate['TEMPLATE_ASSETS_URL'] = APP_BASE_URL . 'application/views/templates/' . APP_SITE_TEMPLATE . '/assets/';
-		$this->dataTemplate['TEMPLATE_JS_URL'] = $this->dataTemplate['TEMPLATE_ASSETS_URL'] . 'js/';
-		$this->dataTemplate['TEMPLATE_CSS_URL'] = $this->dataTemplate['TEMPLATE_ASSETS_URL'] . 'css/';
-		$this->dataTemplate['TEMPLATE_IMG_URL'] = $this->dataTemplate['TEMPLATE_ASSETS_URL'] . 'img/';
-
-		isset($this->dataTemplate['PAGE_TITLE']) ?: $this->dataTemplate['PAGE_TITLE'] = '404 - page not found';
-		isset($this->dataTemplate['PAGE_DESCRIPTION']) ?: $this->dataTemplate['PAGE_DESCRIPTION'] = '404 - page not found';
-		isset($this->dataTemplate['PAGE_KEYWORDS']) ?: $this->dataTemplate['PAGE_KEYWORDS'] = '404 - page not found';
-		isset($this->dataTemplate['PAGE_CANONICAL']) ?: $this->dataTemplate['PAGE_CANONICAL'] = '';
+		$this->Template->TEMPLATE_ASSETS_URL = APP_BASE_URL . 'application/views/templates/' . APP_SITE_TEMPLATE . '/assets/';
+		$this->Template->TEMPLATE_JS_URL = $this->Template->TEMPLATE_ASSETS_URL . 'js/';
+		$this->Template->TEMPLATE_CSS_URL = $this->Template->TEMPLATE_ASSETS_URL . 'css/';
+		$this->Template->TEMPLATE_IMG_URL = $this->Template->TEMPLATE_ASSETS_URL . 'img/';
 
 		# загрузка хуков генерации 404 страницы
 		$this->loadHooksPlugin('render_notfound');
@@ -740,61 +677,15 @@ class Index extends CI_Controller {
 			$this->$className = new $className();
 		}
 
-
-		#########################################################################
-		# !УСТАРЕЛО в версии 6.0
-		# Преобработка контента в библиотеке контента шаблона
-		$data = array();
-			$patchLibFile = APP_SITE_TEMPLATES_PATH . APP_SITE_TEMPLATE . '/Libraries/Contents/AllContents.php';
-			if(file_exists($patchLibFile))
-			{
-				require_once($patchLibFile);
-				if(class_exists('ContentRootLib')) {
-					$LibClass = new ContentRootLib($this->dataTemplate);
-					$data = $LibClass->runLib();
-					unset($LibClass);
-					if($data) {
-						$this->dataTemplate = $data;
-					}
-				}
-			}
-
-		# !УСТАРЕЛО в версии 6.0
-		# Преобработка шаблона в библиотеке контента шаблона
-		$patchLibFile = APP_SITE_TEMPLATES_PATH . APP_SITE_TEMPLATE . '/Libraries/Templates/AllTemplates.php';
-		if(file_exists($patchLibFile))
-		{
-			require_once($patchLibFile);
-			if(class_exists('TemplateRootLib')) {
-				$LibClass = new TemplateRootLib($this->dataTemplate);
-				$data = $LibClass->runLib();
-				unset($LibClass);
-				if($data) {
-					$this->dataTemplate = $data;
-				}
-			}
-		}
-
-		# !УСТАРЕЛО в версии 6.0
-		# Преобработка в библиотеке файла вывода
-		$patchLibFile = APP_SITE_TEMPLATES_PATH . APP_SITE_TEMPLATE . '/Libraries/Templates/' . ucfirst(APP_SITE_404_TEMPLATE) . '.php';
-		if(file_exists($patchLibFile))
-		{
-			require_once($patchLibFile);
-			if(class_exists('TemplateLib')) {
-				$LibClass = new TemplateLib($this->dataTemplate);
-				$data = $LibClass->runLib();
-				unset($LibClass);
-				if($data) {
-					$this->dataTemplate = $data;
-				}
-			}
-		}
-		# !УСТАРЕЛО в версии 6.0
-		#########################################################################
-
 		$this->_compressStyles();
-		$CONTENT = $this->load->view($this->viewsTemplatePath . APP_SITE_404_TEMPLATE, $this->dataTemplate, TRUE);
+
+		# совместимость с версиями ниже 7.3 - dataTemplate загружаем в $this->Template
+		if($this->dataTemplate) {
+			Template::setVars($this->dataTemplate);
+			$this->dataTemplate = array();
+		}
+
+		$CONTENT = $this->load->view($this->viewsTemplatePath . APP_SITE_404_TEMPLATE, Template::getVars(), TRUE);
 		$this->load->view('application', array('CONTENT' => $CONTENT));
 	}
 
