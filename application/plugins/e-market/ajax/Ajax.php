@@ -13,6 +13,10 @@
 	* UPD 2018-10-17
 	* version 2.1
 	* переделана логика. Добавлен метод _ajaxChangeDescriptionProduct() для изменения описания товара
+	*
+	* UPD 2018-10-25
+	* version 2.2
+	* Ошибка в методах - методы не должны гененрировать json-ответ
 */
 
 class Ajax extends CI_Model {
@@ -60,7 +64,6 @@ class Ajax extends CI_Model {
 		$this->response['status'] = 'OK';
 		$this->response['info'] = 'Complite';
 		$this->response['cartInfo'] = $CI->EmarketModel->cartInfo(0, $this->post['cartType']);
-		$this->renderResponse();
 	}
 
 
@@ -84,7 +87,6 @@ class Ajax extends CI_Model {
 			$this->response['info'] = 'Error';
 			$this->response['cartInfo'] = array();
 		}
-		//$this->renderResponse();
 	}
 
 	/*
@@ -115,7 +117,6 @@ class Ajax extends CI_Model {
 		} else {
 			$this->response['info'] = 'Error'; // количество товара не изменилось
 		}
-		$this->renderResponse();
 	}
 
 	/*
@@ -188,7 +189,6 @@ class Ajax extends CI_Model {
 		} else {
 			$this->response['info'] = 'Error'; // товар не удален из корзины
 		}
-		$this->renderResponse();
 	}
 
 
@@ -198,7 +198,6 @@ class Ajax extends CI_Model {
 			$this->response['info'] = $info;
 		}
 		echo json_encode($this->response);
-		//pr($this->response);
 	}
 
 }
