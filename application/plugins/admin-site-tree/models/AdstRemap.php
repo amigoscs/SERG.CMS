@@ -1,8 +1,12 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 /*
-	*  admin-site-tree Model
-
+	*  Роут для стуктуры сайта.
+	*
+	* UPD 2018-10-25
+	* Version 1.1
+	* Адаптация под версию 7.4+
+	*
 */
 
 class AdstRemap extends CI_Model {
@@ -25,34 +29,34 @@ class AdstRemap extends CI_Model {
 		# настроено на закрытие сайта. Доступ открыт только для админов или отмеченных групп
 		if($siteClose == 'yes' and file_exists($fileClosePath)) {
 			$userGroupsOpen = explode(',', app_get_option('adst_available_groups', 'admin-site-tree', '2'));
-			$IndexController->dataTemplate['LINKTOLOGOUT'] = 0;
-			$IndexController->dataTemplate['USER'] = array();
+			$IndexController->Template->LINKTOLOGOUT = 0;
+			$IndexController->Template->USER = array();
 
-			$userLoginGroup = FALSE;
-			if($user = is_login()){
+			$userLoginGroup = false;
+			if($user = is_login()) {
 				$userLoginGroup = $user['group'];
-				$IndexController->dataTemplate['USER'] = $user;
+				$IndexController->Template->USER = $user;
 			}
 
-			if(!is_admin()){
+			if(!is_admin()) {
 
 				// если пользователь залогинен, то надо проверить, возможно он разрешен в настройках
 				if($userLoginGroup){
-					if(in_array($userLoginGroup, $userGroupsOpen))
-						return TRUE;
-					else
-						$IndexController->dataTemplate['LINKTOLOGOUT'] = '1';
-
+					if(in_array($userLoginGroup, $userGroupsOpen)) {
+						return true;
+					} else {
+						$IndexController->Template->LINKTOLOGOUT = '1';
+					}
 				}
 
-				$IndexController->dataTemplate['PAGE_TITLE'] = app_get_option('site_title_default', 'site', '');
-				$IndexController->dataTemplate['PAGE_DESCRIPTION'] = app_get_option('site_description_default', 'site', '');
-				$IndexController->dataTemplate['PAGE_KEYWORDS'] = app_get_option('site_keywords_default', 'site', '');
+				$IndexController->Template->PAGE_TITLE = app_get_option('site_title_default', 'site', '');
+				$IndexController->Template->PAGE_DESCRIPTION = app_get_option('site_description_default', 'site', '');
+				$IndexController->Template->PAGE_KEYWORDS = app_get_option('site_keywords_default', 'site', '');
 
 				// укажем наш файл как шаблон страницы
 				$IndexController->page_template = $fileClose;
 				// отключим штатный ремап
-				$IndexController->BreakRemap = TRUE;
+				$IndexController->BreakRemap = true;
 			}
 		}
 	}

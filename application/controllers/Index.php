@@ -77,6 +77,11 @@ class Index extends CI_Controller {
 	 * Создан синглетон для перенных шаблона. Теперь перенные в шаблон добавляеются так: Template::getInstance()->VAR_NAME = VAR_VALUE или $CI->Template->VAR_NAME = VAR_VALUE;
 	 * Получить значения можно так: Template::getInstance()->VAR_NAME или $CI->Template->VAR_NAME
 	 *
+	 * Version 15.1
+	 * UPD 2018-10-25
+	 * FIX #543
+	 * Ошибка при отсутствующем файле контента
+	 *
 	 */
 
 	// Шаблон страницы
@@ -120,6 +125,9 @@ class Index extends CI_Controller {
 
 	// Объект данных шаблона
 	public $Template;
+
+	// Объект страница
+	public $Page;
 
 	public function __construct()
 	{
@@ -167,6 +175,11 @@ class Index extends CI_Controller {
 		if(file_exists(APPPATH . 'libraries/Template.php')) {
 			require_once(APPPATH . 'libraries/Template.php');
 			$this->Template = Template::getInstance();
+		}
+
+		# страница
+		if(file_exists(APPPATH . 'libraries/PageLib.php')) {
+			require_once(APPPATH . 'libraries/PageLib.php');
 		}
 
 		// автозагрузка плагинов
@@ -287,6 +300,7 @@ class Index extends CI_Controller {
 			}
 
 			$this->urlobjects->load($this->loading);
+			$this->Page = new PageLib($this->loading);
 
 			# запись head
 			$this->Template->PAGE_TITLE = $this->urlobjects->title;
@@ -529,7 +543,13 @@ class Index extends CI_Controller {
 			}
 		}
 
-		$CONTENT = $this->load->view($this->viewsTemplatePath . 'contents/' . $this->content_template, Template::getVars(), true);
+		# если файл контента отсутствует, то контент оставляем пустым
+		if($this->content_template) {
+			$CONTENT = $this->load->view($this->viewsTemplatePath . 'contents/' . $this->content_template, Template::getVars(), true);
+		} else {
+			$CONTENT = '';
+		}
+
 
 		# загрузка хуков в конце генерации контента
 		$this->loadHooksPlugin('render_content_end');
