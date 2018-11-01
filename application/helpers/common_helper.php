@@ -58,6 +58,9 @@
 	* 2.59 (2018-09-26)
 	* Добавлены две функции app_data_type_decode и app_data_type_encode для кодирования и декодирования ID data-полей
 	*
+	* 2.6 (2018-11-01)
+	* app_normalize_data_values - правки в обработке multiselect
+	*
 */
 
 $CI = &get_instance();
@@ -1197,7 +1200,13 @@ function app_normalize_data_values($dataValues = array())
 	if($dataValues['types_fields_type'] == 'multiselect')
 	{
 		$dataValues['select_values'] = app_parse_select_values($dataValues['types_fields_values']);
-		$dataValues['value'] = explode(',', $dataValues['objects_data_value']);
+		$tmp = explode(',', $dataValues['objects_data_value']);
+		$dataValues['value'] = array();
+		foreach($tmp as $tv) {
+			if(isset($dataValues['select_values'][$tv])) {
+				$dataValues['value'][$tv] = $dataValues['select_values'][$tv];
+			}
+		}
 	}
 	if($dataValues['types_fields_type'] == 'date')
 	{
