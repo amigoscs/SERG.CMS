@@ -75,6 +75,10 @@
 	* UPD 2018-08-13
 	* Version 25.1
 	* Исправлена ошибка обработки доступов к странице при обновлении
+	*
+	* UPD 2018-11-01
+	* Version 25.2
+	* Метод updateDataFieldsArray - при сохранении массива выпадала ошибка
 */
 
 class ObjectAdmModel extends CI_Model {
@@ -449,6 +453,7 @@ class ObjectAdmModel extends CI_Model {
 
 			# родитель. Если есть родитель, то патч от него
 			$objects[$keyID]['parent'] = array();
+			//pr($this->parentsObjects);
 			if($this->parentsObjects && isset($this->parentsObjects[$row['tree_parent_id']])){
 				// если это не ссылка, то формируем патч
 				if(!$isLink){
@@ -601,6 +606,10 @@ class ObjectAdmModel extends CI_Model {
 
 		foreach($fields as $key => $value)
 		{
+			if(is_array($value)) {
+				$value = implode(',', $value);
+			}
+
 			$data = array(
 				'objects_data_obj' => $obj_id,
 				'objects_data_field' => $key,
