@@ -800,7 +800,7 @@ input[type="checkbox"] {
   margin: 4px 0 0;
   margin-top: 1px \9;
   line-height: normal;
-  width: 0;height: 0}
+  width: 0;height: 0;position: absolute;opacity: 0}
 input[type="radio"] + label, input[type="checkbox"] + label {cursor: pointer;}
 input[type="radio"] + label::before, input[type="checkbox"] + label::before {content: '';width: 19px;height: 19px;display: inline-block;vertical-align: middle;background:#fff;border: 1px solid #ccc;margin-right: 4px}
 input[type="radio"]:checked + label::before, input[type="checkbox"]:checked + label::before {background:url('../img/cd-nav-icons.svg') no-repeat -426px 0;border-color:#fff}
