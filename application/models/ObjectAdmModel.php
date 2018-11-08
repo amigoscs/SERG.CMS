@@ -79,6 +79,11 @@
 	* UPD 2018-11-01
 	* Version 25.2
 	* Метод updateDataFieldsArray - при сохранении массива выпадала ошибка
+	*
+	* UPD 2018-11-08
+	* Version 25.3
+	* Метод getChildsObjects - в пагинации ошибка
+	*
 */
 
 class ObjectAdmModel extends CI_Model {
@@ -382,14 +387,15 @@ class ObjectAdmModel extends CI_Model {
 
 			$this->pagRows = $this->db->count_all_results('objects', false);
 			$this->paginationArray = app_pagination_array($this->limit, $this->pagRows, $this->paginationKey);
+			$cntPages = ceil($this->pagRows / $this->limit);
 
 			$getValues = $this->input->get();
 			if(isset($getValues[$this->paginationKey]) and $getValues[$this->paginationKey] and is_numeric($getValues[$this->paginationKey]))
 			{
 				$activePage = intval($getValues[$this->paginationKey]);
-				if($activePage > count($this->paginationArray)){
-					$activePage = count($this->paginationArray);
-					$offset = $this->limit * $activePage - $this->limit;
+				if($activePage > $cntPages){
+					//$activePage = count($this->paginationArray);
+					$offset = $this->limit * $cntPages - $this->limit;
 				}else if($activePage < 2){
 					$activePage = 1;
 					$offset = 0;
