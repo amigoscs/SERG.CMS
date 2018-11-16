@@ -132,4 +132,4 @@ $autoload['language'] = array();
 |
 |	$autoload['model'] = array('first_model' => 'first');
 */
-$autoload['model'] = array('CommonModel', 'ObjectAdmModel', 'TreelibAdmModel', 'LoginAdmModel', 'WidjetAdmModel');
+$autoload['model'] = array('CommonModel', 'ObjectAdmModel', 'TreelibAdmModel', 'LoginAdmModel', 'WidjetAdmModel', 'AppTreeModel', 'AppObjectModel');

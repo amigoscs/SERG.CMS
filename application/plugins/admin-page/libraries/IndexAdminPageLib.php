@@ -101,6 +101,12 @@ class IndexAdminPageLib {
 
 		$updateParams = array();
 
+		if($CI->input->post()) {
+			//pr($CI->input->post());
+			//exit();
+		}
+
+
 		# update data fields
 		if($data_fields = $CI->input->post('data_field')) {
 			foreach($data_fields as $key => $value){
@@ -130,11 +136,25 @@ class IndexAdminPageLib {
 			}
 		}
 
-		if(!$data = $CI->AdminPageModel->loadObjectFromRow($nodeID)) {
+		$data = array();
+		$CI->AppTreeModel->reset();
+		$CI->AppTreeModel->loadData = true;
+		$data = $CI->AppTreeModel->node($nodeID);
+		if(isset($data[$nodeID])) {
+			$data = $data[$nodeID];
+		} else {
 			$CI->pageErrorMessage = app_lang('ADMP_INFO_NOT_FOUND');
 			$CI->pageContent = '';
 			return;
 		}
+
+		/*if(!$data = $CI->AdminPageModel->loadObjectFromRow($nodeID)) {
+			$CI->pageErrorMessage = app_lang('ADMP_INFO_NOT_FOUND');
+			$CI->pageContent = '';
+			return;
+		}*/
+
+		//pr($data);
 
 		$data['obj_data_type'] = explode('|', trim($data['obj_data_type'], '|'));
 
@@ -322,8 +342,8 @@ class IndexAdminPageLib {
 		$CI = &get_instance();
 		# update data fields
 		if(isset($params['data_field'])) {
-			foreach($params['data_field'] as $key => $value){
-				$upd = $CI->ObjectAdmModel->updateDataFieldsArray($value, $key);
+			foreach($params['data_field'] as $key => $value) {
+				$CI->AppObjectModel->updateData($key, $value, true);
 			}
 		}
 
@@ -344,7 +364,7 @@ class IndexAdminPageLib {
 					$value['data_type'] = '|' . 1 . '|';;
 				}
 
-				$upd = $CI->ObjectAdmModel->updateObject($value, $key);
+				$upd = $CI->AppObjectModel->update($key, $value);
 			}
 		}
 
@@ -352,21 +372,26 @@ class IndexAdminPageLib {
 		if(isset($params['tree'])) {
 			foreach($params['tree'] as $key => $value)
 			{
-				# если url пустой, то отправим название объекта
 				if(!trim($value['url'])) {
 					$value['url'] = $obj_name;
 				}
-				# проверим короткую ссылку. Если такая существует в БД, надо менять
-				if($CI->AdminPageModel->checkShortLink($value['short'], $key)) {
-					$value['short'] = $CI->AdminPageModel->createShortLink();
+
+				if(isset($value['folow'])) {
+					$value['folow'] = 1;
+				} else {
+					$value['folow'] = 0;
 				}
 
-				$upd = $CI->TreelibAdmModel->updateTree($key, $value);
+				// для типа ССЫЛКА url оставляем как есть, для других переписываем
+				if($value['type_object'] != 4)  {
+					$value['url'] = app_translate($value['url']);
+				}
+
+				$CI->AppTreeModel->update($key, $value);
 			}
-
-			$CI->TreelibAdmModel->updateCanonicalOblect(0, $key);
 		}
-
 		return true;
 	}
+
+
 }
