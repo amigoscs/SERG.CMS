@@ -160,7 +160,7 @@ ul.jqtree-tree .jqtree-title[data-type-obj="9"] {color:#106192}
 
 
 ul.jqtree-tree .jqtree-element:hover > .jqtree-title {text-decoration: underline}
-li.status-hidden > div > .jqtree-title {opacity: 0.7; color: #ccc !important}
+li.st-hidden > div > .jqtree-title {color:#b5b4b4 !important}
 
 li.object-copy > div > .jqtree-title::after {content: ' copy'; color: #ccc !important; font-style: italic}
 

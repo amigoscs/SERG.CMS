@@ -17,7 +17,7 @@ $(document).ready(function(e){
 			// Add 'icon' before title
 			var $ElemLiTitle = $li.find('.jqtree-title');
 			if(TreeDataTypesIcons['icon_' + CurrentObjType]) {
-				$li.addClass('status-' + node.objStatus);
+				$li.addClass('st-' + node.objStatus);
 				$ElemLiTitle.attr('data-type-obj', CurrentObjType).before('<img class="img-icon" src="' + TreeDataTypesIcons.icons_path + TreeDataTypesIcons['icon_' + CurrentObjType] + '"/>');
 			}
 
@@ -56,7 +56,7 @@ $(document).ready(function(e){
 				$.each(DATA.object_status, function(idx, status){
 					Nodes = $TREE.tree('getNodesByProperty', 'objectID', idx);
 					$.each(Nodes, function(idx, node){
-						$(node.element).removeClass('status-publish status-hidden').addClass('status-' + status);
+						$(node.element).removeClass('st-publish st-hidden').addClass('st-' + status);
 					});
 				});
 				remove_loader();
