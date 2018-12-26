@@ -6,6 +6,10 @@
 	* UPD 2018-10-26
 	* Version 1.0
 	*
+	* UPD 2018-12-26
+	* Version 1.1
+	* Переделан алгоритм формирования короткой ссылки. Добавлен метод $this->shortLinkGenerate()
+	*
 */
 
 class AppTreeModel extends CI_Model {
@@ -495,13 +499,18 @@ class AppTreeModel extends CI_Model {
 
 		# проверим SHORT LINK, возможно такой уже есть
 		if(isset($data['tree_short'])) {
+			if(!$data['tree_short']) {
+				$args['short'] = $this->shortLinkGenerate();
+				return $this->update($nodeID, $args);
+			}
+
 			$this->db->select('tree_short');
 			$this->db->where('tree_parent_id', $parentID);
 			$this->db->where('tree_short', $data['tree_short']);
 			$this->db->where('tree_id !=', $nodeID);
 			$query = $this->db->get('tree');
 			if($query->num_rows()) {
-				$args['short'] = $data['tree_short'] . '-1';
+				$args['short'] = $this->shortLinkGenerate();
 				return $this->update($nodeID, $args);
 			}
 		}
@@ -513,5 +522,19 @@ class AppTreeModel extends CI_Model {
 			return false;
 		}
 	}
+
+	/*
+	* генерирует короткую ссылку
+	*/
+	public function shortLinkGenerate(){
+		$length = 8;
+		$chars = 'abdefhiknrstyzABDEFGHKNQRSTYZ';
+		$numChars = strlen($chars);
+		$string = '';
+		for ($i = 0; $i < $length; $i++) {
+			$string .= substr($chars, rand(1, $numChars) - 1, 1);
+		}
+		return $string;
+	 }
 
 }
