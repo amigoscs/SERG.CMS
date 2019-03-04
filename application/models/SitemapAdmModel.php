@@ -8,6 +8,10 @@
 	* Version 1.0
 	* UPD 2018-09-06
 	* Переделана логика построения файла sitemap
+	*
+	* Version 1.1
+	* UPD 2019-03-04
+	* Исправлена ошибка - выдача страницы, отключенной на сайте
 */
 
 class SitemapAdmModel extends CI_Model {
@@ -42,6 +46,7 @@ class SitemapAdmModel extends CI_Model {
 		$this->db->select('tree_folow, tree_parent_id, tree_id, obj_h1, obj_lastmod, obj_date_publish, obj_canonical');
 		$this->db->join('objects', 'tree.tree_object = objects.obj_id');
 		$this->db->where('tree_folow', '1');
+		$this->db->where('obj_status', 'publish');
 		$this->db->where('obj_ugroups_access', 'ALL');
 		$query = $this->db->get('tree');
 
