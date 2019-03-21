@@ -10,6 +10,10 @@
 	* Version 1.1
 	* Переделан алгоритм формирования короткой ссылки. Добавлен метод $this->shortLinkGenerate()
 	*
+	* UPD 2019-03-21
+	* Version 1.2
+	* Добавлена objSelect
+	*
 */
 
 class AppTreeModel extends CI_Model {
@@ -59,6 +63,9 @@ class AppTreeModel extends CI_Model {
 	// количество строк в выборке
 	public $numRows;
 
+	// количество строк в выборке
+	public $objSelect;
+
 	public function __construct()
     {
         parent::__construct();
@@ -83,12 +90,17 @@ class AppTreeModel extends CI_Model {
 		$this->pagArray = array();
 		$this->pagKey = 'page';
 		$this->numRows = 0;
+		$this->objSelect = '';
 
 	}
 
 	# возвращает всех потомков со всех уровней вложенности
 	public function childrenAll($parentID = 1)
 	{
+		if($this->objSelect) {
+			$this->db->select($this->objSelect);
+		}
+
 		$this->db->join('tree', 'objects.obj_id = tree.tree_object');
 
 		# страница разрешена: ALL - всем, LOGIN - авторизованным, |1| только группе 1, |1|3| - только группам 1 и 3
@@ -130,6 +142,10 @@ class AppTreeModel extends CI_Model {
 		if($this->publish) {
 			$this->db->where('objects.obj_status', 'publish');
 			$this->db->where('objects.obj_date_publish <=', date('Y-m-d H:i:s'));
+		}
+
+		if($this->orderField) {
+			$this->db->order_by($this->orderField, $this->orderAsc);
 		}
 
 		$query = $this->db->get('objects');
@@ -195,6 +211,10 @@ class AppTreeModel extends CI_Model {
 	{
 		$this->TMP_BUFFER = array();
 		$this->BUFFER = array();
+
+		if($this->objSelect) {
+			$this->db->select($this->objSelect);
+		}
 
 		$this->db->join('tree', 'objects.obj_id = tree.tree_object');
 

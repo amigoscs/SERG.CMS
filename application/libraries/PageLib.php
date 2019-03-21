@@ -8,6 +8,10 @@
 	* Version 1.0
 	* Первая версия
 	*
+	* UPD 2019-03-21
+	* Version 1.1
+	* Нормализованы ДАТА поля. добавлены методы dataValue и dataSaveValue
+	*
 */
 
 class PageLib {
@@ -27,6 +31,12 @@ class PageLib {
 				$this->currentIndex = $index;
 			}
 		}
+
+		$val = null;
+		foreach($pages[$this->currentIndex]['data_fields'] as &$val) {
+			$val = app_normalize_data_values($val);
+		}
+		unset($val);
 
 		$this->PAGES = $pages;
 	}
@@ -61,6 +71,24 @@ class PageLib {
 		} else {
 			return $this->PAGES[$this->currentIndex]['data_fields'];
 		}
+	}
+
+	# возвращает значение DATA-параметров страницы
+	public function dataValue($id = false)
+	{
+		if($data = $this->data($id)) {
+			return $data['value'];
+		}
+		return false;
+	}
+
+	# возвращает значение DATA-параметров (Прямое значение из базы)
+	public function dataSaveValue($id = false)
+	{
+		if($data = $this->data($id)) {
+			return $data['orig_value'];
+		}
+		return false;
 	}
 
 	# гетер текущей страницы
