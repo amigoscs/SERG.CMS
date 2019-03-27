@@ -82,6 +82,10 @@ class Index extends CI_Controller {
 	 * FIX #543
 	 * Ошибка при отсутствующем файле контента
 	 *
+	 * Version 15.2
+	 * UPD 2019-03-27
+	 * Ошибка при рендеренге 404-ой страницы
+	 *
 	 */
 
 	// Шаблон страницы
@@ -293,6 +297,8 @@ class Index extends CI_Controller {
 		{
 			$content = $this->CommonModel->loadPagesFromURL($this->urls);
 			$this->return_active_page($content, 0);
+
+			$this->Page = new PageLib($this->loading);
 
 			# сегменты и страницы не совпадают. Ошибка 404
 			if(count($this->urls) != count($this->loading)) {
