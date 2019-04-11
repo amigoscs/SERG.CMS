@@ -6,7 +6,7 @@
 */
 
 class Ajax extends CI_Model {
-	
+
 	private $post, $get; // данные POST и GET
 
 	function __construct($post, $get)
@@ -24,18 +24,25 @@ class Ajax extends CI_Model {
 		error_reporting(0); // Set E_ALL for debuging
 		$CI = &get_instance();
 
-		//pr($CI);
-
 		$path_plugin = info('plugins_dir') . 'elfinder/';
 
 		# папка пользователя
-		$folderFiles = $this->post['elfFolder'];
+		$folderFiles = '';
+		if(!isset($this->post['elfFolder'])) {
+			// в POST директории нет, проверим ее в GET (такое может быть, если файл пытаются скачать)
+			if(isset($this->get['elfFolder'])) {
+				$folderFiles = $this->get['elfFolder'];
+			}
+		} else {
+			$folderFiles = $this->post['elfFolder'];
+		}
 
 		if(!$folderFiles){
+			//$folderFiles = '21101be496547703b5a8d29d46aebe49';
 			exit('Directory error');
 		}
 
-		$pathUrl = info('base_url') . 'uploads/'. app_get_option("el_userfolder_path", "elfinder", "tempuserfiles") . '/' . $folderFiles;;
+		$pathUrl = info('base_url') . 'uploads/'. app_get_option("el_userfolder_path", "elfinder", "tempuserfiles") . '/' . $folderFiles;
 		$path = APP_BASE_PATH . 'uploads/'. app_get_option("el_userfolder_path", "elfinder", "tempuserfiles") . '/' . $folderFiles;
 
 		if($this->post['cmd'] == 'open')
